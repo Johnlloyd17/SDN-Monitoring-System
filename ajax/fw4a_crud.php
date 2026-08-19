@@ -52,8 +52,10 @@ if ($action === 'add') {
     if (mysqli_query($con, $query)) {
         $action_log = 'Added Item ' . $locality;
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
+        ob_clean();
         echo json_encode(['success' => true, 'message' => 'Access point added successfully']);
     } else {
+        ob_clean();
         echo json_encode(['success' => false, 'error' => 'Failed to add: ' . mysqli_error($con)]);
     }
     exit;
@@ -104,8 +106,10 @@ if ($action === 'edit') {
     if (mysqli_query($con, $query)) {
         $action_log = 'Updated Item ' . $locality;
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
+        ob_clean();
         echo json_encode(['success' => true, 'message' => 'Access point updated successfully']);
     } else {
+        ob_clean();
         echo json_encode(['success' => false, 'error' => 'Failed to update: ' . mysqli_error($con)]);
     }
     exit;
@@ -115,23 +119,29 @@ if ($action === 'delete') {
     $ids = isset($_POST['ids']) ? $_POST['ids'] : [];
     if (!is_array($ids)) $ids = [$ids];
 
-    $deleted = 0;
+    $intIds = [];
     foreach ($ids as $rawId) {
         $id = intval($rawId);
-        if ($id <= 0) continue;
-
-        $itemQ = mysqli_query($con, "SELECT locations FROM tblfwfa WHERE id = $id");
-        $itemRow = mysqli_fetch_assoc($itemQ);
-        $itemName = $itemRow ? $itemRow['locations'] : 'Unknown';
-
-        if (mysqli_query($con, "DELETE FROM tblfwfa WHERE id = $id")) {
-            $action_log = 'Deleted Item: ' . $itemName;
-            mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
-            $deleted++;
-        }
+        if ($id > 0) { $intIds[] = $id; }
     }
 
-    echo json_encode(['success' => $deleted > 0, 'deleted' => $deleted, 'message' => "$deleted item(s) deleted"]);
+    if (empty($intIds)) {
+        ob_clean();
+        echo json_encode(['success' => false, 'message' => 'No valid IDs provided']);
+        exit;
+    }
+
+    $idList = implode(',', $intIds);
+    $count = count($intIds);
+
+    @mysqli_query($con, "DELETE FROM tblfwfa WHERE id IN ($idList)");
+
+    $logMsg = "Batch deleted $count item(s) (IDs: $idList)";
+    $logMsgEsc = mysqli_real_escape_string($con, $logMsg);
+    @mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . mysqli_real_escape_string($con, $_SESSION['role']) . "', NOW(), '$logMsgEsc')");
+
+    ob_clean();
+    echo json_encode(['success' => true, 'deleted' => $count, 'message' => "$count item(s) deleted"]);
     exit;
 }
 

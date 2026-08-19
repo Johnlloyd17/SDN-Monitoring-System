@@ -360,7 +360,6 @@ if (!isset($_SESSION['role'])) {
                                                     <th>Strategy</th>
                                                     <th>Status</th>
                                                     <th>Downtime Logs Link</th>
-                                                    <th>Reason for Outage</th>
                                                     <th>Remarks</th>
                                                     <th>Contact Person</th>
                                                 <th style="width: 40px !important;">Option</th>
@@ -412,7 +411,6 @@ if (!isset($_SESSION['role'])) {
                                                                     <td>' . $row['strategy'] . '</td>
                                                                     <td>' . $row['status'] . '</td>
                                                                     <td>' . $row['downtime'] . '</td>
-                                                                    <td>' . $row['reason'] . '</td>
                                                                     <td>' . $row['remarks'] . '</td>
                                                                     <td>' . $row['contact'] . '</td>
 

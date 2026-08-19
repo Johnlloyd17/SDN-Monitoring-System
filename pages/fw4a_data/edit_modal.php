@@ -70,7 +70,17 @@
                             </div>
                             <div class="form-group">
                                 <label>Status: </label>
-                                <input name="txt_edit_status" class="form-control input-sm" type="text" value="' . htmlspecialchars($row["status"], ENT_QUOTES, "UTF-8") . '" />
+                                <select name="txt_edit_status" class="form-control input-sm">
+                                    <option value="">-- Select Status --</option>' .
+                                    '<option value="Active"' . ($row["status"] === "Active" ? " selected" : "") . '>Active</option>' .
+                                    '<option value="Inactive"' . ($row["status"] === "Inactive" ? " selected" : "") . '>Inactive</option>' .
+                                    '<option value="Ongoing"' . ($row["status"] === "Ongoing" ? " selected" : "") . '>Ongoing</option>' .
+                                    '<option value="Terminated"' . ($row["status"] === "Terminated" ? " selected" : "") . '>Terminated</option>' .
+                                    '<option value="Deactivated"' . ($row["status"] === "Deactivated" ? " selected" : "") . '>Deactivated</option>' .
+                                    '<option value="Ongoing Acceptance"' . ($row["status"] === "Ongoing Acceptance" ? " selected" : "") . '>Ongoing Acceptance</option>' .
+                                    '<option value="For Installation"' . ($row["status"] === "For Installation" ? " selected" : "") . '>For Installation</option>' .
+                                '<option value="Other"' . ($row["status"] !== "Active" && $row["status"] !== "Inactive" && $row["status"] !== "Ongoing" && $row["status"] !== "Terminated" && $row["status"] !== "Deactivated" && $row["status"] !== "Ongoing Acceptance" && $row["status"] !== "For Installation" ? " selected" : "") . '>Other</option>' .
+                                '</select>
                             </div>
                             <div class="form-group">
                                 <label>Remarks: </label>

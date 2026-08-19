@@ -317,6 +317,30 @@ if (!isset($_SESSION['role'])) {
         </div>
 </div>
 
+<!-- ========================= MAP SECTION ========================= -->
+<div class="row" style="margin-top: 10px;">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:10px 15px;"
+                 data-toggle="collapse" data-target="#mapCollapse">
+                <span><i class="fa fa-map-marker"></i> Access Points Map</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn btn-xs btn-default" id="mapToggleView" title="Toggle Heatmap/Locators" onclick="event.stopPropagation();">
+                        <i class="fa fa-fire"></i> Heatmap
+                    </button>
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+            </div>
+            <div id="mapCollapse" class="collapse in">
+                <div class="panel-body" style="padding:0;">
+                    <div id="fw4aMap" style="width:100%; height:450px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========================= END MAP SECTION ========================= -->
+
                         <!-- Toolbar: Add + Delete + Row Filter (left) | Search + Import + Export (right) -->
                         <div style="padding:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -355,7 +379,7 @@ if (!isset($_SESSION['role'])) {
                         </div>
 
                                 <div class="box-body table-responsive">
-                                    <table id="table" class="table table-bordered table-striped">
+                                    <table id="table" class="table table-bordered">
                                         <thead>
                                         <tr>
                                             <?php if ($isAdmin) { ?>
@@ -435,7 +459,19 @@ if (!isset($_SESSION['role'])) {
                                                 <div class="form-group"><label>Latitude:</label><input type="text" name="txt_edit_latitude" id="edit_latitude" class="form-control input-sm" /></div>
                                                 <div class="form-group"><label>Longitude:</label><input type="text" name="txt_edit_longitude" id="edit_longitude" class="form-control input-sm" /></div>
                                                 <div class="form-group"><label>Strategy:</label><input type="text" name="txt_edit_strategy" id="edit_strategy" class="form-control input-sm" /></div>
-                                                <div class="form-group"><label>Status:</label><input type="text" name="txt_edit_status" id="edit_status" class="form-control input-sm" /></div>
+                                                <div class="form-group"><label>Status:</label>
+                                                    <select name="txt_edit_status" id="edit_status" class="form-control input-sm">
+                                                        <option value="">-- Select Status --</option>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Inactive">Inactive</option>
+                                                        <option value="Ongoing">Ongoing</option>
+                                                        <option value="Terminated">Terminated</option>
+                                                        <option value="Deactivated">Deactivated</option>
+                                                        <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                                        <option value="For Installation">For Installation</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
                                                 <div class="form-group"><label>Remarks:</label><textarea name="txt_edit_remarks" id="edit_remarks" class="form-control input-sm"></textarea></div>
                                             </div>
                                         </div>
@@ -745,6 +781,7 @@ if (!isset($_SESSION['role'])) {
             loadData(1);
             loadFilters();
             loadStats();
+            loadMapData();
         });
 
         // Per-page selector
@@ -827,6 +864,7 @@ if (!isset($_SESSION['role'])) {
                         loadData(currentPage);
                         loadFilters();
                         loadStats();
+                        loadMapData();
                         document.getElementById('addForm').reset();
                     } else {
                         $('#addAlert').html('<div class="alert alert-danger">' + escHtml(res.error) + '</div>').show();
@@ -862,7 +900,12 @@ if (!isset($_SESSION['role'])) {
                 $('#edit_latitude').val(item.latitude);
                 $('#edit_longitude').val(item.longitude);
                 $('#edit_strategy').val(item.strategy);
-                $('#edit_status').val(item.status);
+                var knownStatuses = ['Active','Inactive','Ongoing','Terminated','Deactivated','Ongoing Acceptance','For Installation'];
+                if (item.status && knownStatuses.indexOf(item.status) === -1) {
+                    $('#edit_status').val('Other');
+                } else {
+                    $('#edit_status').val(item.status);
+                }
                 $('#edit_remarks').val(item.remarks);
                 $('#editModal').modal('show');
             }).fail(function() {
@@ -887,6 +930,7 @@ if (!isset($_SESSION['role'])) {
                         loadData(currentPage);
                         loadFilters();
                         loadStats();
+                        loadMapData();
                     } else {
                         $('#editAlert').html('<div class="alert alert-danger">' + escHtml(res.error) + '</div>').show();
                     }
@@ -1018,6 +1062,10 @@ if (!isset($_SESSION['role'])) {
         });
 
         $('#confirmDeleteBtn').on('click', function() {
+            var btn = $(this);
+            if (btn.hasClass('disabled')) return;
+            btn.addClass('disabled').prop('disabled', true).text('Deleting...');
+
             var ids = Object.keys(selectedIds);
             var fd = new FormData();
             fd.append('action', 'delete');
@@ -1032,13 +1080,19 @@ if (!isset($_SESSION['role'])) {
                 dataType: 'json',
                 success: function(res) {
                     $('#deleteModal').modal('hide');
+                    btn.removeClass('disabled').prop('disabled', false).text('OK');
                     showToast(res.message, 'success');
                     clearSelection();
                     loadData(currentPage);
                     loadFilters();
                     loadStats();
+                    loadMapData();
                 },
-                error: function() { showToast('Network error.', 'danger'); }
+                error: function(xhr, status, err) {
+                    console.error('[Delete Error]', status, err, xhr.responseText);
+                    btn.removeClass('disabled').prop('disabled', false).text('OK');
+                    showToast('Network error.', 'danger');
+                }
             });
         });
 
@@ -1051,9 +1105,18 @@ if (!isset($_SESSION['role'])) {
             fetch('import.php', {
                 method: 'POST',
                 body: formData
-            }).then(response => response.json()).then(data => {
+            }).then(function(response) {
+                return response.text().then(function(text) {
+                    try { return JSON.parse(text); }
+                    catch(e) { console.error('Import raw response:', text); throw e; }
+                });
+            }).then(data => {
                 if (data.success) {
-                    location.reload();
+                    var msg = data.inserted + ' row(s) inserted';
+                    if (data.skipped > 0) { msg += ', ' + data.skipped + ' skipped'; }
+                    console.log('[Import Result]', msg, data);
+                    showToast(msg + '. Reloading...', 'success');
+                    setTimeout(function() { location.reload(); }, 1500);
                 } else {
                     showToast(data.error || 'Import failed.', 'danger');
                 }
@@ -1081,9 +1144,185 @@ if (!isset($_SESSION['role'])) {
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
+        // ========== MAP ==========
+        var fw4aMap = null;
+        var mapMarkersLayer = null;
+        var mapHeatLayer = null;
+        var mapMode = 'markers';
+        var mapLegend = null;
+
+        var statusColors = {
+            'Active':              '#27ae60',
+            'Inactive':            '#95a5a6',
+            'Ongoing':             '#3498db',
+            'Terminated':          '#c0392b',
+            'Deactivated':         '#e67e22',
+            'Ongoing Acceptance':  '#9b59b6',
+            'For Installation':    '#1abc9c'
+        };
+        var defaultStatusColor = '#7f8c8d';
+
+        function getStatusColor(status) {
+            return statusColors[status] || defaultStatusColor;
+        }
+
+        function initMap() {
+            fw4aMap = L.map('fw4aMap', {
+                center: [12.8797, 121.7740],
+                zoom: 7,
+                scrollWheelZoom: true
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+                maxZoom: 19,
+                subdomains: 'abcd'
+            }).addTo(fw4aMap);
+
+            mapMarkersLayer = L.layerGroup();
+            mapHeatLayer = L.heatLayer([], {
+                radius: 25,
+                blur: 15,
+                maxZoom: 17,
+                gradient: {
+                    0.2: 'blue',
+                    0.4: 'cyan',
+                    0.6: 'lime',
+                    0.8: 'yellow',
+                    1.0: 'red'
+                }
+            });
+
+            addMapLegend();
+            loadMapData();
+        }
+
+        function addMapLegend() {
+            if (mapLegend) fw4aMap.removeControl(mapLegend);
+            var html = '<div class="map-legend"><b>Status Legend</b><br>';
+            for (var status in statusColors) {
+                html += '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + statusColors[status] + ';margin-right:5px;vertical-align:middle;"></span>' + status + '<br>';
+            }
+            html += '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + defaultStatusColor + ';margin-right:5px;vertical-align:middle;"></span>Other';
+            html += '</div>';
+            mapLegend = L.control({ position: 'bottomright' });
+            mapLegend.onAdd = function() {
+                var div = L.DomUtil.create('div');
+                div.innerHTML = html;
+                return div;
+            };
+            mapLegend.addTo(fw4aMap);
+        }
+
+        function loadMapData() {
+            if (!fw4aMap) return;
+            var f = getFilters();
+            var params = 'strategy=' + encodeURIComponent(f.strategy) +
+                         '&type=' + encodeURIComponent(f.type) +
+                         '&locality=' + encodeURIComponent(f.locality) +
+                         '&barangay=' + encodeURIComponent(f.barangay);
+
+            $.getJSON(basePath + 'fw4a_map_data.php?' + params, function(res) {
+                renderMapPoints(res.points || []);
+            }).fail(function() {
+                console.error('Failed to load map data');
+            });
+        }
+
+        function renderMapPoints(points) {
+            fw4aMap.removeLayer(mapMarkersLayer);
+            fw4aMap.removeLayer(mapHeatLayer);
+            mapMarkersLayer.clearLayers();
+
+            if (points.length === 0) return;
+
+            var heatData = [];
+            var markers = [];
+
+            points.forEach(function(p) {
+                var statusColor = getStatusColor(p.status);
+                var marker = L.circleMarker([p.lat, p.lng], {
+                    radius: 7,
+                    fillColor: statusColor,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                });
+
+                var popupContent =
+                    '<div style="font-size:13px; line-height:1.6;">' +
+                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.locations || 'N/A') + '</b><br>' +
+                        '<b>Locality:</b> ' + escHtml(p.locality) + '<br>' +
+                        '<b>Barangay:</b> ' + escHtml(p.barangay) + '<br>' +
+                        '<b>District:</b> ' + escHtml(p.district || 'N/A') + '<br>' +
+                        '<b>Code:</b> ' + escHtml(p.code || 'N/A') + '<br>' +
+                        '<b>Type:</b> ' + escHtml(p.type) + '<br>' +
+                        '<b>Strategy:</b> ' + escHtml(p.strategy) + '<br>' +
+                        '<b>Status:</b> <span style="color:' + statusColor + '; font-weight:bold;">' + escHtml(p.status) + '</span><br>' +
+                        '<b>Coordinates:</b> ' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) +
+                        (p.remarks ? '<br><b>Remarks:</b> ' + escHtml(p.remarks) : '') +
+                    '</div>';
+
+                marker.bindPopup(popupContent, { maxWidth: 300, className: 'fw4a-popup' });
+                mapMarkersLayer.addLayer(marker);
+                markers.push(marker);
+
+                heatData.push([p.lat, p.lng, 1]);
+            });
+
+            mapHeatLayer = L.heatLayer(heatData, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 17,
+                gradient: {
+                    0.2: 'blue',
+                    0.4: 'cyan',
+                    0.6: 'lime',
+                    0.8: 'yellow',
+                    1.0: 'red'
+                }
+            });
+
+            if (mapMode === 'heatmap') {
+                mapHeatLayer.addTo(fw4aMap);
+            } else {
+                mapMarkersLayer.addTo(fw4aMap);
+            }
+
+            if (markers.length > 0) {
+                var group = new L.featureGroup(markers);
+                fw4aMap.fitBounds(group.getBounds().pad(0.1));
+            }
+
+            setTimeout(function() { fw4aMap.invalidateSize(); }, 300);
+        }
+
+        $('#mapToggleView').on('click', function() {
+            if (mapMode === 'heatmap') {
+                fw4aMap.removeLayer(mapHeatLayer);
+                mapMarkersLayer.addTo(fw4aMap);
+                mapMode = 'markers';
+                $(this).html('<i class="fa fa-map-marker"></i> Locators');
+            } else {
+                fw4aMap.removeLayer(mapMarkersLayer);
+                mapHeatLayer.addTo(fw4aMap);
+                mapMode = 'heatmap';
+                $(this).html('<i class="fa fa-fire"></i> Heatmap');
+            }
+        });
+
+        $('#mapCollapse').on('shown.bs.collapse', function() {
+            if (fw4aMap) fw4aMap.invalidateSize();
+        });
+        $('#mapCollapse').on('hidden.bs.collapse', function() {
+            if (fw4aMap) fw4aMap.invalidateSize();
+        });
+
         // ========== INIT ==========
         loadFilters();
         loadData(1);
+        initMap();
 
     })();
     </script>
@@ -1144,51 +1383,8 @@ if (!isset($_SESSION['role'])) {
         .header-address {
             margin: 0; /* Remove default margin */
             font-size: 14px; /* Adjust font size as needed */
-            color: #555; /* Optional: Change color for better visibility */
+            color: #555;
         }
-        /* Adjust table layout to auto for column width based on content */
-        table {
-            table-layout: auto;
-            width: 100%;
-        }
-
-        /* Ensure header text wraps to two lines */
-        table th {
-            white-space: normal;
-            text-align: center; /* Center-align headers if needed */
-            word-wrap: break-word; /* Allow long words to break */
-            overflow-wrap: break-word; /* Ensure long words break in modern browsers */
-            max-width: 200px; /* Example max-width to limit header width */
-        }
-
-        table td {
-            white-space: nowrap; /* Ensure cell text does not wrap */
-        }
-
-        /* Optional: Adjust column widths if necessary */
-        table th, table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-
-        /* Optional: Adjust specific column widths */
-        table th:nth-child(1) { width: 30px; } /* Example width for checkbox column */
-        table th:nth-child(2) { width: 50px; } /* Example width for No. column */
-
-        /* Prevent doubled border between the two-row header and the table body
-           (Chrome border-collapse quirk with rowspan header cells) */
-        #table thead th {
-            border-bottom-width: 1px !important;
-        }
-        #table tbody tr:first-child td {
-            border-top-width: 1px !important;
-        }
-
-            /* Ensure header text does not wrap */
-            table th {
-                white-space: nowrap;
-                text-align: center; /* Center-align headers if needed */
-            }
 
     /* File item container */
     .file-item {
@@ -1299,6 +1495,88 @@ if (!isset($_SESSION['role'])) {
             margin-left: auto; /* Push the date/time to the right */
         }
         /* Other styles remain unchanged */
+
+    /* ========== TABLE STYLES ========== */
+    #table {
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        width: 100%;
+    }
+
+    #table thead tr:first-child th,
+    #table thead tr:nth-child(2) th {
+        background-color: #3c8dbc;
+        color: #ffffff;
+        border: 1px solid #32739e;
+        text-align: center;
+        font-weight: 600;
+        padding: 8px;
+    }
+
+    #table tbody td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        white-space: nowrap;
+    }
+
+    #tableBody tr {
+        background-color: #ffffff !important;
+    }
+
+    #tableBody tr:hover {
+        background-color: #e8f4fd !important;
+        cursor: default;
+        transition: background-color 0.15s ease;
+    }
+
+    /* ========== MAP STYLES ========== */
+    #fw4aMap {
+        z-index: 1;
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        font-size: 13px;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.3);
+    }
+
+    .leaflet-popup-content {
+        margin: 10px 15px;
+        line-height: 1.5;
+    }
+
+    .leaflet-popup-content b {
+        color: darkblue;
+    }
+
+    .fw4a-popup .leaflet-popup-content {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .map-legend {
+        background: white;
+        padding: 10px 14px;
+        border-radius: 5px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        font-size: 12px;
+        line-height: 1.9;
+        font-family: Arial, sans-serif;
+    }
+
+    .map-legend b {
+        font-size: 13px;
+        margin-bottom: 2px;
+        display: block;
+    }
+
+    .panel-heading:hover {
+        background-color: #f5f5f5;
+    }
+
+    #mapToggleView {
+        margin-right: 10px;
+    }
 
 </style>
     </body>

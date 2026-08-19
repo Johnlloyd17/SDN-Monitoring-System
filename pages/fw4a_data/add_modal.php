@@ -69,7 +69,17 @@
                             </div>
                             <div class="form-group">
                                 <label>Status:</label>
-                                <input name="txt_status" class="form-control input-sm" type="text" placeholder="Status" />
+                                <select name="txt_status" class="form-control input-sm">
+                                    <option value="">-- Select Status --</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Remarks:</label>

@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ERROR | E_PARSE);
+ini_set('memory_limit', '256M');
+set_time_limit(300);
 include "../connection.php";
 
 function isValidFileExtension($filename) {
@@ -25,9 +28,19 @@ function xlsxToArray($filePath) {
     $shared = array();
     $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
     if ($sharedXml !== false) {
-        $sx = simplexml_load_string($sharedXml);
-        foreach ($sx->si as $si) {
-            $shared[] = (string)$si->t;
+        $sx = @simplexml_load_string($sharedXml);
+        if ($sx !== false) {
+            foreach ($sx->si as $si) {
+                if (isset($si->t)) {
+                    $shared[] = (string)$si->t;
+                } else {
+                    $text = '';
+                    foreach ($si->r as $r) {
+                        if (isset($r->t)) { $text .= (string)$r->t; }
+                    }
+                    $shared[] = $text;
+                }
+            }
         }
     }
 
@@ -45,7 +58,10 @@ function xlsxToArray($filePath) {
     $sheetXml = $zip->getFromName($sheetFiles[0]);
     $zip->close();
 
-    $sx = simplexml_load_string($sheetXml);
+    $sx = @simplexml_load_string($sheetXml);
+    if ($sx === false) {
+        return ['success' => false, 'error' => 'Unable to parse worksheet XML.'];
+    }
     $rows = array();
     foreach ($sx->sheetData->row as $row) {
         $cells = array();
@@ -63,11 +79,12 @@ function xlsxToArray($filePath) {
             }
             $type = (string)$c['t'];
             if ($type === 's') {
-                $val = $shared[(int)(string)$c->v];
+                $idx = isset($c->v) ? (int)(string)$c->v : -1;
+                $val = ($idx >= 0 && isset($shared[$idx])) ? $shared[$idx] : '';
             } elseif ($type === 'inlineStr') {
-                $val = (string)$c->is->t;
+                $val = isset($c->is->t) ? (string)$c->is->t : '';
             } else {
-                $val = (string)$c->v;
+                $val = isset($c->v) ? (string)$c->v : '';
             }
             $cells[$col] = $val;
         }
@@ -103,32 +120,7 @@ function saveRow($con, $data) {
     $actSql = $dateActivation ? "'$dateActivation'" : 'NULL';
     $accSql = $dateAcceptance ? "'$dateAcceptance'" : 'NULL';
 
-    $matchSql = $code !== ''
-        ? "code = '$code'"
-        : "(locality = '$locality' AND locations = '$locations' AND (type = '$type' OR (type IS NULL AND '$type' = '')))";
-
-    $check = mysqli_query($con, "SELECT id FROM tblfwfa WHERE $matchSql LIMIT 1");
-    if (mysqli_num_rows($check) > 0) {
-        return mysqli_query($con, "UPDATE tblfwfa SET
-            locality = '$locality',
-            barangay = '$barangay',
-            district = '$district',
-            transport_location = '$transportLocation',
-            transport_type = '$transportType',
-            locations = '$locations',
-            type = '$type',
-            nationwide_id = '$nationwideId',
-            date_of_activation = $actSql,
-            current_date_of_acceptance = $accSql,
-            latitude = $latSql,
-            longitude = $lngSql,
-            strategy = '$strategy',
-            status = '$status',
-            remarks = '$remarks'
-            WHERE $matchSql");
-    }
-
-    return mysqli_query($con, "INSERT INTO tblfwfa (
+    if (@mysqli_query($con, "INSERT INTO tblfwfa (
         locality, barangay, district, transport_location, transport_type,
         locations, type, code, nationwide_id, date_of_activation,
         current_date_of_acceptance, latitude, longitude, strategy, status, remarks
@@ -136,7 +128,10 @@ function saveRow($con, $data) {
         '$locality', '$barangay', '$district', '$transportLocation', '$transportType',
         '$locations', '$type', '$code', '$nationwideId', $actSql,
         $accSql, $latSql, $lngSql, '$strategy', '$status', '$remarks'
-    )");
+    )")) {
+        return 'inserted';
+    }
+    return false;
 }
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
@@ -147,7 +142,8 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $fileTmpName = $_FILES['file']['tmp_name'];
         $success = true;
         $error = '';
-        $processed = 0;
+        $inserted = 0;
+        $skipped = 0;
 
         if ($extension === 'xlsx') {
             $result = xlsxToArray($fileTmpName);
@@ -157,20 +153,19 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             }
             foreach ($result['rows'] as $idx => $cells) {
                 if ($idx < 2) { continue; } // skip the two header rows
-                $locality = trim((string)($cells[1] ?? ''));
-                $locations = trim((string)($cells[6] ?? ''));
-                $code = trim((string)($cells[7] ?? ''));
-                if ($locality === '' && $locations === '' && $code === '') {
-                    continue; // skip blank rows
+                $hasData = false;
+                for ($c = 1; $c <= 16; $c++) {
+                    if (trim((string)($cells[$c] ?? '')) !== '') { $hasData = true; break; }
                 }
+                if (!$hasData) { continue; }
                 $data = array(
                     trim((string)($cells[1] ?? '')),
                     trim((string)($cells[2] ?? '')),
                     trim((string)($cells[3] ?? '')),
                     trim((string)($cells[4] ?? '')),
                     trim((string)($cells[5] ?? '')),
-                    $locations,
-                    $code,
+                    trim((string)($cells[6] ?? '')),
+                    trim((string)($cells[7] ?? '')),
                     trim((string)($cells[8] ?? '')),
                     trim((string)($cells[9] ?? '')),
                     trim((string)($cells[10] ?? '')),
@@ -181,12 +176,9 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
                     trim((string)($cells[15] ?? '')),
                     trim((string)($cells[16] ?? ''))
                 );
-                if (!saveRow($con, $data)) {
-                    $success = false;
-                    $error = mysqli_error($con);
-                    break;
-                }
-                $processed++;
+                $action = saveRow($con, $data);
+                if ($action === 'inserted') { $inserted++; }
+                else { $skipped++; }
             }
         } elseif ($extension === 'csv') {
             $handle = fopen($fileTmpName, "r");
@@ -195,9 +187,9 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
                 while (($data = fgetcsv($handle)) !== false) {
                     if (count($data) >= 17) {
                         $row = array_map(function ($v) { return trim((string)$v); }, array_slice($data, 1, 16));
-                        if ($row[0] === '' && $row[5] === '' && $row[6] === '') {
-                            continue; // skip blank rows
-                        }
+                        $hasData = false;
+                        foreach ($row as $v) { if ($v !== '') { $hasData = true; break; } }
+                        if (!$hasData) { continue; }
                         if (!saveRow($con, $row)) {
                             $success = false;
                             $error = mysqli_error($con);
@@ -232,9 +224,12 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             exit;
         }
 
+        $total = $inserted + $skipped;
         if ($success) {
-            echo json_encode(['success' => true, 'processed' => $processed]);
+            ob_clean();
+            echo json_encode(['success' => true, 'total' => $total, 'inserted' => $inserted, 'skipped' => $skipped]);
         } else {
+            ob_clean();
             echo json_encode(['success' => false, 'error' => $error]);
         }
     } else {

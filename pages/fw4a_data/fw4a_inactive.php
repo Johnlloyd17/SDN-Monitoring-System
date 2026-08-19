@@ -99,7 +99,6 @@ if (!isset($_SESSION['role'])) {
                                                         <th>Site Code</th>
                                                         <th>Strategy</th>
                                                         <th>Status</th>
-                                                        <th>Reason for Outage</th>
                                                         <th>Remarks</th>
                                                     </tr>
                                                 </thead>
@@ -140,7 +139,6 @@ if (!isset($_SESSION['role'])) {
                                                                     <td>' . $row['code'] . '</td>
                                                                     <td>' . $row['strategy'] . '</td>
                                                                     <td>' . $row['status'] . '</td>
-                                                                    <td>' . $row['reason'] . '</td>
                                                                     <td>' . $row['remarks'] . '</td>
                                        
                                                         </tr>
