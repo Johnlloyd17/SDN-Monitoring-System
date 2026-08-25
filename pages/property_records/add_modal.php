@@ -1,11 +1,12 @@
+<?php if (!isset($con)) include "../connection.php";
 <!-- ========================= MODAL ======================= -->
 <div id="addModal" class="modal fade">
     <form method="post" enctype="multipart/form-data">
-        <div class="modal-dialog modal-lg" style="width:750px !important;">
+        <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Add Item</h4>
+                    <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Add Property Record</h4>
                 </div>
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                     <div class="row">

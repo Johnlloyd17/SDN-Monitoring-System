@@ -294,9 +294,9 @@ if (!isset($_SESSION['role'])) {
 
 <!-- View Pass Slip Detail Modal -->
 <div class="modal fade" id="viewPassSlipModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document" style="width: 95%; max-width: 1100px;">
+    <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background: #1b3a6b; color: #fff;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%); color: #fff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Pass Slip Preview</h4>
             </div>
@@ -309,7 +309,7 @@ if (!isset($_SESSION['role'])) {
 
 <!-- Return Pass Slip Modal -->
 <div class="modal fade" id="returnPassSlipModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-sdm-lg" role="document">
         <div class="modal-content">
             <form method="POST" action="function.php">
                 <div class="modal-header">
@@ -403,9 +403,9 @@ if (!isset($_SESSION['role'])) {
 
 <!-- Print Pass Slip Modal -->
 <div class="modal fade" id="printPassSlipModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document" style="width: 95%; max-width: 1100px;">
+    <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background: #1b3a6b; color: #fff; border-radius: 0;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%); color: #fff; border-radius: 0;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-print"></i> Pass Slip Preview</h4>
             </div>
@@ -421,7 +421,7 @@ if (!isset($_SESSION['role'])) {
 
 <!-- Upload Attachment Modal -->
 <div class="modal fade" id="uploadAttachmentModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog modal-sdm-md" role="document">
         <div class="modal-content">
             <div class="modal-header" style="background: #e67e22; color: #fff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
@@ -457,9 +457,9 @@ if (!isset($_SESSION['role'])) {
 
 <!-- Preview Attachment Modal -->
 <div class="modal fade" id="previewAttachmentModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document" style="width: 95%; max-width: 1100px;">
+    <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header" style="background: #1b3a6b; color: #fff;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%); color: #fff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-file-image-o"></i> <span id="previewFileName">Preview</span></h4>
             </div>

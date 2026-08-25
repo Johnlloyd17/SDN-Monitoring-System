@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 if (isset($_POST['btn_add'])) {
     // Sanitize input data
     $project = mysqli_real_escape_string($con, $_POST['txt_project']);

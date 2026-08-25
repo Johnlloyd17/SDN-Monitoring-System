@@ -259,11 +259,11 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= ADD MODAL ======================= -->
         <div id="addModal" class="modal fade">
             <form id="addForm" enctype="multipart/form-data">
-                <div class="modal-dialog modal-lg" style="width:750px !important;">
+                <div class="modal-dialog modal-sdm-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Add Item</h4>
+                            <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Add Property Record</h4>
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <div id="addAlert" style="display:none;"></div>
@@ -307,11 +307,11 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= EDIT MODAL (Single Dynamic) ======================= -->
         <div id="editModal" class="modal fade">
             <form id="editForm">
-                <div class="modal-dialog modal-lg" style="width:750px !important;">
+                <div class="modal-dialog modal-sdm-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Edit Item</h4>
+                            <h4 class="modal-title"><i class="fa fa-pencil-square-o"></i> Edit Property Record</h4>
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <div id="editAlert" style="display:none;"></div>
@@ -356,11 +356,11 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= VIEW/PHOTOS MODAL (Single Dynamic) ======================= -->
         <div id="viewModal" class="modal fade" role="dialog">
             <form id="photoForm" enctype="multipart/form-data">
-                <div class="modal-dialog modal-lg" style="width:850px !important;">
+                <div class="modal-dialog modal-sdm-xl">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">View Files for: <span id="viewItemName"></span></h4>
+                            <h4 class="modal-title"><i class="fa fa-folder-open"></i> View Files for: <span id="viewItemName"></span></h4>
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <input type="hidden" name="hidden_id" id="view_hidden_id" value="" />
@@ -384,7 +384,7 @@ if (!isset($_SESSION['role'])) {
 
         <!-- ========================= PREVIEW FILE MODAL ======================= -->
         <div id="previewFileModal" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-lg" role="document" style="width: 95%; max-width: 1100px;">
+            <div class="modal-dialog modal-sdm-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header" style="background: #1b3a6b; color: #fff;">
                         <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
@@ -407,11 +407,11 @@ if (!isset($_SESSION['role'])) {
 
         <!-- ========================= DELETE CONFIRMATION MODAL ======================= -->
         <div id="deleteModal" class="modal fade">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-sdm-sm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Delete Confirmation</h4>
+                        <h4 class="modal-title"><i class="fa fa-trash"></i> Delete Confirmation</h4>
                     </div>
                     <div class="modal-body">
                         <p>Are you sure you want to delete the selected item(s)?</p>
@@ -426,7 +426,7 @@ if (!isset($_SESSION['role'])) {
 
         <!-- Pass Slip History Modal -->
         <div class="modal fade" id="passSlipHistoryModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-sdm-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>

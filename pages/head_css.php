@@ -12,6 +12,8 @@
     <link href="../../js/morris/morris-0.4.3.min.css" rel="stylesheet" type="text/css" />
     <!-- Theme style -->
     <link href="../../css/AdminLTE.css" rel="stylesheet" type="text/css" />
+    <!-- Unified Modal Design System -->
+    <link href="../../css/modal-overrides.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="../../css/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
     <link href="../../css/select2.css" rel="stylesheet" type="text/css" />

@@ -84,7 +84,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">ICT Proficiency Diagnostic Examination</div>
                 <div class="panel-body">
-                    <div id="ilcdb-diagnostic"></div>
+                    <div id="ilcdb-diagnostic" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">Diagnostic Examination Examinees</div>
                 <div class="panel-body">
-                    <div id="diagnostic-examinees"></div>
+                    <div id="diagnostic-examinees" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">SPARK Technical Training Conducted</div>
                 <div class="panel-body">
-                    <div id="ilcdb-spark"></div>
+                    <div id="ilcdb-spark" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -111,7 +111,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">SPARK Technical Training Completers</div>
                 <div class="panel-body">
-                    <div id="spark-completers"></div>
+                    <div id="spark-completers" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">Capacity Development</div>
                 <div class="panel-body">
-                    <div id="dlt"></div>
+                    <div id="dlt" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -130,7 +130,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">Training on Digital Transformative Technologies</div>
                 <div class="panel-body">
-                    <div id="transformative"></div>
+                    <div id="transformative" style="height: 300px;"></div>
                 </div>
             </div>
         </div>

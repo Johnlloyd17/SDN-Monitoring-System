@@ -1,6 +1,6 @@
 <!-- Add Pass Slip Modal -->
 <div class="modal fade" id="addPassSlipModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-sdm-lg" role="document">
         <div class="modal-content">
             <form method="POST" action="function.php" id="addPassSlipForm">
                 <div class="modal-header">

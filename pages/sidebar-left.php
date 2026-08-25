@@ -37,14 +37,6 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-project-diagram"></i> <span>DREAMS</span> <i class="fa fa-angle-down pull-right"></i>
-            </a>
-            <ul class="treeview-menu">
-                <!-- Add relevant links here -->
-            </ul>
-        </li>
-        <li class="treeview">
-            <a href="#">
                 <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-down pull-right"></i>
             </a>
             <ul class="treeview-menu">
@@ -156,14 +148,6 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-project-diagram"></i> <span>DREAMS</span> <i class="fa fa-angle-down pull-right"></i>
-            </a>
-            <ul class="treeview-menu">
-                <!-- Add relevant links here -->
-            </ul>
-        </li>
-        <li class="treeview">
-            <a href="#">
                 <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-down pull-right"></i>
             </a>
             <ul class="treeview-menu">
@@ -251,6 +235,8 @@ echo '
 ?>
 <script>
 (function() {
+    document.body.classList.add('fixed');
+
     // Current page's absolute path (ignores query string/hash)
     var currentPath = window.location.pathname;
 

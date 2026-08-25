@@ -56,12 +56,20 @@ if (!isset($_SESSION['role'])) {
                                             </thead>
                                             <tbody>
                                             <?php
-                                             $counter = 1;  // Initialize counter
+                                             $counter = 1;
                                              $totalMunicipalities = 0;
                                              $totalBarangaysWithAccess = 0;
                                              $totalBarangayCount = 0;
 
-                                             // Fetch data from tblsdn
+                                             // Single query: all municipalities with distinct barangay access counts
+                                             $accessMap = [];
+                                             $accessQuery = mysqli_query($con, "SELECT locality, COUNT(DISTINCT barangay) AS barangays_with_access FROM tblfwfa WHERE locality != '' GROUP BY locality");
+                                             while ($aRow = mysqli_fetch_assoc($accessQuery)) {
+                                                 $accessMap[$aRow['locality']] = $aRow['barangays_with_access'];
+                                             }
+
+                                             $totalLGUWithAccess = count($accessMap);
+
                                              $tableQuery = "SELECT * FROM tblsdn WHERE municipality != ''";
                                              $result = mysqli_query($con, $tableQuery);
 
@@ -72,16 +80,10 @@ if (!isset($_SESSION['role'])) {
                                              while ($row = mysqli_fetch_assoc($result)) {
                                                  $barangayCount = $row['barangay_count'];
                                                  $municipality = $row['municipality'];
-
-                                                 // Query to get the number of distinct barangays with access points from tblfwfa
-                                                 $accessQuery = "SELECT COUNT(DISTINCT barangay) as barangays_with_access FROM tblfwfa WHERE locality = '" . mysqli_real_escape_string($con, $municipality) . "'";
-                                                 $accessResult = mysqli_query($con, $accessQuery);
-                                                 $accessRow = mysqli_fetch_assoc($accessResult);
-                                                 $barangaysWithAccess = $accessRow['barangays_with_access'];
+                                                 $barangaysWithAccess = isset($accessMap[$municipality]) ? $accessMap[$municipality] : 0;
 
                                                  $penetrationRate = ($barangayCount > 0) ? ($barangaysWithAccess / $barangayCount) * 100 : 0;
 
-                                                 // Accumulate totals for final calculation
                                                  $totalMunicipalities++;
                                                  $totalBarangaysWithAccess += $barangaysWithAccess;
                                                  $totalBarangayCount += $barangayCount;
@@ -104,19 +106,9 @@ if (!isset($_SESSION['role'])) {
                                                     <td colspan="5" style="text-align: right;"><strong>Total LGU Penetration Rate:</strong></td>
                                                     <td>
                                                         <?php
-                                                        // Calculate total distinct municipalities with access points
-                                                        $distinctAccessQuery = "SELECT COUNT(DISTINCT locality) as total_lgu_with_access FROM tblfwfa";
-                                                        $distinctAccessResult = mysqli_query ($con, $distinctAccessQuery);
-                                                        $distinctAccessRow = mysqli_fetch_assoc($distinctAccessResult);
-                                                        $totalLGUWithAccess = $distinctAccessRow['total_lgu_with_access'];
-
-                                                        // Calculate total number of municipalities
-                                                        $totalMunicipalitiesQuery = "SELECT COUNT(*) as total_municipalities FROM tblsdn";
-                                                        $totalMunicipalitiesResult = mysqli_query($con, $totalMunicipalitiesQuery);
-                                                        $totalMunicipalitiesRow = mysqli_fetch_assoc($totalMunicipalitiesResult);
-                                                        $totalMunicipalitiesCount = $totalMunicipalitiesRow['total_municipalities'];
-
-                                                        // Calculate the total LGU penetration rate
+                                                        $totalMunicipalitiesCountQuery = mysqli_query($con, "SELECT COUNT(*) AS cnt FROM tblsdn WHERE municipality != ''");
+                                                        $totalMunicipalitiesCountRow = mysqli_fetch_assoc($totalMunicipalitiesCountQuery);
+                                                        $totalMunicipalitiesCount = $totalMunicipalitiesCountRow['cnt'];
                                                         $totalLGUPenetrationRate = ($totalMunicipalitiesCount > 0) ? ($totalLGUWithAccess / $totalMunicipalitiesCount) * 100 : 0;
                                                         echo number_format($totalLGUPenetrationRate, 2) . '%';
                                                         ?>

@@ -1,0 +1,8 @@
+{
+    "intelephense.environment.globals": [
+        "con"
+    ],
+    "intelephense.stubs": [
+        "mysqli"
+    ]
+}

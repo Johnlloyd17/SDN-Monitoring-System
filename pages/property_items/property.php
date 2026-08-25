@@ -196,11 +196,11 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= ADD MODAL ======================= -->
         <div id="addModal" class="modal fade">
             <form id="addForm">
-                <div class="modal-dialog modal-lg" style="width:750px !important;">
+                <div class="modal-dialog modal-sdm-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Add Procurement Record</h4>
+                            <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Add Procurement Record</h4>
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <div id="addAlert" style="display:none;"></div>
@@ -247,11 +247,11 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= EDIT MODAL ======================= -->
         <div id="editModal" class="modal fade">
             <form id="editForm">
-                <div class="modal-dialog modal-lg" style="width:750px !important;">
+                <div class="modal-dialog modal-sdm-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Edit Procurement Record</h4>
+                            <h4 class="modal-title"><i class="fa fa-pencil-square-o"></i> Edit Procurement Record</h4>
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <div id="editAlert" style="display:none;"></div>
@@ -298,11 +298,11 @@ if (!isset($_SESSION['role'])) {
 
         <!-- ========================= DELETE CONFIRMATION MODAL ======================= -->
         <div id="deleteModal" class="modal fade">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-sdm-sm">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Delete Confirmation</h4>
+                        <h4 class="modal-title"><i class="fa fa-trash"></i> Delete Confirmation</h4>
                     </div>
                     <div class="modal-body">
                         <p>Are you sure you want to delete the selected record(s)?</p>

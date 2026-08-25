@@ -1,16 +1,16 @@
 <!-- ========================= ADD MODAL ======================= -->
 <div id="addModal" class="modal fade">
     <form id="addForm" enctype="multipart/form-data">
-        <div class="modal-dialog modal-lg" style="width:750px !important;">
+        <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Add Access Point</h4>
+                    <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Add Access Point</h4>
                 </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="modal-body">
                     <div id="addAlert" style="display:none;"></div>
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Locality:</label>
                                 <input name="txt_locality" id="add_locality" class="form-control input-sm" type="text" placeholder="Locality" />
@@ -47,13 +47,15 @@
                                 <label>Nationwide ID:</label>
                                 <input name="txt_nationwide_id" class="form-control input-sm" type="text" placeholder="Nationwide ID" />
                             </div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Date of Activation:</label>
-                                <input name="txt_date_of_activation" class="form-control input-sm" type="date" placeholder="Date of Activation" />
+                                <input name="txt_date_of_activation" class="form-control input-sm" type="date" />
                             </div>
                             <div class="form-group">
                                 <label>Current Date of Acceptance:</label>
-                                <input name="txt_current_date_of_acceptance" class="form-control input-sm" type="date" placeholder="Current Date of Acceptance" />
+                                <input name="txt_current_date_of_acceptance" class="form-control input-sm" type="date" />
                             </div>
                             <div class="form-group">
                                 <label>Latitude:</label>
@@ -83,14 +85,14 @@
                             </div>
                             <div class="form-group">
                                 <label>Remarks:</label>
-                                <textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks"></textarea>
+                                <textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks" rows="3"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Cancel" />
-                    <input type="submit" class="btn btn-primary btn-sm" id="addSubmitBtn" value="Add Item" />
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" class="btn btn-primary" id="addSubmitBtn" value="Add Item" />
                 </div>
             </div>
         </div>

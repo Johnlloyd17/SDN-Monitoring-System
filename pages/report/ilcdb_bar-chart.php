@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 $selected_year = isset($_POST['selected_year']) ? $_POST['selected_year'] : date("Y"); // Default to current year if no year is selected
 
 $year_condition = "AND YEAR(start) = $selected_year"; // Filter by the selected year

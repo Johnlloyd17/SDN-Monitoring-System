@@ -184,17 +184,17 @@ if (!isset($_SESSION['role'])) {
                                                                     <td>' . $row['remark'] . '</td>';
                                             if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['lgu'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['lgu'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                 </table>
 
+                                <?php include "edit_modal.php"; ?>
+                                <?php include "view_modal.php"; ?>
 
                                     <?php include "../deleteModal.php"; ?>
 
@@ -224,33 +224,101 @@ if (!isset($_SESSION['role'])) {
         include "../footer.php"; ?>
 <script type="text/javascript">
 
-var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
-var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
-
-//select all checkboxes
-select_all.addEventListener("change", function(e){
-    for (i = 0; i < checkboxes.length; i++) { 
-        checkboxes[i].checked = select_all.checked;
-    }
-});
-
-
-for (var i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('change', function(e){ //".checkbox" change 
-        //uncheck "select all", if one of the listed checkbox item is unchecked
-        if(this.checked == false){
-            select_all.checked = false;
-        }
-        //check "select all" if all checkbox items are checked
-        if(document.querySelectorAll('.checkbox:checked').length == checkboxes.length){
-            select_all.checked = true;
-        }
-    });
-}
     $(function() {
-        $("#table").dataTable({
-           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+        $("#table").DataTable({
+            "aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 3] }],
+            "aaSorting": [],
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100]
         });
+
+        var editFields = [
+            'province','district','municipality','lgu','class','system','action',
+            'businessyn','businessstatus','barangayyn','barangaystatus',
+            'buildingyn','buildingstatus','workingyn','workingstatus',
+            'bfpyn','bplyn','bplstatus','ecedulayn','ecedulastatus',
+            'elcryn','elcrstatus','enewsyn','enewsstatus','remark'
+        ];
+
+        $(document).on('click', '.btn-edit-item', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '../../ajax/bpls_get_item.php',
+                method: 'GET',
+                data: { action: 'item', id: id },
+                dataType: 'json',
+                success: function(data) {
+                    $('#edit_hidden_id').val(data.id);
+                    for (var i = 0; i < editFields.length; i++) {
+                        var f = editFields[i];
+                        $('#edit_' + f).val(data[f] || '');
+                    }
+                    $('#editModal').modal('show');
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-view-item', function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $('#view_item_title').text(name);
+            $('#view_hidden_id').val(id);
+            $('#photoGrid').empty();
+
+            $.ajax({
+                url: '../../ajax/bpls_get_item.php',
+                method: 'GET',
+                data: { action: 'photos', id: id },
+                dataType: 'json',
+                success: function(photos) {
+                    if (photos.length === 0) {
+                        $('#photoGrid').html('<div class="col-md-12"><p>No files found.</p></div>');
+                    } else {
+                        var html = '';
+                        for (var i = 0; i < photos.length; i++) {
+                            var p = photos[i];
+                            var ext = p.type;
+                            html += '<div class="col-md-4">';
+                            html += '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />';
+                            html += '<div class="file-item">';
+                            if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                                html += '<img src="' + p.filepath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
+                            } else if (ext === 'pdf') {
+                                html += '<div class="file-thumbnail-pdf"><embed src="' + p.filepath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                            } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
+                                html += '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
+                            } else {
+                                html += '<div class="file-thumbnail">File type not previewable</div>';
+                            }
+                            var nameClean = p.filename.replace(/\d+/g, '');
+                            html += '<div class="file-info"><span class="filename">' + nameClean + '</span>';
+                            html += '<a href="' + p.filepath + '" download class="download-btn"><i class="fas fa-download"></i></a></div>';
+                            html += '</div></div>';
+                        }
+                        $('#photoGrid').html(html);
+                    }
+                    rebindPhotoCheckboxes();
+                    $('#viewModal').modal('show');
+                }
+            });
+        });
+
+        function rebindPhotoCheckboxes() {
+            var selectAll = document.getElementById("cbxMainphoto");
+            var boxes = document.getElementsByClassName("chk_deletephoto");
+            selectAll.checked = false;
+            selectAll.onchange = function(e) {
+                for (var i = 0; i < boxes.length; i++) {
+                    boxes[i].checked = selectAll.checked;
+                }
+            };
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].onchange = function(e) {
+                    if (!this.checked) selectAll.checked = false;
+                    if (document.querySelectorAll('.chk_deletephoto:checked').length === boxes.length) selectAll.checked = true;
+                };
+            }
+        }
     });
 
      // Function to update the date and time

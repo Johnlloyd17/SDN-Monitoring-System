@@ -58,12 +58,18 @@ if (!isset($_SESSION['role'])) {
                                         </thead>
                                         <tbody>
                                         <?php
-                                         $counter = 1;  // Initialize counter
+                                         $counter = 1;
                                          $totalBarangays = 0;
                                          $totalBarangaysWithAccess = 0;
 
-                                         // Fetch data from tblbrgy
-                                         $tableQuery = "SELECT * FROM tblbrgy";
+                                         // Single query: LEFT JOIN to find barangays with access
+                                         $accessMap = [];
+                                         $accessQuery = mysqli_query($con, "SELECT barangay, locality, COUNT(*) AS access_count FROM tblfwfa WHERE locality != '' GROUP BY barangay, locality");
+                                         while ($aRow = mysqli_fetch_assoc($accessQuery)) {
+                                             $accessMap[$aRow['barangay'] . '|' . $aRow['locality']] = $aRow['access_count'];
+                                         }
+
+                                         $tableQuery = "SELECT * FROM tblbrgy ORDER BY municipality, barangay";
                                          $result = mysqli_query($con, $tableQuery);
 
                                          if (!$result) {
@@ -73,20 +79,15 @@ if (!isset($_SESSION['role'])) {
                                          while ($row = mysqli_fetch_assoc($result)) {
                                              $barangay = $row['barangay'];
                                              $locality = $row['municipality'];
+                                             $key = $barangay . '|' . $locality;
+                                             $hasAccess = isset($accessMap[$key]) && $accessMap[$key] > 0;
 
-                                             // Check if the barangay exists in tblfwfa
-                                             $accessQuery = "SELECT COUNT(*) as has_access FROM tblfwfa WHERE barangay = '" . mysqli_real_escape_string($con, $barangay) . "' AND locality = '" . mysqli_real_escape_string($con, $locality) . "'";
-                                             $accessResult = mysqli_query($con, $accessQuery);
-                                             $accessRow = mysqli_fetch_assoc($accessResult);
-                                             $hasAccess = $accessRow['has_access'] > 0;
-
-                                             // Count total barangays and barangays with access points
                                              $totalBarangays++;
                                              if ($hasAccess) {
                                                  $totalBarangaysWithAccess++;
-                                                 $accessCell = '<td style="background-color: rgba(0, 0, 255, 0.1);">Yes</td>'; // Blue with 50% opacity
+                                                 $accessCell = '<td style="background-color: rgba(0, 0, 255, 0.1);">Yes</td>';
                                              } else {
-                                                 $accessCell = '<td style="background-color: rgba(255, 0, 0, 0.1);">No</td>'; // Red with 50% opacity
+                                                 $accessCell = '<td style="background-color: rgba(255, 0, 0, 0.1);">No</td>';
                                              }
 
                                              echo '

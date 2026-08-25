@@ -21,26 +21,16 @@
             padding: 10px; /* Optional: Add padding to make the icon fit better */
         }
 
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 300px; /* Set a fixed height for the charts */
-            margin-bottom: 20px;
-        }
-        .chart-container canvas {
-            width: 100% !important; /* Ensure canvas takes up full width */
-            height: 100% !important; /* Ensure canvas takes up full height */
-        }
         .panel-body {
-            padding: 15px; /* Add padding to the panel body */
+            padding: 15px;
         }
         .info-box-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 80px; /* Adjust height as needed */
-            width: 80px; /* Adjust width as needed */
-            font-size: 40px; /* Adjust icon size */
+            height: 80px;
+            width: 80px;
+            font-size: 40px;
         }
         .dataTables_filter input {
             padding-top: 20px;
@@ -84,8 +74,28 @@
             color: #555; /* Optional: Change color for better visibility */
             margin-left: auto; /* Push the date/time to the right */
         }
-        /* Other styles remain unchanged */
-           
+        /* Chart panels */
+        .chart-panel {
+            margin-bottom: 0;
+        }
+        .chart-panel .panel-body {
+            padding: 10px 15px 5px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-bottom: 10px;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
     </style>
 </head>
 <body class="skin-black">
@@ -277,6 +287,93 @@
                 </div><!-- /.panel -->
             </div>
 
+            <!-- Charts Section -->
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <?php
+                    // Chart 1: Activities by District (Doughnut)
+                    $districtQuery = mysqli_query($con, "SELECT 
+                        SUM(CASE WHEN district = 'District 1' OR district = 'District 1 (Siargao)' THEN 1 ELSE 0 END) AS district1,
+                        SUM(CASE WHEN district = 'District 2' OR district = 'District 2 (Mainland)' THEN 1 ELSE 0 END) AS district2
+                    FROM tblactivity");
+                    $districtRow = mysqli_fetch_assoc($districtQuery);
+
+                    // Chart 2: Activities per Project (Horizontal Bar)
+                    $projectQuery = mysqli_query($con, "SELECT project, COUNT(*) AS total FROM tblactivity WHERE project IS NOT NULL AND project != '' GROUP BY project ORDER BY total DESC");
+                    $projectLabels = [];
+                    $projectData = [];
+                    while ($row = mysqli_fetch_assoc($projectQuery)) {
+                        $projectLabels[] = $row['project'];
+                        $projectData[] = (int)$row['total'];
+                    }
+
+                    // Chart 3: Top 10 Municipalities (Bar)
+                    $topMuniQuery = mysqli_query($con, "SELECT municipality, COUNT(*) AS total FROM tblactivity WHERE municipality IS NOT NULL AND municipality != '' GROUP BY municipality ORDER BY total DESC LIMIT 10");
+                    $muniLabels = [];
+                    $muniData = [];
+                    while ($row = mysqli_fetch_assoc($topMuniQuery)) {
+                        $muniLabels[] = $row['municipality'];
+                        $muniData[] = (int)$row['total'];
+                    }
+
+                    // Chart 4: Activities by Sector (Pie)
+                    $sectorQuery = mysqli_query($con, "SELECT sector, COUNT(*) AS total FROM tblactivity WHERE sector IS NOT NULL AND sector != '' GROUP BY sector ORDER BY total DESC");
+                    $sectorLabels = [];
+                    $sectorData = [];
+                    while ($row = mysqli_fetch_assoc($sectorQuery)) {
+                        $sectorLabels[] = $row['sector'];
+                        $sectorData[] = (int)$row['total'];
+                    }
+                ?>
+
+                <!-- Row 1: District Doughnut + Projects Bar -->
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div class="panel panel-default chart-panel">
+                            <div class="panel-heading">Activities by District</div>
+                            <div class="panel-body">
+                                <div class="chart-container">
+                                    <canvas id="districtChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div class="panel panel-default chart-panel">
+                            <div class="panel-heading">Activities per Project</div>
+                            <div class="panel-body">
+                                <div class="chart-container">
+                                    <canvas id="projectChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Top Municipalities Bar + Sector Pie -->
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div class="panel panel-default chart-panel">
+                            <div class="panel-heading">Top 10 Municipalities by Activity</div>
+                            <div class="panel-body">
+                                <div class="chart-container">
+                                    <canvas id="municipalityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div class="panel panel-default chart-panel">
+                            <div class="panel-heading">Activities by Sector</div>
+                            <div class="panel-body">
+                                <div class="chart-container">
+                                    <canvas id="sectorChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- DataTables Table -->
             <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="panel panel-default">
@@ -295,30 +392,34 @@
                                     <th>ILCDB</th>
                                     <th>GECS</th>
                                     <th>DREAM</th>
-                                    <th 
                                     <th>GOVNET</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                // Fetch all municipalities
-                                $municipalitiesQuery = mysqli_query($con, "SELECT DISTINCT municity FROM tblproject ORDER BY municity");
-                                $municipalities = [];
-                                while ($row = mysqli_fetch_assoc($municipalitiesQuery)) {
-                                    $municipalities[] = $row['municity'];
+                                // Single query to get all municipality × project counts
+                                $crossTabQuery = mysqli_query($con, "
+                                    SELECT municipality, project, COUNT(*) AS total
+                                    FROM tblactivity
+                                    WHERE municipality != '' AND project != ''
+                                    GROUP BY municipality, project
+                                ");
+                                $crossTabData = [];
+                                while ($row = mysqli_fetch_assoc($crossTabQuery)) {
+                                    $crossTabData[$row['municipality']][$row['project']] = $row['total'];
                                 }
 
-                                // Define the list of projects
+                                // Fetch all municipalities
+                                $municipalitiesQuery = mysqli_query($con, "SELECT DISTINCT municipality FROM tblactivity WHERE municipality != '' ORDER BY municipality ASC");
                                 $projects = ['Cybersecurity', 'eLGU BPLS', 'FWFA', 'IIDB', 'ILCDB', 'GECS', 'DREAM', 'GOVNET'];
 
-                                // Display each municipality with counts for each project
-                                foreach ($municipalities as $municipality) {
+                                while ($mRow = mysqli_fetch_assoc($municipalitiesQuery)) {
+                                    $municipality = $mRow['municipality'];
                                     echo '<tr>';
-                                    echo '<td>' . $municipality . '</td>';
+                                    echo '<td>' . htmlspecialchars($municipality) . '</td>';
                                     foreach ($projects as $project) {
-                                        $q = mysqli_query($con, "SELECT COUNT(*) AS total FROM tblactivity WHERE municipality = '$municipality' AND project = '$project'");
-                                        $result = mysqli_fetch_assoc($q);
-                                        echo '<td>' . $result['total'] . '</td>';
+                                        $count = isset($crossTabData[$municipality][$project]) ? $crossTabData[$municipality][$project] : 0;
+                                        echo '<td>' . $count . '</td>';
                                     }
                                     echo '</tr>';
                                 }
@@ -361,6 +462,138 @@ function updateDateTime() {
         // Update the date and time every second
         setInterval(updateDateTime, 1000);
         updateDateTime(); // Initial call to display immediately
+
+        // --- CHARTS ---
+
+        // Chart 1: Activities by District (Doughnut)
+        var districtCtx = document.getElementById('districtChart').getContext('2d');
+        new Chart(districtCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['District 1 (Siargao)', 'District 2 (Mainland)'],
+                datasets: [{
+                    data: [<?php echo (int)$districtRow['district1']; ?>, <?php echo (int)$districtRow['district2']; ?>],
+                    backgroundColor: ['#3498db', '#e67e22'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 13 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                var pct = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                return context.label + ': ' + context.raw + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Activities per Project (Horizontal Bar)
+        var projectCtx = document.getElementById('projectChart').getContext('2d');
+        var projectColors = ['#3498db','#27ae60','#e74c3c','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e'];
+        new Chart(projectCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($projectLabels); ?>,
+                datasets: [{
+                    label: 'Activities',
+                    data: <?php echo json_encode($projectData); ?>,
+                    backgroundColor: projectColors.slice(0, <?php echo count($projectLabels); ?>),
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return context.raw + ' activities'; }
+                        }
+                    }
+                },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+                }
+            }
+        });
+
+        // Chart 3: Top 10 Municipalities (Bar)
+        var muniCtx = document.getElementById('municipalityChart').getContext('2d');
+        new Chart(muniCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($muniLabels); ?>,
+                datasets: [{
+                    label: 'Activities',
+                    data: <?php echo json_encode($muniData); ?>,
+                    backgroundColor: '#3498db',
+                    hoverBackgroundColor: '#2980b9',
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return context.raw + ' activities'; }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 30 } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+                }
+            }
+        });
+
+        // Chart 4: Activities by Sector (Pie)
+        var sectorCtx = document.getElementById('sectorChart').getContext('2d');
+        var sectorColors = ['#3498db','#27ae60','#e74c3c','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e','#d35400','#16a085'];
+        new Chart(sectorCtx, {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($sectorLabels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($sectorData); ?>,
+                    backgroundColor: sectorColors.slice(0, <?php echo count($sectorLabels); ?>),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                var pct = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                return context.label + ': ' + context.raw + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

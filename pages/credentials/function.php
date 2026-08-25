@@ -1,4 +1,5 @@
-<?php if(isset($_POST['btn_add'])){
+<?php if (!isset($con)) include "../connection.php";
+if(isset($_POST['btn_add'])){
     $txt_name = $_POST['txt_name'];
     $txt_uname = $_POST['txt_uname'];
     $txt_pass = $_POST['txt_pass'];

@@ -205,13 +205,11 @@ if (!isset($_SESSION['role'])) {
                                                                 <td>' . $row['remarks'] . '</td>';
                                             if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                 </table>
@@ -231,6 +229,8 @@ if (!isset($_SESSION['role'])) {
 
                             <?php include "../duplicate_error.php"; ?>
 
+            <?php include "edit_modal.php"; ?>
+            <?php include "view_modal.php"; ?>
             <?php include "add_modal.php"; ?>
 
             <?php include "function.php"; ?>
@@ -271,6 +271,74 @@ for (var i = 0; i < checkboxes.length; i++) {
     $(function() {
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+        });
+
+        $(document).on('click', '.btn-edit-item', function() {
+            var id = $(this).data('id');
+            $.get('../../ajax/planned_get_item.php', { action: 'item', id: id }, function(data) {
+                $('#edit_hidden_id').val(data.id || '');
+                $('#edit_start').val(data.start || '');
+                $('#edit_end').val(data.end || '');
+                $('#edit_project').val(data.project || '');
+                $('#edit_subproject').val(data.subproject || '');
+                $('#edit_indicator').val(data.indicator || '');
+                $('#edit_activity').val(data.activity || '');
+                $('#edit_training').val(data.training || '');
+                $('#edit_municipality').val(data.municipality || '');
+                $('#edit_barangay').val(data.barangay || '');
+                $('#edit_district').val(data.district || '');
+                $('#edit_agency').val(data.agency || '');
+                $('#edit_mode').val(data.mode || '');
+                $('#edit_sector').val(data.sector || '');
+                $('#edit_person').val(data.person || '');
+                $('#edit_resource').val(data.resource || '');
+                $('#edit_participants').val(data.participants || '');
+                $('#edit_completers').val(data.completers || '');
+                $('#edit_male').val(data.male || '');
+                $('#edit_female').val(data.female || '');
+                $('#edit_approved').val(data.approved || '');
+                $('#edit_mov').val(data.mov || '');
+                $('#edit_remarks').val(data.remarks || '');
+                $('#edit_type').val(data.type || '');
+                $('#editModal').modal('show');
+            }, 'json');
+        });
+
+        $(document).on('click', '.btn-view-item', function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $('#view_item_title').text(name);
+            $('#view_hidden_id').val(id);
+            $.get('../../ajax/planned_get_item.php', { action: 'photos', id: id }, function(data) {
+                var grid = $('#photoGrid');
+                grid.empty();
+                if (data.length === 0) {
+                    grid.html('<div class="col-md-12 text-center"><p>No files uploaded yet.</p></div>');
+                } else {
+                    $.each(data, function(i, photo) {
+                        var filePath = 'photo/' + photo.filename;
+                        var ext = photo.filename.split('.').pop().toLowerCase();
+                        var thumb = '';
+                        if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                            thumb = '<img src="' + filePath + '" alt="' + photo.filename + '" class="file-thumbnail"/>';
+                        } else if (ext === 'pdf') {
+                            thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                        } else {
+                            thumb = '<div class="file-thumbnail-office"><i class="fas fa-file"></i></div>';
+                        }
+                        var nameNoNum = photo.filename.replace(/\d+/g, '');
+                        grid.append(
+                            '<div class="col-md-4">' +
+                            '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + photo.id + '" />' +
+                            '<div class="file-item">' + thumb +
+                            '<div class="file-info"><span class="filename">' + nameNoNum + '</span>' +
+                            '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
+                            '</div></div></div>'
+                        );
+                    });
+                }
+                $('#viewModal').modal('show');
+            }, 'json');
         });
     });
    // Function to update the date and time

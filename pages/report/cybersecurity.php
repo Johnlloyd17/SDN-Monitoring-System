@@ -84,7 +84,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">No. of Cybersecurity Awareness (Face-to-Face)</div>
                 <div class="panel-body">
-                    <div id="face-to-face"></div>
+                    <div id="face-to-face" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">No. of Individuals Reached (Face-to-Face)</div>
                 <div class="panel-body">
-                    <div id="reachf"></div>
+                    <div id="reachf" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">No. of PKI Awareness Campaigns</div>
                 <div class="panel-body">
-                    <div id="pki-awareness"></div>
+                    <div id="pki-awareness" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -111,7 +111,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">No. of Issued Digital Certificates</div>
                 <div class="panel-body">
-                    <div id="pki-certificates"></div>
+                    <div id="pki-certificates" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -119,7 +119,7 @@ if (!isset($_SESSION['role'])) {
             <div class="panel panel-default">
                 <div class="panel-heading">Number of PNPKI Users Training conducted</div>
                 <div class="panel-body">
-                    <div id="pki-training"></div>
+                    <div id="pki-training" style="height: 300px;"></div>
                 </div>
             </div>
         </div>

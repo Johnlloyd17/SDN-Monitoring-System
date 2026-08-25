@@ -1,17 +1,16 @@
 <?php echo '
 <div id="editModal' . $row['id'] . '" class="modal fade">
     <form method="post">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Edit Access Point</h4>
+                    <h4 class="modal-title"><i class="fa fa-pencil-square-o"></i> Edit Access Point</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <input type="hidden" value="' . htmlspecialchars($row["id"], ENT_QUOTES, "UTF-8") . '" name="hidden_id" id="hidden_id"/>
-                            
                             <div class="form-group">
                                 <label>Locality: </label>
                                 <input name="txt_edit_locality" id="edit_locality_' . $row["id"] . '" class="form-control input-sm" type="text" value="' . htmlspecialchars($row["locality"], ENT_QUOTES, "UTF-8") . '" />
@@ -48,6 +47,8 @@
                                 <label>Nationwide ID: </label>
                                 <input name="txt_edit_nationwide_id" class="form-control input-sm" type="text" value="' . htmlspecialchars($row["nationwide_id"], ENT_QUOTES, "UTF-8") . '" />
                             </div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Date of Activation: </label>
                                 <input name="txt_edit_date_of_activation" class="form-control input-sm" type="date" value="' . htmlspecialchars($row["date_of_activation"], ENT_QUOTES, "UTF-8") . '" />
@@ -84,7 +85,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Remarks: </label>
-                                <textarea name="txt_edit_remarks" class="form-control input-sm">' . htmlspecialchars($row["remarks"], ENT_QUOTES, "UTF-8") . '</textarea>
+                                <textarea name="txt_edit_remarks" class="form-control input-sm" rows="3">' . htmlspecialchars($row["remarks"], ENT_QUOTES, "UTF-8") . '</textarea>
                             </div>
                         </div>
                     </div>

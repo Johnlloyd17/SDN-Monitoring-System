@@ -248,11 +248,11 @@ $rInactive = mysqli_fetch_assoc($qInactive);
                                                 echo '
                                                 <div id="editSubItemModal' . $row['id'] . '" class="modal fade">
                                                     <form method="post">
-                                                        <div class="modal-dialog">
+                                                        <div class="modal-dialog modal-sdm-sm">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
                                                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                                    <h4 class="modal-title">Edit Classification</h4>
+                                                                    <h4 class="modal-title"><i class="fa fa-pencil-square-o"></i> Edit Classification</h4>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <input type="hidden" name="hidden_id" value="' . $row['id'] . '" />
@@ -297,7 +297,7 @@ $rInactive = mysqli_fetch_assoc($qInactive);
 
                                     <!-- Delete Confirmation Modal -->
                                     <div id="deleteSubItemModal" class="modal fade">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-sdm-sm">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -322,7 +322,7 @@ $rInactive = mysqli_fetch_assoc($qInactive);
                 <!-- Add Sub-Item Modal -->
                 <div id="addSubItemModal" class="modal fade">
                     <form method="post">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-sdm-sm">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>

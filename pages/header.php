@@ -1,5 +1,4 @@
-<?php
-
+<?php if (!isset($con)) include "connection.php";
 echo '<header class="header">
         <a href="#" class="logo">
            
@@ -51,11 +50,11 @@ echo '<header class="header">
 
 <div id="editProfileModal" class="modal fade">
     <form method="post">
-        <div class="modal-dialog modal-sm" style="width:300px !important;">
+        <div class="modal-dialog modal-sdm-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Change Account</h4>
+                    <h4 class="modal-title"><i class="fa fa-user"></i> Change Account</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">

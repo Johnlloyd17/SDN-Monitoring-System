@@ -613,13 +613,11 @@ if (!isset($_SESSION['role'])) {
                                                                 <td>' . $row['identifier'] . '</td> ';
                                                                if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'fwfasdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['barangay'], ENT_QUOTES, 'UTF-8').'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                 </table>
@@ -640,6 +638,8 @@ if (!isset($_SESSION['role'])) {
                             <?php include "../duplicate_error.php"; ?>
 
             <?php include "add_modal.php"; ?>
+            <?php include "edit_modal.php"; ?>
+            <?php include "view_modal.php"; ?>
 
             <?php include "function.php"; ?>
 
@@ -653,29 +653,6 @@ if (!isset($_SESSION['role'])) {
         include "../footer.php"; ?>
 <script type="text/javascript">
 
-var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
-var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
-
-//select all checkboxes
-select_all.addEventListener("change", function(e){
-    for (i = 0; i < checkboxes.length; i++) { 
-        checkboxes[i].checked = select_all.checked;
-    }
-});
-
-
-for (var i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('change', function(e){ //".checkbox" change 
-        //uncheck "select all", if one of the listed checkbox item is unchecked
-        if(this.checked == false){
-            select_all.checked = false;
-        }
-        //check "select all" if all checkbox items are checked
-        if(document.querySelectorAll('.checkbox:checked').length == checkboxes.length){
-            select_all.checked = true;
-        }
-    });
-}
     $(function() {
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
@@ -733,6 +710,111 @@ for (var i = 0; i < checkboxes.length; i++) {
 document.getElementById('municipalitySelect').addEventListener('change', function() {
     document.getElementById('filterForm').submit();
 });
+
+$(document).on('click', '.btn-edit-item', function() {
+    var id = $(this).data('id');
+    $.getJSON('ajax/tech4ed_get_item.php?action=item&id=' + id, function(data) {
+        $('#edit_hidden_id').val(data.id);
+        $('#edit_region').val(data.region);
+        $('#edit_province').val(data.province);
+        $('#edit_district').val(data.district);
+        $('#edit_municipality').val(data.municipality);
+        $('#edit_barangay').val(data.barangay);
+        $('#edit_street').val(data.street);
+        $('#edit_location').val(data.location);
+        $('#edit_cname').val(data.cname);
+        $('#edit_host').val(data.host);
+        $('#edit_category').val(data.category);
+        $('#edit_longitude').val(data.longitude);
+        $('#edit_latitude').val(data.latitude);
+        $('#edit_cmanager').val(data.cmanager);
+        $('#edit_cemail').val(data.cemail);
+        $('#edit_cmobile').val(data.cmobile);
+        $('#edit_clandline').val(data.clandline);
+        $('#edit_cgender').val(data.cgender);
+        $('#edit_amanager').val(data.amanager);
+        $('#edit_aemail').val(data.aemail);
+        $('#edit_amobile').val(data.amobile);
+        $('#edit_alandline').val(data.alandline);
+        $('#edit_agender').val(data.agender);
+        $('#edit_launch').val(data.launch);
+        $('#edit_registration').val(data.registration);
+        $('#edit_operation').val(data.operation);
+        $('#edit_visited').val(data.visited);
+        $('#edit_desktop').val(data.desktop);
+        $('#edit_laptop').val(data.laptop);
+        $('#edit_printer').val(data.printer);
+        $('#edit_scanner').val(data.scanner);
+        $('#edit_status').val(data.status);
+        $('#edit_network').val(data.network);
+        $('#edit_connectivity').val(data.connectivity);
+        $('#edit_speed').val(data.speed);
+        $('#edit_cmtmale').val(data.cmtmale);
+        $('#edit_cmtfemale').val(data.cmtfemale);
+        $('#edit_straining').val(data.straining);
+        $('#edit_etraining').val(data.etraining);
+        $('#edit_signing').val(data.signing);
+        $('#edit_partner').val(data.partner);
+        $('#edit_expiration').val(data.expiration);
+        $('#edit_donation').val(data.donation);
+        $('#edit_datedonation').val(data.datedonation);
+        $('#edit_tcms').val(data.tcms);
+        $('#edit_key_one').val(data.key_one);
+        $('#edit_identifier').val(data.identifier);
+        $('#editModal').modal('show');
+    });
+});
+
+$(document).on('click', '.btn-view-item', function() {
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    $('#view_item_title').text(name);
+    $('#view_hidden_id').val(id);
+    var $grid = $('#photoGrid').empty();
+    $.getJSON('ajax/tech4ed_get_item.php?action=photos&id=' + id, function(photos) {
+        if (photos.length === 0) {
+            $grid.html('<div class="col-md-12"><p>No files uploaded.</p></div>');
+        } else {
+            $.each(photos, function(i, p) {
+                var filePath = p.filepath;
+                var ext = p.type;
+                var nameClean = p.filename.replace(/\d+/g, '');
+                var thumb = '';
+                if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                    thumb = '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
+                } else if (ext === 'pdf') {
+                    thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
+                    thumb = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
+                } else {
+                    thumb = '<div class="file-thumbnail">File type not previewable</div>';
+                }
+                $grid.append(
+                    '<div class="col-md-4">' +
+                        '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />' +
+                        '<div class="file-item">' + thumb +
+                            '<div class="file-info">' +
+                                '<span class="filename">' + nameClean + '</span>' +
+                                '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+            });
+        }
+        $('#viewModal').modal('show');
+    });
+});
+
+var select_all = document.getElementById("cbxMainphoto");
+if (select_all) {
+    select_all.addEventListener("change", function(e){
+        var checkboxes = document.getElementsByClassName("chk_deletephoto");
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = select_all.checked;
+        }
+    });
+}
 
 </script>
 

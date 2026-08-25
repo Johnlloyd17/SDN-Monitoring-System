@@ -1,10 +1,10 @@
 <?php echo '<div id="editModal'.$row['id'].'" class="modal fade">
 <form method="post">
-  <div class="modal-dialog modal-sm" style="width:300px !important;">
+  <div class="modal-dialog modal-sdm-sm">
     <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Edit Credential Info</h4>
+            <h4 class="modal-title"><i class="fa fa-pencil-square-o"></i> Edit Credential Info</h4>
         </div>
         <div class="modal-body">
         <div class="row">

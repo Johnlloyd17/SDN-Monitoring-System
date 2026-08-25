@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 if (isset($_POST['btn_add'])) {
     $region = $_POST['txt_region'];
     $province = $_POST['txt_province'];
@@ -64,7 +64,7 @@ if (isset($_POST['btn_add'])) {
         '$signing', '$partner', '$expiration', '$donation', '$datedonation', '$tcms', '$key_one', '$identifier'
     )";
 
-    echo $query; // Output the query to debug
+
     $query_result = mysqli_query($con, $query) or die('Error: ' . mysqli_error($con));
 
     $id = mysqli_insert_id($con);

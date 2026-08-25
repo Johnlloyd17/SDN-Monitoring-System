@@ -2,11 +2,11 @@
 <!-- ========================= MODAL ======================= -->
 <div id="detailsModal<?php echo $row['id'];?>" class="modal fade">
 <form method="post">
-  <div class="modal-dialog " >
+  <div class="modal-dialog modal-sdm-lg">
     <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">Details of <?php echo '<b>'.$row['cname'].'</b>';?></h4>
+            <h4 class="modal-title"><i class="fa fa-user"></i> Details of <?php echo '<b>'.$row['cname'].'</b>';?></h4>
         </div>
         <div class="modal-body">
             

@@ -1,11 +1,11 @@
-<?php 
+<?php if (!isset($con)) include "../connection.php";
 echo '<div id="viewModal'.$row['id'].'" class="modal fade" role="dialog">
 <form method="post" enctype="multipart/form-data">
-  <div class="modal-dialog modal-lg" style="width:850px !important;">
+  <div class="modal-dialog modal-sdm-xl">
     <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title">View Files for Activity: '.$row['description'].'</h4>
+            <h4 class="modal-title"><i class="fa fa-folder-open"></i> View Files for: '.$row['description'].'</h4>
         </div>
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
             <input type="hidden" name="hidden_id" value="'.$row['id'].'">

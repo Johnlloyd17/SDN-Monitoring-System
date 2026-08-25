@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 if(isset($_POST['btn_add'])){
     $txt_zone = $_POST['txt_zone'];
     $txt_uname = $_POST['txt_uname'];

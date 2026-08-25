@@ -538,40 +538,38 @@ if (!isset($_SESSION['role'])) {
                                             echo '<tr>';
                                             if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'cybersecuritysdn') {
                                                 echo '<td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>';
-                                                echo ' <td>' . $counter++ . '</td>'; // Assuming 'id' is the primary key
+                                                echo ' <td>' . $counter++ . '</td>';
                                             }
                                             echo '
                                                 <td>' . $row['start'] . '</td>
-                                                                <td>' . $row['end'] . '</td>
-                                                                <td>' . $row['project'] . '</td>
-                                                                <td>' . $row['subproject'] . '</td>
-                                                                 <td>' . $row['indicator'] . '</td>
-                                                                <td>' . $row['activity'] . '</td>
-                                                                <td>' . $row['training'] . '</td>
-                                                                <td>' . $row['municipality'] . '</td>
-                                                                <td>' . $row['barangay'] . '</td>
-                                                                <td>' . $row['district'] . '</td>
-                                                                <td>' . $row['agency'] . '</td>
-                                                                <td>' . $row['mode'] . '</td>
-                                                                <td>' . $row['sector'] . '</td>
-                                                                <td>' . $row['person'] . '</td>
-                                                                <td>' . $row['resource'] . '</td>
-                                                                <td>' . $row['participants'] . '</td>
-                                                                <td>' . $row['completers'] . '</td>
-                                                                <td>' . $row['male'] . '</td>
-                                                                <td>' . $row['female'] . '</td>
-                                                                <td>' . $row['approved'] . '</td>
-                                                                <td>' . $row['mov'] . '</td>
-                                                                <td>' . $row['remarks'] . '</td>';
+                                                <td>' . $row['end'] . '</td>
+                                                <td>' . $row['project'] . '</td>
+                                                <td>' . $row['subproject'] . '</td>
+                                                <td>' . $row['indicator'] . '</td>
+                                                <td>' . $row['activity'] . '</td>
+                                                <td>' . $row['training'] . '</td>
+                                                <td>' . $row['municipality'] . '</td>
+                                                <td>' . $row['barangay'] . '</td>
+                                                <td>' . $row['district'] . '</td>
+                                                <td>' . $row['agency'] . '</td>
+                                                <td>' . $row['mode'] . '</td>
+                                                <td>' . $row['sector'] . '</td>
+                                                <td>' . $row['person'] . '</td>
+                                                <td>' . $row['resource'] . '</td>
+                                                <td>' . $row['participants'] . '</td>
+                                                <td>' . $row['completers'] . '</td>
+                                                <td>' . $row['male'] . '</td>
+                                                <td>' . $row['female'] . '</td>
+                                                <td>' . $row['approved'] . '</td>
+                                                <td>' . $row['mov'] . '</td>
+                                                <td>' . $row['remarks'] . '</td>';
                                             if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'cybersecuritysdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-activity" data-id="'.$row['id'].'" data-activity="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-activity" data-id="'.$row['id'].'" data-activity="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                     </tbody>
@@ -579,6 +577,8 @@ if (!isset($_SESSION['role'])) {
 
 
                                     <?php include "../deleteModal.php"; ?>
+                                    <?php include "edit_modal.php"; ?>
+                                    <?php include "view_modal.php"; ?>
 
                                     </form>
                                 </div><!-- /.box-body -->
@@ -633,6 +633,88 @@ for (var i = 0; i < checkboxes.length; i++) {
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
         });
+
+        // Edit Activity: fetch data via AJAX and populate modal
+        $(document).on('click', '.btn-edit-activity', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            $.getJSON('../../ajax/activity_get_item.php?action=item&id=' + id, function(data) {
+                $('#edit_hidden_id').val(data.id);
+                $('#edit_start').val(data.start || '');
+                $('#edit_end').val(data.end || '');
+                $('#edit_project').val(data.project || '');
+                $('#edit_subproject').val(data.subproject || '');
+                $('#edit_indicator').val(data.indicator || '');
+                $('#edit_activity').val(data.activity || '');
+                $('#edit_training').val(data.training || '');
+                $('#edit_municipality').val(data.municipality || '');
+                $('#edit_barangay').val(data.barangay || '');
+                $('#edit_district').val(data.district || '');
+                $('#edit_agency').val(data.agency || '');
+                $('#edit_mode').val(data.mode || '');
+                $('#edit_sector').val(data.sector || '');
+                $('#edit_person').val(data.person || '');
+                $('#edit_resource').val(data.resource || '');
+                $('#edit_participants').val(data.participants || '');
+                $('#edit_completers').val(data.completers || '');
+                $('#edit_male').val(data.male || '');
+                $('#edit_female').val(data.female || '');
+                $('#edit_approved').val(data.approved || '');
+                $('#edit_mov').val(data.mov || '');
+                $('#edit_remarks').val(data.remarks || '');
+                $('#editModal').modal('show');
+            });
+        });
+
+        // View Activity: fetch photos via AJAX and populate modal
+        $(document).on('click', '.btn-view-activity', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var activityName = $(this).data('activity');
+            $('#view_hidden_id').val(id);
+            $('#view_activity_title').text(activityName);
+            $('#photoGrid').html('<p class="text-muted">Loading photos...</p>');
+            $('#viewModal').modal('show');
+
+            $.getJSON('../../ajax/activity_get_item.php?action=photos&id=' + id, function(photos) {
+                if (photos.length === 0) {
+                    $('#photoGrid').html('<p class="text-muted">No photos found.</p>');
+                    return;
+                }
+                var html = '';
+                for (var i = 0; i < photos.length; i++) {
+                    var p = photos[i];
+                    var filePath = 'photo/' + p.filename;
+                    var ext = p.filename.split('.').pop().toLowerCase();
+                    html += '<div class="col-md-4">';
+                    html += '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />';
+                    html += '<div class="file-item">';
+                    if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                        html += '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
+                    } else if (ext === 'pdf') {
+                        html += '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                    } else {
+                        html += '<div class="file-thumbnail">File type not previewable</div>';
+                    }
+                    html += '<div class="file-info"><span class="filename">' + p.filename.replace(/\d+/g, '') + '</span>';
+                    html += '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a></div></div></div>';
+                }
+                $('#photoGrid').html(html);
+                // Re-bind photo select-all checkbox
+                bindPhotoCheckboxes();
+            });
+        });
+
+        function bindPhotoCheckboxes() {
+            var selectAll = document.getElementById("cbxMainphoto");
+            var cbs = document.getElementsByClassName("chk_deletephoto");
+            if (selectAll) {
+                selectAll.checked = false;
+                selectAll.onchange = function() {
+                    for (var j = 0; j < cbs.length; j++) cbs[j].checked = selectAll.checked;
+                };
+            }
+        }
     });
    // Function to update the date and time
    function updateDateTime() {

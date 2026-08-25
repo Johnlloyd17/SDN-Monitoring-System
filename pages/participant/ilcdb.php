@@ -239,13 +239,11 @@ if (!isset($_SESSION['role'])) {
                                                                      <td>' . $row['remarks'] . '</td>';
                                             if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'ilcdbsdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['fullname'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['fullname'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                 </table>
@@ -267,6 +265,9 @@ if (!isset($_SESSION['role'])) {
                             <?php include "../duplicate_error.php"; ?>
 
             <?php include "add_modal.php"; ?>
+
+            <?php include "edit_modal.php"; ?>
+            <?php include "view_modal.php"; ?>
 
             <?php include "function.php"; ?>
 
@@ -306,6 +307,78 @@ for (var i = 0; i < checkboxes.length; i++) {
     $(function() {
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+        });
+
+        $(document).on('click', '.btn-edit-item', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            $.ajax({
+                url: '../../ajax/participant_get_item.php?action=item&id=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    $('#edit_hidden_id').val(data.id);
+                    $('#edit_start').val(data.start);
+                    $('#edit_end').val(data.end);
+                    $('#edit_activity').val(data.activity);
+                    $('#edit_indicator').val(data.indicator);
+                    $('#edit_fullname').val(data.fullname);
+                    $('#edit_sex').val(data.sex);
+                    $('#edit_contact').val(data.contact);
+                    $('#edit_email').val(data.email);
+                    $('#edit_mode').val(data.mode);
+                    $('#edit_agency').val(data.agency);
+                    $('#edit_sector').val(data.sector);
+                    $('#edit_project').val(data.project);
+                    $('#edit_person').val(data.person);
+                    $('#edit_remarks').val(data.remarks);
+                    $('#editModal').modal('show');
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-view-item', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $('#view_item_title').text(name);
+            $('#view_hidden_id').val(id);
+            $.ajax({
+                url: '../../ajax/participant_get_item.php?action=photos&id=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function(photos) {
+                    var html = '';
+                    if (photos.length === 0) {
+                        html = '<div class="col-md-12 text-center"><p>No photos found.</p></div>';
+                    } else {
+                        for (var i = 0; i < photos.length; i++) {
+                            var p = photos[i];
+                            var filePath = 'photo/' + p.filename;
+                            var ext = p.filename.split('.').pop().toLowerCase();
+                            var thumb = '';
+                            if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                                thumb = '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
+                            } else if (ext === 'pdf') {
+                                thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                            } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
+                                thumb = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
+                            } else {
+                                thumb = '<div class="file-thumbnail">File type not previewable</div>';
+                            }
+                            var nameWithoutNums = p.filename.replace(/\d+/g, '');
+                            html += '<div class="col-md-4">' +
+                                '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />' +
+                                '<div class="file-item">' + thumb +
+                                '<div class="file-info"><span class="filename">' + nameWithoutNums + '</span>' +
+                                '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
+                                '</div></div></div>';
+                        }
+                    }
+                    $('#photoGrid').html(html);
+                    $('#viewModal').modal('show');
+                }
+            });
         });
     });
 

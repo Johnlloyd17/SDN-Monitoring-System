@@ -1,0 +1,280 @@
+/* ============================================
+   UNIFIED MODAL DESIGN SYSTEM
+   SDN Monitoring System — Modal Overrides
+   ============================================ */
+
+/* --- SIZING --- */
+.modal-dialog { margin: 30px auto; }
+
+.modal-sdm-sm { width: 400px; }
+.modal-sdm-md { width: 700px; }
+.modal-sdm-lg { width: 850px; }
+.modal-sdm-xl { width: 95%; max-width: 1100px; }
+
+@media (max-width: 991px) {
+  .modal-sdm-md,
+  .modal-sdm-lg,
+  .modal-sdm-sm { width: 95%; }
+}
+
+/* --- CONTENT --- */
+.modal-content {
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* --- HEADER --- */
+.modal-content > .modal-header,
+.modal-content > form > .modal-header {
+  background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%);
+  color: #fff;
+  padding: 14px 20px;
+  border-bottom: none;
+}
+
+.modal-content .modal-header .modal-title,
+.modal-content > form .modal-header .modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.modal-content .modal-header .close,
+.modal-content > form .modal-header .close {
+  color: #fff;
+  opacity: 0.8;
+  text-shadow: none;
+  margin-top: 2px;
+}
+
+.modal-content .modal-header .close:hover,
+.modal-content > form .modal-header .close:hover {
+  opacity: 1;
+}
+
+.modal-content .modal-header .fa,
+.modal-content .modal-header .glyphicon,
+.modal-content > form .modal-header .fa,
+.modal-content > form .modal-header .glyphicon {
+  margin-right: 6px;
+}
+
+/* --- BODY --- */
+.modal-content > .modal-body,
+.modal-content > form > .modal-body {
+  padding: 20px 24px;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+/* --- 2-COLUMN GRID --- */
+.modal-body .row > .col-md-6,
+.modal-body .row > .col-sm-6 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+@media (min-width: 992px) {
+  .modal-body .row > .col-md-6 + .col-md-6,
+  .modal-body .row > .col-sm-6 + .col-sm-6 {
+    border-left: 1px solid #eee;
+  }
+}
+
+/* --- FORM GROUPS --- */
+.modal-body .form-group {
+  margin-bottom: 12px;
+}
+
+.modal-body .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.modal-body .form-control {
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  padding: 6px 10px;
+  height: auto;
+}
+
+.modal-body .form-control:focus {
+  border-color: #3c8dbc;
+  box-shadow: 0 0 0 2px rgba(60, 141, 188, 0.15);
+}
+
+.modal-body .form-control.input-sm {
+  font-size: 13px;
+  padding: 5px 10px;
+}
+
+/* --- FOOTER --- */
+.modal-content > .modal-footer,
+.modal-content > form > .modal-footer,
+.modal-content > .modal-content > .modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid #eee;
+  background: #f9fafb;
+  text-align: right;
+}
+
+.modal-content .modal-footer .btn,
+.modal-content > form .modal-footer .btn {
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 18px;
+  min-width: 90px;
+}
+
+.modal-content .modal-footer .btn-default,
+.modal-content > form .modal-footer .btn-default {
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #666;
+}
+
+.modal-content .modal-footer .btn-default:hover,
+.modal-content > form .modal-footer .btn-default:hover {
+  background: #f5f5f5;
+  border-color: #aaa;
+}
+
+.modal-content .modal-footer .btn-primary,
+.modal-content > form .modal-footer .btn-primary {
+  background: #3c8dbc;
+  border-color: #367fa9;
+}
+
+.modal-content .modal-footer .btn-primary:hover,
+.modal-content > form .modal-footer .btn-primary:hover {
+  background: #367fa9;
+}
+
+.modal-content .modal-footer .btn-success,
+.modal-content > form .modal-footer .btn-success {
+  background: #00a65a;
+  border-color: #008c4e;
+}
+
+.modal-content .modal-footer .btn-danger,
+.modal-content > form .modal-footer .btn-danger {
+  background: #f56954;
+  border-color: #e04a36;
+}
+
+.modal-content .modal-footer .btn + .btn,
+.modal-content > form .modal-footer .btn + .btn {
+  margin-left: 8px;
+}
+
+/* --- TABS (for 20+ field forms) --- */
+.modal-tabs .nav-tabs {
+  border-bottom: 2px solid #3c8dbc;
+  margin-bottom: 16px;
+}
+
+.modal-tabs .nav-tabs > li > a {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  border-radius: 4px 4px 0 0;
+  padding: 8px 16px;
+  border: none;
+}
+
+.modal-tabs .nav-tabs > li.active > a,
+.modal-tabs .nav-tabs > li.active > a:hover,
+.modal-tabs .nav-tabs > li.active > a:focus {
+  background: #3c8dbc;
+  color: #fff;
+  border: none;
+}
+
+.modal-tabs .tab-content { padding: 0; }
+
+/* --- SECTION HEADERS --- */
+.modal-section-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #001f3f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 0 4px;
+  margin: 12px 0 8px;
+  border-bottom: 2px solid #3c8dbc;
+}
+
+/* --- DELETE / CONFIRMATION MODAL --- */
+.modal-confirm .modal-body {
+  text-align: center;
+  padding: 30px 20px;
+  max-height: none;
+}
+
+.modal-confirm .modal-body .fa-exclamation-triangle {
+  font-size: 48px;
+  color: #f56954;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.modal-confirm .modal-body p {
+  font-size: 15px;
+  color: #555;
+  margin: 0;
+}
+
+.modal-confirm .modal-footer { text-align: center; }
+
+.modal-confirm .modal-footer .btn-danger {
+  background: #f56954;
+  border-color: #e04a36;
+  color: #fff;
+}
+
+/* --- VIEW / FILE MODAL --- */
+.modal-view .modal-header {
+  background: linear-gradient(135deg, #1b3a6b 0%, #3c8dbc 100%);
+}
+
+/* --- SCROLLBAR --- */
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.modal-body::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
+.modal-body::-webkit-scrollbar-thumb:hover { background: #999; }
+
+/* --- HR SEPARATOR --- */
+.modal-body hr {
+  margin: 12px 0;
+  border-color: #e0e0e0;
+}
+
+/* --- SMALL SECTION TITLES inside modal body --- */
+.modal-body h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px;
+}
+
+.modal-body h5 .fa {
+  margin-right: 6px;
+  color: #3c8dbc;
+}
+
+/* --- REQUIRED FIELD ASTERISK --- */
+.modal-body .form-group label .req-asterisk {
+  color: #dd4b39;
+  font-weight: 700;
+  margin-left: 2px;
+  font-size: 110%;
+}

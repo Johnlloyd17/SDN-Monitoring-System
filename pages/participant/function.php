@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 if (isset($_POST['btn_add'])) {
     $start = mysqli_real_escape_string($con, $_POST['txt_start']);
     $end = mysqli_real_escape_string($con, $_POST['txt_end']);
@@ -28,7 +28,7 @@ if (isset($_POST['btn_add'])) {
         '$project', '$person', '$remarks'
     )";
 
-    echo $query; // Output the query to debug
+
     $query_result = mysqli_query($con, $query) or die('Error: ' . mysqli_error($con));
 
     $id = mysqli_insert_id($con);

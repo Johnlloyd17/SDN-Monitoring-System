@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 // Add Item
 if (isset($_POST['btn_add'])) {
     $province = mysqli_real_escape_string($con, $_POST['txt_province']);
@@ -44,7 +44,7 @@ if (isset($_POST['btn_add'])) {
         '$bfpyn', '$bplyn', '$bplstatus', '$ecedulayn', '$ecedulastatus', '$elcryn', '$elcrstatus', '$enewsyn', '$enewsstatus', '$remark'
     )";
 
-    echo $query; // Output the query to debug
+
     $query_result = mysqli_query($con, $query) or die('Error: ' . mysqli_error($con));
 
     $id = mysqli_insert_id($con);

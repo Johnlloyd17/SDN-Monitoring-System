@@ -1,4 +1,4 @@
-<?php
+<?php if (!isset($con)) include "../connection.php";
 // Add Item
 if (isset($_POST['btn_add'])) {
     $locality = mysqli_real_escape_string($con, $_POST['txt_locality']);
@@ -23,7 +23,7 @@ if (isset($_POST['btn_add'])) {
         '$locality', '$barangay', '$location', '$date', '$year', '$type', '$status', '$accomplished', '$remarks'
     )";
     
-    echo $query; // Output the query to debug
+
     $query_result = mysqli_query($con, $query) or die('Error: ' . mysqli_error($con));
 
     $id = mysqli_insert_id($con);

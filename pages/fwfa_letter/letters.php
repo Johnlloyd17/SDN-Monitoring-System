@@ -428,13 +428,11 @@ if (!isset($_SESSION['role'])) {
                                                                 <td>' . $row['remarks'] . '</td> ';
   if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'fwfasdn') {
                                                 echo '<td>
-                                                    <button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm" data-target="#viewModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
+                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['location'], ENT_QUOTES, 'UTF-8').'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
                                                 </td>';
                                             }
                                             echo '</tr>';
-                                            include "edit_modal.php"; // Include edit modal
-                                            include "view_modal.php"; // Include view modal
                                         }
                                         ?>
                                                 </table>
@@ -455,6 +453,8 @@ if (!isset($_SESSION['role'])) {
                             <?php include "../duplicate_error.php"; ?>
 
             <?php include "add_modal.php"; ?>
+            <?php include "edit_modal.php"; ?>
+            <?php include "view_modal.php"; ?>
 
             <?php include "function.php"; ?>
 
@@ -467,25 +467,72 @@ if (!isset($_SESSION['role'])) {
         <?php }
         include "../footer.php"; ?>
  <script type="text/javascript">
-    var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
-var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
 
-//select all checkboxes
-select_all.addEventListener("change", function(e){
-    for (i = 0; i < checkboxes.length; i++) { 
-        checkboxes[i].checked = select_all.checked;
-    }
+$(document).on('click', '.btn-edit-item', function() {
+    var id = $(this).data('id');
+    $.getJSON('ajax/letter_get_item.php?action=item&id=' + id, function(data) {
+        $('#edit_hidden_id').val(data.id);
+        $('#edit_locality').val(data.locality);
+        $('#edit_barangay').val(data.barangay);
+        $('#edit_district').val(data.district);
+        $('#edit_location').val(data.location);
+        $('#edit_date').val(data.date);
+        $('#edit_year').val(data.year);
+        $('#edit_type').val(data.type);
+        $('#edit_status').val(data.status);
+        $('#edit_accomplished').val(data.accomplished);
+        $('#edit_remarks').val(data.remarks);
+        $('#editModal').modal('show');
+    });
 });
 
-for (var i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('change', function(e){ //".checkbox" change 
-        //uncheck "select all", if one of the listed checkbox item is unchecked
-        if(this.checked == false){
-            select_all.checked = false;
+$(document).on('click', '.btn-view-item', function() {
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    $('#view_item_title').text(name);
+    $('#view_hidden_id').val(id);
+    var $grid = $('#photoGrid').empty();
+    $.getJSON('ajax/letter_get_item.php?action=photos&id=' + id, function(photos) {
+        if (photos.length === 0) {
+            $grid.html('<div class="col-md-12"><p>No files uploaded.</p></div>');
+        } else {
+            $.each(photos, function(i, p) {
+                var filePath = p.filepath;
+                var ext = p.type;
+                var nameClean = p.filename.replace(/\d+/g, '');
+                var thumb = '';
+                if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
+                    thumb = '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
+                } else if (ext === 'pdf') {
+                    thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
+                } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
+                    thumb = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
+                } else {
+                    thumb = '<div class="file-thumbnail">File type not previewable</div>';
+                }
+                $grid.append(
+                    '<div class="col-md-4">' +
+                        '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />' +
+                        '<div class="file-item">' + thumb +
+                            '<div class="file-info">' +
+                                '<span class="filename">' + nameClean + '</span>' +
+                                '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>'
+                );
+            });
         }
-        //check "select all" if all checkbox items are checked
-        if(document.querySelectorAll('.checkbox:checked').length == checkboxes.length){
-            select_all.checked = true;
+        $('#viewModal').modal('show');
+    });
+});
+
+var select_all = document.getElementById("cbxMainphoto");
+if (select_all) {
+    select_all.addEventListener("change", function(e){
+        var checkboxes = document.getElementsByClassName("chk_deletephoto");
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = select_all.checked;
         }
     });
 }

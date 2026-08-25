@@ -1,15 +1,15 @@
 <!-- ========================= MODAL ======================= -->
 <div id="addModal" class="modal fade">
     <form method="post" enctype="multipart/form-data">
-        <div class="modal-dialog modal-sm" style="width:500px !important;">
+        <div class="modal-dialog modal-sdm-md">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Add Item</h4>
+                    <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Add Target</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Locality:</label>
                                 <input name="txt_locality" class="form-control input-sm" type="text" placeholder="Locality" />
@@ -30,6 +30,8 @@
                                 <label>Year:</label>
                                 <input name="txt_year" class="form-control input-sm" type="text" placeholder="Year" />
                             </div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Type:</label>
                                 <input name="txt_type" class="form-control input-sm" type="text" placeholder="Type" />
