@@ -104,7 +104,6 @@ if ($_SESSION['role'] == "Administrator") {
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
-                <li><a href="../property_records/classification_list.php"><i class="fa fa-tags"></i> Classification List</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
         </li>
@@ -215,7 +214,6 @@ if ($_SESSION['role'] == "Administrator") {
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
-                <li><a href="../property_records/classification_list.php"><i class="fa fa-tags"></i> Classification List</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
         </li>
@@ -237,39 +235,27 @@ echo '
 (function() {
     document.body.classList.add('fixed');
 
-    // Current page's absolute path (ignores query string/hash)
     var currentPath = window.location.pathname;
-
-    // Find all sidebar links
     var links = document.querySelectorAll('.sidebar-menu a');
     for (var i = 0; i < links.length; i++) {
         var href = links[i].getAttribute('href');
         if (!href || href === '#') continue;
-
-        // Resolve the link's href to a full absolute path relative to the
-        // current location, so links sharing the same filename in different
-        // folders (e.g. activity/cybersecurity.php vs report/cybersecurity.php)
-        // are never confused with one another.
         var linkPath;
         try {
             linkPath = new URL(href, window.location.href).pathname;
         } catch (e) {
             continue;
         }
-
         if (linkPath === currentPath) {
-            // Mark this <li> as active
             var li = links[i].closest('li');
             if (li) li.classList.add('active');
-
-            // If inside a treeview submenu, open and highlight the parent
             var parentTreeview = links[i].closest('.treeview');
             if (parentTreeview) {
                 parentTreeview.classList.add('active', 'menu-open');
                 var submenu = parentTreeview.querySelector('.treeview-menu');
                 if (submenu) submenu.style.display = 'block';
             }
-            break; // exact match found, no need to keep looking
+            break;
         }
     }
 })();

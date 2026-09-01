@@ -560,15 +560,6 @@ include "../footer.php"; ?>
             var selectedIds = {};
             var selectAllActive = false;
 
-            function showToast(msg, type) {
-                var toast = document.getElementById('ajaxToast');
-                toast.className = 'alert alert-' + type;
-                toast.innerHTML = msg;
-                toast.style.display = 'block';
-                setTimeout(function() {
-                    toast.style.display = 'none';
-                }, 3000);
-            }
 
             function getFilters() {
                 return {
@@ -1267,10 +1258,9 @@ include "../footer.php"; ?>
                     scrollWheelZoom: true
                 });
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
-                    maxZoom: 19,
-                    subdomains: 'abcd'
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
                 }).addTo(fw4aMap);
 
                 mapMarkersLayer = L.layerGroup();

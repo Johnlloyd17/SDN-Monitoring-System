@@ -21,24 +21,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Classification:</label>
-                                <select name="txt_classification" class="form-control input-sm select2" style="width:100%;">
-                                    <option value="">-- Select Classification --</option>
-                                    <?php
-                                    $classResult = mysqli_query($con, "SELECT category, sub_item FROM classifications WHERE status = 'active' ORDER BY category ASC, sub_item ASC");
-                                    if ($classResult) {
-                                        $currentCat = '';
-                                        while ($classRow = mysqli_fetch_assoc($classResult)) {
-                                            if ($classRow['category'] !== $currentCat) {
-                                                if ($currentCat !== '') echo '</optgroup>';
-                                                $currentCat = $classRow['category'];
-                                                echo '<optgroup label="' . htmlspecialchars($currentCat) . '">';
-                                            }
-                                            echo '<option value="' . htmlspecialchars($classRow['sub_item']) . '">' . htmlspecialchars($classRow['sub_item']) . '</option>';
-                                        }
-                                        if ($currentCat !== '') echo '</optgroup>';
-                                    }
-                                    ?>
-                                </select>
+                                <input name="txt_classification" class="form-control input-sm" type="text" placeholder="Classification" />
                             </div>
                             <div class="form-group">
                                 <label>Quantity:</label>

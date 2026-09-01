@@ -6,12 +6,13 @@ $filterProject = isset($_GET['project']) ? mysqli_real_escape_string($con, $_GET
 $filterICS = isset($_GET['ics']) ? mysqli_real_escape_string($con, $_GET['ics']) : '';
 $filterYear = isset($_GET['year']) ? mysqli_real_escape_string($con, $_GET['year']) : '';
 $filterRemarks = isset($_GET['remarks']) ? mysqli_real_escape_string($con, $_GET['remarks']) : '';
+$filterStatus = isset($_GET['status']) ? mysqli_real_escape_string($con, $_GET['status']) : '';
 
 // Initialize the base SQL query
 $query = "SELECT 
             project, item, classification, quantity, unit, description, 
             received, property, ics, serial, date, officer, cost, life, 
-            transferred, remarks 
+            transferred, remarks, status 
           FROM inventory 
           WHERE project != ''"; // Start with a base query that retrieves all records
 
@@ -28,6 +29,9 @@ if (!empty($filterYear)) {
 if (!empty($filterRemarks)) {
     $query .= " AND remarks = '$filterRemarks'";
 }
+if (!empty($filterStatus)) {
+    $query .= " AND status = '$filterStatus'";
+}
 
 // Set headers to trigger download as a CSV file
 header('Content-Type: text/csv; charset=utf-8');
@@ -42,7 +46,7 @@ fputcsv($output, array(
     'Description/Model', 'Received From', 'Property Number', 
     'ICS/PAR Number', 'Serial Number', 'Date Acquired', 
     'Accountable Officer', 'Unit Cost', 'Estimated Useful Life', 
-    'Received/Transferred', 'Remarks'
+    'Received/Transferred', 'Remarks', 'Status'
 ));
 
 // Execute the query

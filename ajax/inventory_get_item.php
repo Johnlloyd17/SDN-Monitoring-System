@@ -51,15 +51,5 @@ if ($action === 'photos' && isset($_GET['id'])) {
     exit;
 }
 
-if ($action === 'classifications') {
-    $result = mysqli_query($con, "SELECT category, sub_item FROM classifications WHERE status = 'active' ORDER BY category ASC, sub_item ASC");
-    $classifications = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $classifications[] = $row;
-    }
-    echo json_encode($classifications);
-    exit;
-}
-
 http_response_code(400);
 echo json_encode(['error' => 'Invalid action']);

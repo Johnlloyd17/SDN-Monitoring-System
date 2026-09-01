@@ -14,57 +14,39 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $perPage = isset($_GET['per_page']) ? min(100, max(5, intval($_GET['per_page']))) : 25;
 $offset = ($page - 1) * $perPage;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$project = isset($_GET['project']) ? trim($_GET['project']) : '';
-$ics = isset($_GET['ics']) ? trim($_GET['ics']) : '';
+$projectFundSource = isset($_GET['project_fund_source']) ? trim($_GET['project_fund_source']) : '';
+$paymentStatus = isset($_GET['payment_status']) ? trim($_GET['payment_status']) : '';
 $year = isset($_GET['year']) ? trim($_GET['year']) : '';
-$remarks = isset($_GET['remarks']) ? trim($_GET['remarks']) : '';
-$status = isset($_GET['status']) ? trim($_GET['status']) : '';
-$sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'project';
-$order = isset($_GET['order']) ? strtoupper($_GET['order']) : 'DESC';
 
-$allowedSorts = ['project','item','classification','quantity','unit','description','received','property','ics','serial','date','officer','cost','life','transferred','remarks','status'];
-if (!in_array($sort, $allowedSorts)) $sort = 'project';
-if (!in_array($order, ['ASC','DESC'])) $order = 'DESC';
-
-$where = ["project != ''"];
+$where = ["1=1"];
 $params = [];
 $types = '';
 
 if ($search !== '') {
-    $where[] = "(project LIKE ? OR item LIKE ? OR classification LIKE ? OR description LIKE ? OR property LIKE ? OR ics LIKE ? OR serial LIKE ? OR officer LIKE ? OR remarks LIKE ?)";
+    $where[] = "(pr_no LIKE ? OR activity_id LIKE ? OR activity_name LIKE ? OR project_fund_source LIKE ? OR name_of_supplier LIKE ? OR personnel_in_charge LIKE ? OR remarks LIKE ?)";
     $s = "%$search%";
-    $params = array_merge($params, [$s,$s,$s,$s,$s,$s,$s,$s,$s]);
-    $types .= str_repeat('s', 9);
+    $params = array_merge($params, [$s, $s, $s, $s, $s, $s, $s]);
+    $types .= str_repeat('s', 7);
 }
-if ($project !== '') {
-    $where[] = "project = ?";
-    $params[] = $project;
+if ($projectFundSource !== '') {
+    $where[] = "project_fund_source = ?";
+    $params[] = $projectFundSource;
     $types .= 's';
 }
-if ($ics !== '') {
-    $where[] = "ics = ?";
-    $params[] = $ics;
+if ($paymentStatus !== '') {
+    $where[] = "payment_status = ?";
+    $params[] = $paymentStatus;
     $types .= 's';
 }
 if ($year !== '') {
-    $where[] = "YEAR(date) = ?";
+    $where[] = "YEAR(date_forwarded_to_ro) = ?";
     $params[] = $year;
-    $types .= 's';
-}
-if ($remarks !== '') {
-    $where[] = "remarks = ?";
-    $params[] = $remarks;
-    $types .= 's';
-}
-if ($status !== '') {
-    $where[] = "status = ?";
-    $params[] = $status;
     $types .= 's';
 }
 
 $whereClause = implode(' AND ', $where);
 
-$countQuery = "SELECT COUNT(*) AS total FROM inventory WHERE $whereClause";
+$countQuery = "SELECT COUNT(*) AS total FROM procurement_tracking WHERE $whereClause";
 $countStmt = mysqli_prepare($con, $countQuery);
 if ($types !== '') {
     mysqli_stmt_bind_param($countStmt, $types, ...$params);
@@ -76,7 +58,7 @@ $total = intval($totalRow['total']);
 $totalPages = max(1, ceil($total / $perPage));
 mysqli_stmt_close($countStmt);
 
-$dataQuery = "SELECT * FROM inventory WHERE $whereClause ORDER BY $sort $order LIMIT ? OFFSET ?";
+$dataQuery = "SELECT * FROM procurement_tracking WHERE $whereClause ORDER BY id DESC LIMIT ? OFFSET ?";
 $dataTypes = $types . 'ii';
 $dataParams = array_merge($params, [$perPage, $offset]);
 $dataStmt = mysqli_prepare($con, $dataQuery);

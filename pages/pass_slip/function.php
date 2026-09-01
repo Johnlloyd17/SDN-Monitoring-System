@@ -38,8 +38,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'item_details') {
     header('Content-Type: application/json');
     
     $pass_slip_no = mysqli_real_escape_string($con, $_GET['pass_slip_no']);
-    $query = "SELECT ps.item_description, ps.qty, ps.unit, ps.pullout_date, ps.purpose, ps.requested_by_out, ps.inspected_by_out, ps.approved_by_out, ps.pass_slip_no, ps.status,
-              i.property AS property_no, i.serial AS serial_no, i.ics AS ics_no
+    $query = "SELECT ps.item_description, ps.qty, ps.unit, ps.serial_no, ps.pullout_date, ps.purpose, ps.requested_by_out, ps.inspected_by_out, ps.approved_by_out, ps.pass_slip_no, ps.status,
+              i.property AS property_no, i.serial AS serial_no_inv, i.ics AS ics_no
               FROM pass_slip ps 
               LEFT JOIN inventory i ON ps.inventory_id = i.id 
               WHERE ps.pass_slip_no = '$pass_slip_no' ORDER BY ps.id ASC";
@@ -73,7 +73,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'inspector_list') {
 // ACTION: Create New Pass Slip (supports multiple items)
 // ============================================================
 if (isset($_POST['create_pass_slip'])) {
-    $pullout_date = mysqli_real_escape_string($con, $_POST['pullout_date']);
     $purpose = mysqli_real_escape_string($con, $_POST['purpose']);
     $condition_out = mysqli_real_escape_string($con, $_POST['condition_out']);
     $requested_by_out = mysqli_real_escape_string($con, $_POST['requested_by_out']);
@@ -85,6 +84,9 @@ if (isset($_POST['create_pass_slip'])) {
     $descriptions = $_POST['item_description'] ?? [];
     $qtys = $_POST['qty'] ?? [];
     $units = $_POST['unit'] ?? [];
+    $serial_nos = $_POST['serial_no'] ?? [];
+    $pullout_dates = $_POST['pullout_date'] ?? [];
+    $return_dates = $_POST['return_date'] ?? [];
 
     if (empty($inventory_ids) || count($inventory_ids) == 0) {
         echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
@@ -120,26 +122,44 @@ if (isset($_POST['create_pass_slip'])) {
         $item_desc = mysqli_real_escape_string($con, $descriptions[$index] ?? '');
         $qty = intval($qtys[$index]);
         $unit = mysqli_real_escape_string($con, $units[$index] ?? '');
+        $serial_no = mysqli_real_escape_string($con, $serial_nos[$index] ?? '');
+        $item_pullout_date = mysqli_real_escape_string($con, $pullout_dates[$index] ?? date('Y-m-d'));
+        $item_return_date = !empty($return_dates[$index]) ? "'" . mysqli_real_escape_string($con, $return_dates[$index]) . "'" : "NULL";
 
         if ($qty <= 0) {
             echo "<script>alert('Invalid quantity for row " . ($index + 1) . ".'); window.history.back();</script>";
             exit;
         }
 
-        $checkQuery = "SELECT quantity FROM inventory WHERE id = '$inv_id'";
+        $checkQuery = "SELECT quantity, status, item_type FROM inventory WHERE id = '$inv_id'";
         $checkResult = mysqli_query($con, $checkQuery);
         $item = mysqli_fetch_assoc($checkResult);
 
-        if (!$item || $item['quantity'] < $qty) {
+        if (!$item) {
+            echo "<script>alert('Item not found for row " . ($index + 1) . ".'); window.history.back();</script>";
+            exit;
+        }
+
+        if ($item['item_type'] === 'consumable') {
+            echo "<script>alert('Cannot create pass slip for consumable item: $item_desc. Only equipment items are allowed.'); window.history.back();</script>";
+            exit;
+        }
+
+        if (!in_array($item['status'] ?? '', ['Available', 'For Deployment'])) {
+            echo "<script>alert('Cannot create pass slip for item: $item_desc. Status is \"" . ($item['status'] ?? 'Unknown') . "\" — only Available or For Deployment items can be borrowed.'); window.history.back();</script>";
+            exit;
+        }
+
+        if ($item['quantity'] < $qty) {
             echo "<script>alert('Insufficient quantity for: $item_desc. Available: " . ($item['quantity'] ?? 0) . "); window.history.back();</script>";
             exit;
         }
 
-        $insertQuery = "INSERT INTO pass_slip (pass_slip_no, inventory_id, item_description, qty, unit,
-                        pullout_date, requested_by_out, inspected_by_out, approved_by_out,
+        $insertQuery = "INSERT INTO pass_slip (pass_slip_no, inventory_id, item_description, qty, unit, serial_no,
+                        pullout_date, return_date, requested_by_out, inspected_by_out, approved_by_out,
                         purpose, condition_out, remarks, status, created_by)
-                        VALUES ('$pass_slip_no', '$inv_id', '$item_desc', '$qty', '$unit',
-                        '$pullout_date', '$requested_by_out', '$inspected_by_out', '$approved_by_out',
+                        VALUES ('$pass_slip_no', '$inv_id', '$item_desc', '$qty', '$unit', '$serial_no',
+                        '$item_pullout_date', $item_return_date, '$requested_by_out', '$inspected_by_out', '$approved_by_out',
                         '$purpose', '$condition_out', '$remarks', 'borrowed', '" . ($_SESSION['username'] ?? 'admin') . "')";
 
         if (mysqli_query($con, $insertQuery)) {

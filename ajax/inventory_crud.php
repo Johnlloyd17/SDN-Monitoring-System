@@ -34,11 +34,15 @@ if ($action === 'add') {
     $life = mysqli_real_escape_string($con, $_POST['txt_life'] ?? '');
     $transferred = mysqli_real_escape_string($con, $_POST['txt_transferred'] ?? '');
     $remarks = mysqli_real_escape_string($con, $_POST['txt_remarks'] ?? '');
+    $status = mysqli_real_escape_string($con, $_POST['txt_status'] ?? 'Available');
+    if (!in_array($status, ['Available','For Deployment','Deployed','Temporary Deployed','Defective','Replaced'])) {
+        $status = 'Available';
+    }
 
     $action_log = 'Added Item:' . $description;
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
 
-    $query = "INSERT INTO inventory (project, item, classification, quantity, unit, description, received, property, ics, serial, date, officer, cost, life, transferred, remarks) VALUES ('$project', '$item', '$classification', '$quantity', '$unit', '$description', '$received', '$property', '$ics', '$serial', '$date', '$officer', '$cost', '$life', '$transferred', '$remarks')";
+    $query = "INSERT INTO inventory (project, item, classification, quantity, unit, description, received, property, ics, serial, date, officer, cost, life, transferred, remarks, status) VALUES ('$project', '$item', '$classification', '$quantity', '$unit', '$description', '$received', '$property', '$ics', '$serial', '$date', '$officer', '$cost', '$life', '$transferred', '$remarks', '$status')";
 
     if (mysqli_query($con, $query)) {
         $id = mysqli_insert_id($con);
@@ -80,8 +84,12 @@ if ($action === 'edit') {
     $life = mysqli_real_escape_string($con, $_POST['txt_edit_life'] ?? '');
     $transferred = mysqli_real_escape_string($con, $_POST['txt_edit_transferred'] ?? '');
     $remarks = mysqli_real_escape_string($con, $_POST['txt_edit_remarks'] ?? '');
+    $status = mysqli_real_escape_string($con, $_POST['txt_edit_status'] ?? 'Available');
+    if (!in_array($status, ['Available','For Deployment','Deployed','Temporary Deployed','Defective','Replaced'])) {
+        $status = 'Available';
+    }
 
-    $query = "UPDATE inventory SET project='$project', item='$item', classification='$classification', quantity='$quantity', unit='$unit', description='$description', received='$received', property='$property', ics='$ics', serial='$serial', date='$date', officer='$officer', cost='$cost', life='$life', transferred='$transferred', remarks='$remarks' WHERE id=$id";
+    $query = "UPDATE inventory SET project='$project', item='$item', classification='$classification', quantity='$quantity', unit='$unit', description='$description', received='$received', property='$property', ics='$ics', serial='$serial', date='$date', officer='$officer', cost='$cost', life='$life', transferred='$transferred', remarks='$remarks', status='$status' WHERE id=$id";
 
     if (mysqli_query($con, $query)) {
         $action_log = 'Edited Item: ' . $description;

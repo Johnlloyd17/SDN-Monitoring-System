@@ -559,11 +559,16 @@ if (select_all) {
                     body: formData
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
-                        location.reload(); // Reload the page to show updated data
+                        showToast('Data imported successfully!', 'success');
+                        location.reload();
                     } else {
-                        alert(data.error);
+                        console.error('[Import Error]', data.error);
+                        showToast(data.error || 'Import failed.', 'error');
                     }
-                }).catch(error => console.error('Error:', error));
+                }).catch(function(error) {
+                    console.error('[Import Error]', error);
+                    showToast('Import failed. Check console for details.', 'error');
+                });
             });
 
             document.getElementById('exportBtn').addEventListener('click', function() {

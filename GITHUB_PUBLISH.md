@@ -32,6 +32,18 @@ You should see `## main...origin/main` (meaning local and remote are in sync).
 
 https://github.com/Johnlloyd17/SDN-Monitoring-System
 
+## Pull latest updates from GitHub
+
+```powershell
+# Pull latest changes from remote
+git pull origin main
+
+# If you have local changes that conflict, stash them first
+git stash
+git pull origin main
+git stash pop
+```
+
 ## Useful extra commands
 
 ```powershell
@@ -39,6 +51,19 @@ https://github.com/Johnlloyd17/SDN-Monitoring-System
 git add -A
 git commit -m "your message here"
 git push
+
+# Check status
+git status
+
+# View recent commits
+git log --oneline -5
+
+# See what files changed
+git diff
+
+# Discard all local changes (reset to last commit)
+git checkout .
+git clean -fd
 
 # Make the repository private instead of public
 gh repo edit SDN-Monitoring-System --visibility private

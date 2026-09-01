@@ -55,7 +55,7 @@ if (!isset($_SESSION['role'])) {
                                     }
                                     ?>
                                     <div class="col-md-3 col-sm-6 col-xs-12">
-                                        <div class="info-box">
+                                        <div class="info-box metric-card" data-filter="" style="cursor:pointer;">
                                             <span class="info-box-icon bg-aqua">
                                                 <i class="fa fa-file-text-o"></i>
                                             </span>
@@ -66,7 +66,7 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-sm-6 col-xs-12">
-                                        <div class="info-box">
+                                        <div class="info-box metric-card" data-filter="borrowed" style="cursor:pointer;">
                                             <span class="info-box-icon bg-yellow">
                                                 <i class="fa fa-hand-holding"></i>
                                             </span>
@@ -77,7 +77,7 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-sm-6 col-xs-12">
-                                        <div class="info-box">
+                                        <div class="info-box metric-card" data-filter="returned" style="cursor:pointer;">
                                             <span class="info-box-icon bg-green">
                                                 <i class="fa fa-check-circle"></i>
                                             </span>
@@ -88,7 +88,7 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-sm-6 col-xs-12">
-                                        <div class="info-box">
+                                        <div class="info-box metric-card" data-filter="overdue" style="cursor:pointer;">
                                             <span class="info-box-icon bg-red">
                                                 <i class="fa fa-exclamation-triangle"></i>
                                             </span>
@@ -267,6 +267,7 @@ if (!isset($_SESSION['role'])) {
                         }
                         echo '
                                     <button type="button" class="btn btn-default btn-xs" onclick="openPrintSlip(\'' . $slipNo . '\')" title="Print Pass Slip"><i class="fa fa-print"></i></button>
+                                    <button type="button" class="btn btn-info btn-xs" onclick="openAcknowledgement(\'' . $slipNo . '\')" title="Print Acknowledgement"><i class="fa fa-file-text"></i></button>
                                     <button type="button" class="btn btn-warning btn-xs" onclick="openUploadModal(\'' . $slipNo . '\')" title="Upload Scanned Copy"><i class="fa fa-paperclip"></i></button>
                                 </div>
                             </td>
@@ -333,6 +334,8 @@ if (!isset($_SESSION['role'])) {
                                     <th>Item Description</th>
                                     <th>Qty</th>
                                     <th>Unit</th>
+                                    <th>Serial No.</th>
+                                    <th>Pull-Out Date</th>
                                 </tr>
                             </thead>
                             <tbody id="returnItemsBody"></tbody>
@@ -546,7 +549,7 @@ if (!isset($_SESSION['role'])) {
             tbody.innerHTML = '';
             if (data && data.length > 0) {
                 for (var i = 0; i < data.length; i++) {
-                    tbody.innerHTML += '<tr><td style="text-align:center;">' + (i + 1) + '</td><td>' + data[i].item_description + '</td><td>' + data[i].qty + '</td><td>' + data[i].unit + '</td></tr>';
+                    tbody.innerHTML += '<tr><td style="text-align:center;">' + (i + 1) + '</td><td>' + data[i].item_description + '</td><td>' + data[i].qty + '</td><td>' + data[i].unit + '</td><td>' + (data[i].serial_no || '-') + '</td><td>' + (data[i].pullout_date || '-') + '</td></tr>';
                 }
             }
         });
@@ -592,7 +595,7 @@ if (!isset($_SESSION['role'])) {
     function deleteSelected() {
         var checked = document.querySelectorAll('.chk_delete:checked');
         if (checked.length === 0) {
-            alert('Please select at least one Pass Slip to delete.');
+            showToast('Please select at least one Pass Slip to delete.', 'warning');
             return;
         }
         $('#deleteModal').modal('show');
@@ -605,6 +608,12 @@ if (!isset($_SESSION['role'])) {
         if (!d) return;
         frame.src = 'print_slip.php?id=' + d.first_id;
         $('#printPassSlipModal').modal('show');
+    }
+
+    function openAcknowledgement(slipNo) {
+        var d = passSlipData[slipNo];
+        if (!d) return;
+        window.open('acknowledgement.php?id=' + d.first_id, '_blank', 'width=960,height=700');
     }
 
     function printSlipFrame() {
@@ -709,11 +718,16 @@ if (!isset($_SESSION['role'])) {
 
         $.post('function.php', { action: 'delete_attachments', ids: ids }, function(resp) {
             if (resp.success) {
+                showToast('Attachment(s) deleted successfully.', 'success');
                 loadAttachmentList(slipNo);
             } else {
-                alert(resp.message || 'Failed to delete attachments.');
+                console.error('[Delete Attachment]', resp.message);
+                showToast(resp.message || 'Failed to delete attachments.', 'error');
             }
-        }, 'json');
+        }, 'json').fail(function(xhr, status, error) {
+            console.error('[Delete Attachment Error]', status, error);
+            showToast('Network error. Please try again.', 'error');
+        });
     }
 
     function previewAttachment(fileUrl, fileName) {
@@ -773,7 +787,7 @@ if (!isset($_SESSION['role'])) {
             e.preventDefault();
             var files = document.getElementById('attachmentFiles').files;
             if (files.length === 0) {
-                alert('Please select at least one file to upload.');
+                showToast('Please select at least one file to upload.', 'warning');
                 return;
             }
 
@@ -791,24 +805,21 @@ if (!isset($_SESSION['role'])) {
                 dataType: 'json',
                 success: function(resp) {
                     $('#uploadBtn').prop('disabled', false).html('<i class="fa fa-cloud-upload"></i> Upload');
-                    console.log('Upload Response:', resp);
+                    console.log('[Upload Response]', resp);
                     if (resp.success) {
-                        alert(resp.uploaded + ' file(s) uploaded successfully!');
+                        showToast(resp.uploaded + ' file(s) uploaded successfully!', 'success');
                         document.getElementById('attachmentFiles').value = '';
                         loadAttachmentList(slipNo);
                     } else {
                         var msg = resp.errors && resp.errors.length > 0 ? resp.errors.join('\n') : (resp.message || 'Upload failed.');
-                        console.error('Upload Errors:', resp.errors || resp.message);
-                        alert(msg);
+                        console.error('[Upload Errors]', resp.errors || resp.message);
+                        showToast(msg, 'error');
                     }
                 },
                 error: function(xhr, status, error) {
                     $('#uploadBtn').prop('disabled', false).html('<i class="fa fa-cloud-upload"></i> Upload');
-                    console.error('Upload Error:', status, error);
-                    if (xhr.responseText) {
-                        console.error('Server Response:', xhr.responseText.substring(0, 1000));
-                    }
-                    alert('An error occurred during upload. Check the browser console for details.');
+                    console.error('[Upload Error]', status, error, xhr.responseText);
+                    showToast('An error occurred during upload. Check console for details.', 'error');
                 }
         });
 
@@ -825,6 +836,31 @@ if (!isset($_SESSION['role'])) {
             "aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 8] }],
             "aaSorting": []
         });
+
+        $('.metric-card').on('click', function() {
+            var filter = $(this).data('filter');
+            var table = $('#passSlipTable').DataTable();
+            var searchVal = filter ? String(filter) : '';
+
+            if ($(this).hasClass('metric-card-active')) {
+                searchVal = '';
+            }
+
+            table.search(searchVal).draw();
+            $('#statusSelect').val(filter);
+        });
+
+        $('#statusSelect').on('change', function() {
+            var val = $(this).val();
+            var table = $('#passSlipTable').DataTable();
+            table.search(val).draw();
+        });
+
+        var currentStatus = $('#statusSelect').val();
+        if (currentStatus) {
+            var table = $('#passSlipTable').DataTable();
+            table.search(currentStatus).draw();
+        }
     });
 
     function updateDateTime() {
@@ -944,6 +980,7 @@ if (!isset($_SESSION['role'])) {
         color: #888;
         margin-top: 2px;
     }
+
 </style>
 </style>
 

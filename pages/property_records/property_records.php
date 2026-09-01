@@ -171,6 +171,14 @@ if (!isset($_SESSION['role'])) {
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-md-3 col-sm-6 col-xs-12">
+                                        <div class="form-group">
+                                            <label for="statusSelect">Select Status</label>
+                                            <select id="statusSelect" class="form-control">
+                                                <option value="">All Status</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!-- Toolbar: Add + Delete + Row Filter (left) | Search + Import + Export (right) -->
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
@@ -217,6 +225,7 @@ if (!isset($_SESSION['role'])) {
                                             <th>Classification</th>
                                             <th>Type</th>
                                             <th>Quantity</th>
+                                            <th>Remaining Stock</th>
                                             <th>Unit</th>
                                             <th>Description/Model</th>
                                             <th>Received From</th>
@@ -229,11 +238,12 @@ if (!isset($_SESSION['role'])) {
                                             <th>Estimated Useful Life</th>
                                             <th>Received/Transferred</th>
                                             <th>Remarks</th>
+                                            <th>Status</th>
                                             <th style="width: 80px !important;">Option</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tableBody">
-                                        <tr><td colspan="20" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>
+                                        <tr><td colspan="22" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -273,9 +283,7 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Item No.:</label><input name="txt_item" class="form-control input-sm" type="text" placeholder="Item No." /></div>
                                     <div class="form-group">
                                         <label>Classification:</label>
-                                        <select name="txt_classification" class="form-control input-sm select2" style="width:100%;">
-                                            <option value="">-- Select Classification --</option>
-                                        </select>
+                                        <input name="txt_classification" class="form-control input-sm" type="text" placeholder="Classification" />
                                     </div>
                                     <div class="form-group"><label>Quantity:</label><input name="txt_quantity" class="form-control input-sm" type="number" placeholder="Quantity" /></div>
                                     <div class="form-group"><label>Unit:</label><input name="txt_unit" class="form-control input-sm" type="text" placeholder="Unit" /></div>
@@ -291,6 +299,17 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Unit Cost:</label><input name="txt_cost" class="form-control input-sm" type="text" placeholder="e.g. 43,904.00" /></div>
                                     <div class="form-group"><label>Estimated Useful Life:</label><input name="txt_life" class="form-control input-sm" type="number" placeholder="Estimated Useful Life" /></div>
                                     <div class="form-group"><label>Received/Transferred:</label><input name="txt_transferred" class="form-control input-sm" type="text" placeholder="Received/Transferred" /></div>
+                                    <div class="form-group">
+                                        <label>Status:</label>
+                                        <select name="txt_status" class="form-control input-sm">
+                                            <option value="Available">Available</option>
+                                            <option value="For Deployment">For Deployment</option>
+                                            <option value="Deployed">Deployed</option>
+                                            <option value="Temporary Deployed">Temporary Deployed</option>
+                                            <option value="Defective">Defective</option>
+                                            <option value="Replaced">Replaced</option>
+                                        </select>
+                                    </div>
                                     <div class="form-group"><label>Remarks:</label><textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks"></textarea></div>
                                 </div>
                             </div>
@@ -322,9 +341,7 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Item No.:</label><input type="text" name="txt_edit_item" id="edit_item" class="form-control input-sm" /></div>
                                     <div class="form-group">
                                         <label>Classification:</label>
-                                        <select name="txt_edit_classification" id="edit_classification" class="form-control input-sm select2" style="width:100%;">
-                                            <option value="">-- Select Classification --</option>
-                                        </select>
+                                        <input type="text" name="txt_edit_classification" id="edit_classification" class="form-control input-sm" />
                                     </div>
                                     <div class="form-group"><label>Quantity:</label><input type="number" name="txt_edit_quantity" id="edit_quantity" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Unit:</label><input type="text" name="txt_edit_unit" id="edit_unit" class="form-control input-sm" /></div>
@@ -340,6 +357,17 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Unit Cost:</label><input type="text" name="txt_edit_cost" id="edit_cost" class="form-control input-sm" placeholder="e.g. 43,904.00" /></div>
                                     <div class="form-group"><label>Estimated Useful Life:</label><input type="text" name="txt_edit_life" id="edit_life" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Received/Transferred:</label><input type="text" name="txt_edit_transferred" id="edit_transferred" class="form-control input-sm" /></div>
+                                    <div class="form-group">
+                                        <label>Status:</label>
+                                        <select name="txt_edit_status" id="edit_status" class="form-control input-sm">
+                                            <option value="Available">Available</option>
+                                            <option value="For Deployment">For Deployment</option>
+                                            <option value="Deployed">Deployed</option>
+                                            <option value="Temporary Deployed">Temporary Deployed</option>
+                                            <option value="Defective">Defective</option>
+                                            <option value="Replaced">Replaced</option>
+                                        </select>
+                                    </div>
                                     <div class="form-group"><label>Remarks:</label><input type="text" name="txt_edit_remarks" id="edit_remarks" class="form-control input-sm" /></div>
                                 </div>
                             </div>
@@ -517,22 +545,13 @@ if (!isset($_SESSION['role'])) {
             var perPage = 5;
             var totalPages = 1;
             var searchTimeout = null;
-            var classOptionsHtml = '';
-
-            function showToast(msg, type) {
-                var toast = document.getElementById('ajaxToast');
-                toast.className = 'alert alert-' + type;
-                toast.innerHTML = msg;
-                toast.style.display = 'block';
-                setTimeout(function() { toast.style.display = 'none'; }, 3000);
-            }
-
             function getFilters() {
                 return {
                     project: document.getElementById('projectSelect').value,
                     ics: document.getElementById('icsSelect').value,
                     year: document.getElementById('yearSelect').value,
                     remarks: document.getElementById('remarksSelect').value,
+                    status: document.getElementById('statusSelect').value,
                     search: document.getElementById('searchInput').value
                 };
             }
@@ -540,14 +559,16 @@ if (!isset($_SESSION['role'])) {
             function loadFilters() {
                 var f = getFilters();
                 var params = 'project=' + encodeURIComponent(f.project) + '&ics=' + encodeURIComponent(f.ics) +
-                             '&year=' + encodeURIComponent(f.year) + '&remarks=' + encodeURIComponent(f.remarks);
+                             '&year=' + encodeURIComponent(f.year) + '&remarks=' + encodeURIComponent(f.remarks) +
+                             '&status=' + encodeURIComponent(f.status);
                 $.getJSON(basePath + 'inventory_filters.php?' + params, function(data) {
                     var p = document.getElementById('projectSelect');
                     var i = document.getElementById('icsSelect');
                     var y = document.getElementById('yearSelect');
                     var r = document.getElementById('remarksSelect');
+                    var s = document.getElementById('statusSelect');
 
-                    var pv = p.value, iv = i.value, yv = y.value, rv = r.value;
+                    var pv = p.value, iv = i.value, yv = y.value, rv = r.value, sv = s.value;
 
                     p.innerHTML = '<option value="">All projects</option>';
                     data.projects.forEach(function(v) { p.innerHTML += '<option value="' + escHtml(v) + '">' + escHtml(v) + '</option>'; });
@@ -564,25 +585,12 @@ if (!isset($_SESSION['role'])) {
                     r.innerHTML = '<option value="">All Remarks</option>';
                     data.remarks.forEach(function(v) { r.innerHTML += '<option value="' + escHtml(v) + '">' + escHtml(v) + '</option>'; });
                     r.value = rv;
-                });
-            }
 
-            function loadClassifications() {
-                $.getJSON(basePath + 'inventory_get_item.php?action=classifications', function(data) {
-                    classOptionsHtml = '<option value="">-- Select Classification --</option>';
-                    var currentCat = '';
-                    data.forEach(function(row) {
-                        if (row.category !== currentCat) {
-                            if (currentCat !== '') classOptionsHtml += '</optgroup>';
-                            currentCat = row.category;
-                            classOptionsHtml += '<optgroup label="' + escHtml(currentCat) + '">';
-                        }
-                        classOptionsHtml += '<option value="' + escHtml(row.sub_item) + '">' + escHtml(row.sub_item) + '</option>';
-                    });
-                    if (currentCat !== '') classOptionsHtml += '</optgroup>';
-
-                    $('select[name="txt_classification"]').html(classOptionsHtml);
-                    $('#edit_classification').html(classOptionsHtml);
+                    s.innerHTML = '<option value="">All Status</option>';
+                    if (data.statuses) {
+                        data.statuses.forEach(function(v) { s.innerHTML += '<option value="' + escHtml(v) + '">' + escHtml(v) + '</option>'; });
+                    }
+                    s.value = sv;
                 });
             }
 
@@ -594,10 +602,11 @@ if (!isset($_SESSION['role'])) {
                              '&project=' + encodeURIComponent(f.project) +
                              '&ics=' + encodeURIComponent(f.ics) +
                              '&year=' + encodeURIComponent(f.year) +
-                             '&remarks=' + encodeURIComponent(f.remarks);
+                             '&remarks=' + encodeURIComponent(f.remarks) +
+                             '&status=' + encodeURIComponent(f.status);
 
                 var tbody = document.getElementById('tableBody');
-                tbody.innerHTML = '<tr><td colspan="20" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="22" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
 
                 $.getJSON(basePath + 'inventory_data.php?' + params, function(res) {
                     totalPages = res.total_pages;
@@ -605,14 +614,14 @@ if (!isset($_SESSION['role'])) {
                     renderPagination(res.page, res.total_pages, res.total);
                     updateDeleteBtn();
                 }).fail(function() {
-                    tbody.innerHTML = '<tr><td colspan="20" class="text-center text-danger">Failed to load data.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="22" class="text-center text-danger">Failed to load data.</td></tr>';
                 });
             }
 
             function renderTable(rows) {
                 var tbody = document.getElementById('tableBody');
                 if (!rows || rows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="20" class="text-center">No records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="22" class="text-center">No records found.</td></tr>';
                     return;
                 }
                 var html = '';
@@ -625,6 +634,34 @@ if (!isset($_SESSION['role'])) {
                     } else {
                         itemType = '-';
                     }
+
+                    var statusBadge = '';
+                    var st = row.status || 'Available';
+                    switch(st) {
+                        case 'Available':
+                            statusBadge = '<span class="label label-success">Available</span>';
+                            break;
+                        case 'For Deployment':
+                            statusBadge = '<span class="label label-info">For Deployment</span>';
+                            break;
+                        case 'Deployed':
+                            statusBadge = '<span class="label label-primary">Deployed</span>';
+                            break;
+                        case 'Temporary Deployed':
+                            statusBadge = '<span class="label label-warning">Temp. Deployed</span>';
+                            break;
+                        case 'Defective':
+                            statusBadge = '<span class="label label-danger">Defective</span>';
+                            break;
+                        case 'Replaced':
+                            statusBadge = '<span class="label label-default">Replaced</span>';
+                            break;
+                        default:
+                            statusBadge = escHtml(st);
+                    }
+
+                    var remaining = row.quantity || 0;
+
                     var id = parseInt(row.id);
                     html += '<tr>' +
                         '<td><input type="checkbox" class="chk_delete" data-id="' + id + '" /></td>' +
@@ -634,6 +671,7 @@ if (!isset($_SESSION['role'])) {
                         '<td>' + escHtml(row.classification) + '</td>' +
                         '<td>' + itemType + '</td>' +
                         '<td>' + escHtml(row.quantity) + '</td>' +
+                        '<td>' + escHtml(remaining) + '</td>' +
                         '<td>' + escHtml(row.unit) + '</td>' +
                         '<td>' + escHtml(row.description) + '</td>' +
                         '<td>' + escHtml(row.received) + '</td>' +
@@ -643,9 +681,10 @@ if (!isset($_SESSION['role'])) {
                         '<td>' + escHtml(row.date) + '</td>' +
                         '<td>' + escHtml(row.officer) + '</td>' +
                         '<td>' + escHtml(row.cost) + '</td>' +
-                        '<td>' + escHtml(row.life) + '</td>' +
+                        '<td>' + (row.life ? row.life + ' yrs' : '-') + '</td>' +
                         '<td>' + escHtml(row.transferred) + '</td>' +
                         '<td>' + escHtml(row.remarks) + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
                         '<td class="option-buttons">' +
                             '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
                             '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>' +
@@ -713,7 +752,7 @@ if (!isset($_SESSION['role'])) {
             }
 
             // Filter change handlers
-            $('#projectSelect, #icsSelect, #yearSelect, #remarksSelect').on('change', function() {
+            $('#projectSelect, #icsSelect, #yearSelect, #remarksSelect, #statusSelect').on('change', function() {
                 loadData(1);
                 loadFilters();
             });
@@ -800,7 +839,7 @@ if (!isset($_SESSION['role'])) {
                     $('#edit_hidden_id').val(item.id);
                     $('#edit_project').val(item.project);
                     $('#edit_item').val(item.item);
-                    $('#edit_classification').val(item.classification).trigger('change');
+                    $('#edit_classification').val(item.classification);
                     $('#edit_quantity').val(item.quantity);
                     $('#edit_unit').val(item.unit);
                     $('#edit_description').val(item.description);
@@ -814,6 +853,7 @@ if (!isset($_SESSION['role'])) {
                     $('#edit_life').val(item.life);
                     $('#edit_transferred').val(item.transferred);
                     $('#edit_remarks').val(item.remarks);
+                    $('#edit_status').val(item.status || 'Available');
                     $('#editModal').modal('show');
                 }).fail(function() {
                     showToast('Failed to load item data.', 'danger');
@@ -1071,7 +1111,8 @@ if (!isset($_SESSION['role'])) {
                 var url = 'export.php?ics=' + encodeURIComponent(f.ics) +
                           '&project=' + encodeURIComponent(f.project) +
                           '&year=' + encodeURIComponent(f.year) +
-                          '&remarks=' + encodeURIComponent(f.remarks);
+                          '&remarks=' + encodeURIComponent(f.remarks) +
+                          '&status=' + encodeURIComponent(f.status);
                 window.location.href = url;
             });
 
@@ -1125,7 +1166,6 @@ if (!isset($_SESSION['role'])) {
             updateDateTime();
 
             // ========== INIT ==========
-            loadClassifications();
             loadFilters();
             loadData(1);
 

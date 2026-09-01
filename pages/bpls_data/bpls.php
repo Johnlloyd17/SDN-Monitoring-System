@@ -254,6 +254,10 @@ if (!isset($_SESSION['role'])) {
                         $('#edit_' + f).val(data[f] || '');
                     }
                     $('#editModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('[BPLS Load Item Error]', status, error);
+                    showToast('Failed to load record data.', 'error');
                 }
             });
         });
@@ -299,6 +303,10 @@ if (!isset($_SESSION['role'])) {
                     }
                     rebindPhotoCheckboxes();
                     $('#viewModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('[BPLS Load Photos Error]', status, error);
+                    showToast('Failed to load files.', 'error');
                 }
             });
         });
@@ -353,11 +361,16 @@ if (!isset($_SESSION['role'])) {
                     body: formData
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
-                        location.reload(); // Reload the page to show updated data
+                        showToast('Data imported successfully!', 'success');
+                        location.reload();
                     } else {
-                        alert(data.error);
+                        console.error('[BPLS Import Error]', data.error);
+                        showToast(data.error || 'Import failed.', 'error');
                     }
-                }).catch(error => console.error('Error:', error));
+                }).catch(function(error) {
+                    console.error('[BPLS Import Error]', error);
+                    showToast('Import failed. Check console for details.', 'error');
+                });
             });
 
             document.getElementById('exportBtn').addEventListener('click', function() {

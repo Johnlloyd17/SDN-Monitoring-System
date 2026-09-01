@@ -22,10 +22,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Classification:</label>
-                                <select name="txt_edit_classification" class="form-control input-sm select2" style="width:100%;">
-                                    <option value="">-- Select Classification --</option>
-                                    ' . $selectedClass . $classOptions . '
-                                </select>
+                                <input type="text" name="txt_edit_classification" class="form-control input-sm" value="' . htmlspecialchars($row['classification'], ENT_QUOTES, 'UTF-8') . '" />
                             </div>
                             <div class="form-group">
                                 <label>Quantity:</label>

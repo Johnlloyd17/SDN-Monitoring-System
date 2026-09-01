@@ -278,3 +278,67 @@
   margin-left: 2px;
   font-size: 110%;
 }
+
+/* --- PAGE SIZE --- */
+html {
+  height: 100%;
+  zoom: 0.9;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapper {
+  min-height: 100vh;
+  flex: 1 0 auto;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  background: #222;
+  color: #aaa;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 12px;
+  border-top: 1px solid #444;
+}
+
+.left-side {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  z-index: 1000;
+}
+
+.left-side .sidebar {
+  min-height: 100%;
+  padding-bottom: 20px;
+}
+
+.left-side::-webkit-scrollbar { width: 5px; }
+.left-side::-webkit-scrollbar-track { background: transparent; }
+.left-side::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
+.left-side::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.45); }
+
+.skin-black .left-side {
+  background: #333 !important;
+}
+
+.right-side {
+  min-height: 100vh;
+  padding: 15px 20px;
+  max-width: 1400px;
+}
+
+@media (max-width: 991px) {
+  .right-side {
+    padding: 10px 15px;
+  }
+}

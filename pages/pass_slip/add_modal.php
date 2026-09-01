@@ -8,7 +8,7 @@
                     <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Create Office Equipment Pass Slip</h4>
                 </div>
                 <div class="modal-body">
-                    <!-- Pass Slip Number & Date -->
+                    <!-- Pass Slip Number -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -16,13 +16,6 @@
                                 <input type="text" name="pass_slip_no" class="form-control"
                                     placeholder="e.g., PS-2026-0001" id="passSlipNo">
                                 <small class="text-muted">Auto-generated if left empty</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Pull-Out Date <span class="text-danger">*</span></label>
-                                <input type="date" name="pullout_date" class="form-control" required
-                                    value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
                     </div>
@@ -35,11 +28,12 @@
                         <table class="table table-bordered" id="itemsTable" style="margin-bottom: 5px;">
                             <thead>
                                 <tr>
-                                    <th style="width: 30%;">Select Item <span class="text-danger">*</span></th>
-                                    <th style="width: 20%;">Description</th>
-                                    <th style="width: 10%;">Qty <span class="text-danger">*</span></th>
-                                    <th style="width: 10%;">Unit</th>
-                                    <th style="width: 10%;">Available</th>
+                                    <th style="width: 22%;">Select Item <span class="text-danger">*</span></th>
+                                    <th style="width: 14%;">Serial No.</th>
+                                    <th style="width: 8%;">Qty <span class="text-danger">*</span></th>
+                                    <th style="width: 8%;">Unit</th>
+                                    <th style="width: 16%;">Pull-Out Date <span class="text-danger">*</span></th>
+                                    <th style="width: 16%;">Returned Date</th>
                                     <th style="width: 5%;">Action</th>
                                 </tr>
                             </thead>
@@ -50,28 +44,31 @@
                                             <option value="">-- Select Item --</option>
                                             <?php
                                             include "../connection.php";
-                                            $itemQuery = "SELECT id, description, classification, quantity, unit, item_type FROM inventory WHERE item_type = 'equipment' AND project != '' AND quantity > 0 ORDER BY description ASC";
+                                            $itemQuery = "SELECT id, description, classification, quantity, unit, item_type, status, serial FROM inventory WHERE item_type = 'equipment' AND project != '' AND quantity > 0 AND status IN ('Available', 'For Deployment') ORDER BY description ASC";
                                             $itemResult = mysqli_query($con, $itemQuery);
                                             $inventoryItems = array();
-                                            if ($itemResult) {
-                                                while ($item = mysqli_fetch_assoc($itemResult)) {
-                                                    $inventoryItems[] = $item;
-                                                    echo '<option value="' . $item['id'] . '" 
-                                                        data-desc="' . htmlspecialchars($item['description']) . '"
-                                                        data-class="' . htmlspecialchars($item['classification']) . '"
-                                                        data-qty="' . $item['quantity'] . '"
-                                                        data-unit="' . $item['unit'] . '">' 
-                                                        . htmlspecialchars($item['description']) . ' (' . $item['classification'] . ') - Qty: ' . $item['quantity'] . ' ' . $item['unit'] 
-                                                        . '</option>';
+                                                if ($itemResult) {
+                                                    while ($item = mysqli_fetch_assoc($itemResult)) {
+                                                        $inventoryItems[] = $item;
+                                                        echo '<option value="' . $item['id'] . '" 
+                                                            data-desc="' . htmlspecialchars($item['description']) . '"
+                                                            data-class="' . htmlspecialchars($item['classification']) . '"
+                                                            data-qty="' . $item['quantity'] . '"
+                                                            data-unit="' . htmlspecialchars($item['unit']) . '"
+                                                            data-serial="' . htmlspecialchars($item['serial']) . '"
+                                                            data-status="' . htmlspecialchars($item['status']) . '">' 
+                                                            . htmlspecialchars($item['description']) . ' (' . $item['classification'] . ') - Qty: ' . $item['quantity'] . ' ' . $item['unit'] 
+                                                            . '</option>';
+                                                    }
                                                 }
-                                            }
                                             ?>
                                         </select>
                                     </td>
-                                    <td><input type="text" name="item_description[]" class="form-control" readonly placeholder="Auto-filled"></td>
+                                    <td><input type="text" name="serial_no[]" class="form-control" placeholder="S/N"></td>
                                     <td><input type="number" name="qty[]" class="form-control" required min="1" placeholder="Qty"></td>
                                     <td><input type="text" name="unit[]" class="form-control" readonly placeholder="Auto-filled"></td>
-                                    <td><input type="text" class="form-control" readonly placeholder="Qty"></td>
+                                    <td><input type="date" name="pullout_date[]" class="form-control" required value="<?php echo date('Y-m-d'); ?>"></td>
+                                    <td><input type="date" name="return_date[]" class="form-control" placeholder="mm/dd/yyyy"></td>
                                     <td style="text-align: center; vertical-align: middle;">
                                         <button type="button" class="btn btn-danger btn-xs remove-row" title="Remove Item"><i class="fa fa-times"></i></button>
                                     </td>
@@ -147,39 +144,33 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inventory items data for dynamic row creation
     var inventoryData = <?php echo json_encode($inventoryItems ?? []); ?>;
+    var todayStr = '<?php echo date("Y-m-d"); ?>';
 
-    // Auto-fill fields when inventory is selected
     function bindInventorySelect(selectEl) {
         selectEl.addEventListener('change', function() {
             var row = this.closest('.item-row');
-            var descInput = row.querySelector('input[name="item_description[]"]');
             var unitInput = row.querySelector('input[name="unit[]"]');
             var qtyInput = row.querySelector('input[name="qty[]"]');
-            var availInput = row.querySelectorAll('input')[3];
+            var serialInput = row.querySelector('input[name="serial_no[]"]');
 
             if (this.value) {
                 var selected = this.options[this.selectedIndex];
-                descInput.value = selected.getAttribute('data-desc') || '';
                 unitInput.value = selected.getAttribute('data-unit') || '';
+                serialInput.value = selected.getAttribute('data-serial') || '';
                 qtyInput.value = 1;
                 qtyInput.max = selected.getAttribute('data-qty');
-                availInput.value = selected.getAttribute('data-qty') || '';
             } else {
-                descInput.value = '';
                 unitInput.value = '';
+                serialInput.value = '';
                 qtyInput.value = '';
-                availInput.value = '';
             }
         });
     }
 
-    // Bind existing select
     var firstSelect = document.querySelector('.inventory-select');
     if (firstSelect) bindInventorySelect(firstSelect);
 
-    // Add new item row
     document.getElementById('addRowBtn').addEventListener('click', function() {
         var tbody = document.getElementById('itemsBody');
         var newRow = document.createElement('tr');
@@ -191,7 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 + 'data-desc="' + (item.description || '').replace(/"/g, '&quot;') + '" '
                 + 'data-class="' + (item.classification || '').replace(/"/g, '&quot;') + '" '
                 + 'data-qty="' + item.quantity + '" '
-                + 'data-unit="' + (item.unit || '').replace(/"/g, '&quot;') + '">'
+                + 'data-unit="' + (item.unit || '').replace(/"/g, '&quot;') + '" '
+                + 'data-serial="' + (item.serial || '').replace(/"/g, '&quot;') + '">'
                 + (item.description || '') + ' (' + (item.classification || '') + ') - Qty: ' + item.quantity + ' ' + (item.unit || '')
                 + '</option>';
         });
@@ -202,22 +194,21 @@ document.addEventListener('DOMContentLoaded', function() {
             + '    ' + optionsHtml
             + '  </select>'
             + '</td>'
-            + '<td><input type="text" name="item_description[]" class="form-control" readonly placeholder="Auto-filled"></td>'
+            + '<td><input type="text" name="serial_no[]" class="form-control" placeholder="S/N"></td>'
             + '<td><input type="number" name="qty[]" class="form-control" required min="1" placeholder="Qty"></td>'
             + '<td><input type="text" name="unit[]" class="form-control" readonly placeholder="Auto-filled"></td>'
-            + '<td><input type="text" class="form-control" readonly placeholder="Qty"></td>'
+            + '<td><input type="date" name="pullout_date[]" class="form-control" required value="' + todayStr + '"></td>'
+            + '<td><input type="date" name="return_date[]" class="form-control" placeholder="mm/dd/yyyy"></td>'
             + '<td style="text-align: center; vertical-align: middle;">'
             + '  <button type="button" class="btn btn-danger btn-xs remove-row" title="Remove Item"><i class="fa fa-times"></i></button>'
             + '</td>';
 
         tbody.appendChild(newRow);
 
-        // Bind the new select
         var newSelect = newRow.querySelector('.inventory-select');
         bindInventorySelect(newSelect);
     });
 
-    // Remove item row (event delegation)
     document.getElementById('itemsBody').addEventListener('click', function(e) {
         var btn = e.target.closest('.remove-row');
         if (btn) {
@@ -225,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tbody.querySelectorAll('.item-row').length > 1) {
                 btn.closest('.item-row').remove();
             } else {
-                alert('At least one item is required.');
+                showToast('At least one item is required.', 'warning');
             }
         }
     });

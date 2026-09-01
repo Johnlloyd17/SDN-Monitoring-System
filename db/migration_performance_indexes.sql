@@ -63,8 +63,5 @@ ALTER TABLE `tblparticipant` ADD INDEX `idx_participant_start` (`start`);
 ALTER TABLE `tblparticipant` ADD INDEX `idx_participant_mode` (`mode`);
 
 -- -------------------------------------------------------
--- MEDIUM PRIORITY: classifications (small table but frequently queried)
+-- MEDIUM PRIORITY: (reserved for future use)
 -- -------------------------------------------------------
-ALTER TABLE `classifications` ADD INDEX `idx_classifications_status` (`status`);
-ALTER TABLE `classifications` ADD INDEX `idx_classifications_category` (`category`);
-ALTER TABLE `classifications` ADD INDEX `idx_classifications_cat_sub` (`category`, `sub_item`);

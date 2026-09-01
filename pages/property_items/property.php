@@ -348,14 +348,6 @@ if (!isset($_SESSION['role'])) {
             var totalPages = 1;
             var searchTimeout = null;
 
-            function showToast(msg, type) {
-                var toast = document.getElementById('ajaxToast');
-                toast.className = 'alert alert-' + type;
-                toast.innerHTML = msg;
-                toast.style.display = 'block';
-                setTimeout(function() { toast.style.display = 'none'; }, 3000);
-            }
-
             function getFilters() {
                 return {
                     project_fund_source: document.getElementById('projectFundSourceSelect').value,

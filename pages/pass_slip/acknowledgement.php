@@ -15,7 +15,7 @@ if (!$psQuery || mysqli_num_rows($psQuery) == 0) {
 $psData = mysqli_fetch_assoc($psQuery);
 $pass_slip_no = mysqli_real_escape_string($con, $psData['pass_slip_no']);
 
-$query = "SELECT ps.*, i.description AS item_desc, i.property AS property_no, i.serial AS serial_no, i.ics AS ics_no 
+$query = "SELECT ps.*, i.description AS item_desc, i.property AS property_no, i.serial AS serial_no_inv, i.ics AS ics_no 
           FROM pass_slip ps 
           LEFT JOIN inventory i ON ps.inventory_id = i.id 
           WHERE ps.pass_slip_no = '$pass_slip_no'
@@ -38,7 +38,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pass Slip - <?php echo $row['pass_slip_no']; ?></title>
+    <title>Acknowledgement of Receipt - <?php echo $row['pass_slip_no']; ?></title>
     <style>
         :root {
             --navy: #1b3a6b;
@@ -103,10 +103,17 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
 
         .form-title {
             text-align: center;
-            font-size: 30px;
+            font-size: 26px;
             font-weight: 700;
             letter-spacing: 1px;
-            margin: 34px 0;
+            margin: 34px 0 10px;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 30px;
         }
 
         .slip-info {
@@ -130,7 +137,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         table.items td {
             border: 1.5px solid var(--line);
             padding: 12px 14px;
-            font-size: 16px;
+            font-size: 15px;
             vertical-align: top;
         }
 
@@ -153,7 +160,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         .purpose {
             font-size: 16px;
             line-height: 1.6;
-            margin-bottom: 44px;
+            margin-bottom: 40px;
         }
 
         .purpose strong {
@@ -164,10 +171,19 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             display: inline;
         }
 
+        .declaration {
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            padding: 16px;
+            border: 1px solid #ccc;
+            background: #fafafa;
+        }
+
         .sig-group {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            column-gap: 24px;
+            grid-template-columns: repeat(2, 1fr);
+            column-gap: 40px;
             margin-bottom: 46px;
         }
 
@@ -199,64 +215,9 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             color: #333;
         }
 
-        .divider {
-            border: none;
-            border-top: 1.5px dashed var(--line);
-            margin: 30px 0;
-        }
-
-        .section-label {
-            font-size: 16px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 16px;
-            padding: 8px 12px;
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-        }
-
-        .condition-group {
-            margin-bottom: 20px;
-        }
-
-        .condition-box {
-            display: inline-block;
-            padding: 4px 14px;
-            border: 1.5px solid var(--line);
-            margin: 0 5px;
+        .date-line {
             font-size: 14px;
-        }
-
-        .condition-selected {
-            background-color: var(--line);
-            color: #fff;
-        }
-
-        .remarks-box {
-            border: 1px solid var(--line);
-            padding: 12px 14px;
-            min-height: 40px;
-            margin-bottom: 20px;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .not-returned {
-            padding: 20px;
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            font-size: 15px;
-        }
-
-        .pulled-dates,
-        .returned-dates {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-family: "Segoe Script", "Bradley Hand", cursive;
-            font-size: 17px;
-            min-height: 40px;
+            margin-bottom: 6px;
         }
 
         @media print {
@@ -284,22 +245,22 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         </div>
     </div>
 
-    <div class="form-title">OFFICE EQUIPMENT PASS SLIP</div>
+    <div class="form-title">ACKNOWLEDGEMENT OF RECEIPT</div>
+    <div class="form-subtitle">I hereby acknowledge receipt of the following item(s):</div>
 
     <div class="slip-info">
-        <span>Pass Slip No.: <strong><?php echo htmlspecialchars($row['pass_slip_no']); ?></strong></span>
+        <span>Reference Pass Slip No.: <strong><?php echo htmlspecialchars($row['pass_slip_no']); ?></strong></span>
         <span>Date: <strong><?php echo date('F d, Y', strtotime($row['pullout_date'])); ?></strong></span>
     </div>
 
     <table class="items">
         <colgroup>
-            <col style="width: 4%;">
-            <col style="width: 32%;">
-            <col style="width: 7%;">
+            <col style="width: 5%;">
+            <col style="width: 30%;">
+            <col style="width: 8%;">
             <col style="width: 10%;">
-            <col style="width: 14%;">
-            <col style="width: 16%;">
-            <col style="width: 17%;">
+            <col style="width: 22%;">
+            <col style="width: 25%;">
         </colgroup>
         <thead>
             <tr>
@@ -308,8 +269,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 <th class="center">QTY.</th>
                 <th class="center">UNIT</th>
                 <th>SERIAL NO.</th>
-                <th>PULLED&#8209;OUT DATE</th>
-                <th>RETURNED DATE</th>
+                <th>CONDITION ON ISSUE</th>
             </tr>
         </thead>
         <tbody>
@@ -323,8 +283,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 <td class="center"><?php echo $item['qty']; ?></td>
                 <td class="center"><?php echo $item['unit']; ?></td>
                 <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?></td>
-                <td><?php echo date('F d, Y', strtotime($item['pullout_date'])); ?></td>
-                <td><?php echo $item['return_date'] ? date('F d, Y', strtotime($item['return_date'])) : ''; ?></td>
+                <td><?php echo htmlspecialchars($item['condition_out'] ?? ''); ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -334,70 +293,41 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         <strong>PURPOSE:</strong> <span class="purpose-text"><?php echo htmlspecialchars($row['purpose']); ?></span>
     </div>
 
+    <div class="declaration">
+        <strong>DECLARATION:</strong> I acknowledge that I have received the above-mentioned item(s) in the condition stated. 
+        I accept full responsibility for the safekeeping and proper use of these items and undertake to return them 
+        in the same condition upon completion of the stated purpose, or as otherwise directed by the authorizing office.
+    </div>
+
     <div class="sig-group">
         <div class="sig-block">
-            <div class="sig-label">Requested by:</div>
+            <div class="sig-label">Received by (Borrower):</div>
             <div class="sig-name"><?php echo htmlspecialchars($row['requested_by_out']); ?></div>
             <div class="sig-line"></div>
             <div class="sig-caption">Signature Over Printed Name</div>
+            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
         </div>
         <div class="sig-block">
-            <div class="sig-label">Inspected by:</div>
+            <div class="sig-label">Released by:</div>
             <div class="sig-name"><?php echo htmlspecialchars($row['inspected_by_out']); ?></div>
             <div class="sig-line"></div>
             <div class="sig-caption">Signature Over Printed Name</div>
-        </div>
-        <div class="sig-block">
-            <div class="sig-label">Approved by:</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['approved_by_out']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
+            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
         </div>
     </div>
 
-    <?php if ($row['status'] === 'returned'): ?>
     <div class="sig-group">
         <div class="sig-block">
-            <div class="sig-label">Requested by (Return):</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['requested_by_return']); ?></div>
+            <div class="sig-label">Noted by:</div>
+            <div class="sig-name"><?php echo htmlspecialchars($row['approved_by_out']); ?></div>
             <div class="sig-line"></div>
             <div class="sig-caption">Signature Over Printed Name</div>
+            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
         </div>
         <div class="sig-block">
-            <div class="sig-label">Inspected by (Return):</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['inspected_by_return']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-        </div>
-        <div class="sig-block">
-            <div class="sig-label">Approved by (Return):</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['approved_by_return']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
+            &nbsp;
         </div>
     </div>
-    <?php else: ?>
-    <div class="sig-group">
-        <div class="sig-block">
-            <div class="sig-label">Requested by (Return):</div>
-            <div class="sig-name">&nbsp;</div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-        </div>
-        <div class="sig-block">
-            <div class="sig-label">Inspected by (Return):</div>
-            <div class="sig-name">&nbsp;</div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-        </div>
-        <div class="sig-block">
-            <div class="sig-label">Approved by (Return):</div>
-            <div class="sig-name">&nbsp;</div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-        </div>
-    </div>
-    <?php endif; ?>
 
 </div>
 

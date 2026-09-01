@@ -692,11 +692,16 @@ if (!isset($_SESSION['role'])) {
                     body: formData
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
-                        location.reload(); // Reload the page to show updated data
+                        showToast('Data imported successfully!', 'success');
+                        location.reload();
                     } else {
-                        alert(data.error);
+                        console.error('[Tech4Ed Import Error]', data.error);
+                        showToast(data.error || 'Import failed.', 'error');
                     }
-                }).catch(error => console.error('Error:', error));
+                }).catch(function(error) {
+                    console.error('[Tech4Ed Import Error]', error);
+                    showToast('Import failed. Check console for details.', 'error');
+                });
             });
 
             document.getElementById('exportBtn').addEventListener('click', function() {
@@ -762,6 +767,9 @@ $(document).on('click', '.btn-edit-item', function() {
         $('#edit_key_one').val(data.key_one);
         $('#edit_identifier').val(data.identifier);
         $('#editModal').modal('show');
+    }).fail(function(xhr, status, error) {
+        console.error('[Tech4Ed Load Item Error]', status, error);
+        showToast('Failed to load record data.', 'error');
     });
 });
 
@@ -803,6 +811,9 @@ $(document).on('click', '.btn-view-item', function() {
             });
         }
         $('#viewModal').modal('show');
+    }).fail(function(xhr, status, error) {
+        console.error('[Tech4Ed Load Photos Error]', status, error);
+        showToast('Failed to load files.', 'error');
     });
 });
 

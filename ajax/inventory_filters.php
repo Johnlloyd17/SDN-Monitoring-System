@@ -85,11 +85,13 @@ $project = isset($_GET['project']) ? trim($_GET['project']) : '';
 $ics = isset($_GET['ics']) ? trim($_GET['ics']) : '';
 $year = isset($_GET['year']) ? trim($_GET['year']) : '';
 $remarks = isset($_GET['remarks']) ? trim($_GET['remarks']) : '';
+$filterStatus = isset($_GET['status']) ? trim($_GET['status']) : '';
 
 echo json_encode([
-    'projects' => getSimpleValues($con, 'project', ['ics'=>$ics, 'year'=>$year, 'remarks'=>$remarks]),
-    'ics_list' => getSimpleValues($con, 'ics', ['project'=>$project, 'year'=>$year, 'remarks'=>$remarks]),
-    'years' => getYearValues($con, ['project'=>$project, 'ics'=>$ics, 'remarks'=>$remarks]),
-    'remarks' => getSimpleValues($con, 'remarks', ['project'=>$project, 'ics'=>$ics, 'year'=>$year]),
+    'projects' => getSimpleValues($con, 'project', ['ics'=>$ics, 'year'=>$year, 'remarks'=>$remarks, 'status'=>$filterStatus]),
+    'ics_list' => getSimpleValues($con, 'ics', ['project'=>$project, 'year'=>$year, 'remarks'=>$remarks, 'status'=>$filterStatus]),
+    'years' => getYearValues($con, ['project'=>$project, 'ics'=>$ics, 'remarks'=>$remarks, 'status'=>$filterStatus]),
+    'remarks' => getSimpleValues($con, 'remarks', ['project'=>$project, 'ics'=>$ics, 'year'=>$year, 'status'=>$filterStatus]),
+    'statuses' => getSimpleValues($con, 'status', ['project'=>$project, 'ics'=>$ics, 'year'=>$year, 'remarks'=>$remarks]),
     'classifications' => getSimpleValues($con, 'classification')
 ]);

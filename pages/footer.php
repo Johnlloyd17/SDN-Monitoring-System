@@ -1,9 +1,16 @@
 
 
+<!-- Footer -->
+<footer class="app-footer">
+    &copy; <?php echo date('Y'); ?> DICT Surigao del Norte &mdash; SDN Monitoring System
+</footer>
+
 <!-- Bootstrap -->
 
 <script src="../../js/alert.js" type="text/javascript"></script>
 <script src="../../js/bootstrap.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="../../js/toast-helper.js" type="text/javascript"></script>
 
 
 <script src="../../js/morris/raphael-2.1.0.min.js" type="text/javascript"></script>
