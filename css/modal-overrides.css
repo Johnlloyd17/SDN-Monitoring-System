@@ -322,6 +322,10 @@ body {
   padding-bottom: 20px;
 }
 
+.left-side.collapse-left {
+  left: -220px !important;
+}
+
 .left-side::-webkit-scrollbar { width: 5px; }
 .left-side::-webkit-scrollbar-track { background: transparent; }
 .left-side::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
