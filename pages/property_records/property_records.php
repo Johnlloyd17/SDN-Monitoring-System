@@ -486,7 +486,7 @@ if (!isset($_SESSION['role'])) {
         <!-- Toast Notification -->
         <div id="ajaxToast" class="alert" style="position:fixed; top:1em; right:1em; z-index:9999; display:none; min-width:250px;"></div>
 
-        <?php include '../footer.php'; ?>
+        <?php include dirname(__DIR__) . '/scripts.php'; ?>
 
         <style>
             .info-box-icon {

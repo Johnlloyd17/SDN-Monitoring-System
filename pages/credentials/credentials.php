@@ -97,7 +97,8 @@ if (!isset($_SESSION['role'])) {
         </div><!-- ./wrapper -->
         <!-- jQuery 2.0.2 -->
         <?php }
-        include "../footer.php"; ?>
+        include "../scripts.php";
+        ?>
 <script type="text/javascript">
     $(function() {
         $("#table").dataTable({

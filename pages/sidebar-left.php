@@ -112,7 +112,16 @@ if ($_SESSION['role'] == "Administrator") {
                 <i class="fa fa-shopping-cart"></i> <span>Purchase Request</span>
             </a>
         </li>
-
+        <li>
+            <a href="../bills_monitoring/bills_monitoring.php">
+                <i class="fa fa-file-invoice-dollar"></i> <span>Bills Monitoring</span>
+            </a>
+        </li>
+        <li>
+            <a href="../letters_monitoring/letters_monitoring.php">
+                <i class="fa fa-file-text-o"></i> <span>Letters Monitoring</span>
+            </a>
+        </li>
         <li>
             <a href="../credentials/credentials.php">
                 <i class="fa fa-user-cog"></i> <span>Credentials</span>
@@ -220,6 +229,16 @@ if ($_SESSION['role'] == "Administrator") {
         <li>
             <a href="../property_records/purchase_request.php">
                 <i class="fa fa-shopping-cart"></i> <span>Purchase Request</span>
+            </a>
+        </li>
+        <li>
+            <a href="../bills_monitoring/bills_monitoring.php">
+                <i class="fa fa-file-invoice-dollar"></i> <span>Bills Monitoring</span>
+            </a>
+        </li>
+        <li>
+            <a href="../letters_monitoring/letters_monitoring.php">
+                <i class="fa fa-file-text-o"></i> <span>Letters Monitoring</span>
             </a>
         </li>
     </ul>';

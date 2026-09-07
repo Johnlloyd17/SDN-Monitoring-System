@@ -486,7 +486,7 @@ if (!isset($_SESSION['role'])) {
             </aside>
         </div>
     <?php }
-    include "../footer.php"; ?>
+    include dirname(__DIR__) . '/scripts.php'; ?>
 
 <script type="text/javascript">
     var select_all = document.getElementById("cbxMain");
