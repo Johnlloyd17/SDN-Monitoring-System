@@ -8,10 +8,13 @@ $filterType = isset($_GET['type']) ? mysqli_real_escape_string($con, $_GET['type
 $filterStrategy = isset($_GET['strategy']) ? mysqli_real_escape_string($con, $_GET['strategy']) : '';
 
 // Initialize the base SQL query
-$query = "SELECT 
-            locality, barangay, district, transport_location, transport_type, locations,
-            code, nationwide_id, type, date_of_activation, current_date_of_acceptance,
-            latitude, longitude, strategy, status, remarks
+$query = "SELECT
+            item_no, locality, barangay, district, transport_location, transport_type,
+            site_locations, transfer_new_locations, remarks, site_code, nationwide_id, site_type,
+            date_of_activation, current_date_of_acceptance, latitude, longitude,
+            procurement_initiative, installation_type, uat, conforme, strategy, status, link_type,
+            replacement_form_file, conforme_file, uat_file, additional_uat,
+            site_coordinator_name, contact_details
           FROM tblfwfa WHERE 1=1"; // Ensure the table and column names match your database schema
 
 // Apply filters if provided
@@ -22,7 +25,7 @@ if (!empty($filterBarangay)) {
     $query .= " AND barangay = '$filterBarangay'";
 }
 if (!empty($filterType)) {
-    $query .= " AND type = '$filterType'";
+    $query .= " AND site_type = '$filterType'";
 }
 if (!empty($filterStrategy)) {
     $query .= " AND strategy = '$filterStrategy'";
@@ -35,11 +38,16 @@ header('Content-Disposition: attachment; filename=DICT-SDN_FWFA_Database.csv');
 // Open output stream for writing CSV data
 $output = fopen('php://output', 'w');
 
-// Output column headers for the CSV file
+fwrite($output, "\xEF\xBB\xBF"); // UTF-8 BOM so Excel renders accents correctly
+
+// Output column headers for the CSV file (A..AC, matching the spreadsheet layout)
 fputcsv($output, array(
-   'Locality', 'Barangay', 'District', 'Transport Location', 'Transport Type', 'Locations',
-   'Site Code', 'Nationwide ID', 'Site Type', 'Date of Activation', 'Date of Acceptance',
-   'Latitude', 'Longitude', 'Strategy', 'Status', 'Remarks'
+   'Item No.', 'Locality', 'Barangay', 'District', 'Transport Location', 'Transport Type',
+   'Site Locations', 'Transfer/New Locations', 'Remarks', 'Site Code', 'Nationwide ID', 'Site Type',
+   'Date of Activation', 'Current Date of Acceptance', 'Latitude', 'Longitude',
+   'Procurement Initiative', 'Installation Type', 'UAT', 'Conforme', 'Strategy', 'Status', 'Link Type',
+   'Replacement Form File', 'Conforme File', 'UAT File', 'Additional UAT',
+   'Name (Site Coordinators)', 'Contact Details'
 ));
 
 // Execute the query

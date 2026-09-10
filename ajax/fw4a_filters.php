@@ -55,8 +55,8 @@ $locality = isset($_GET['locality']) ? trim($_GET['locality']) : '';
 $barangay = isset($_GET['barangay']) ? trim($_GET['barangay']) : '';
 
 echo json_encode([
-    'strategies' => getSimpleValues($con, 'strategy', ['type'=>$type, 'locality'=>$locality, 'barangay'=>$barangay]),
-    'types' => getSimpleValues($con, 'type', ['strategy'=>$strategy, 'locality'=>$locality, 'barangay'=>$barangay]),
-    'localities' => getSimpleValues($con, 'locality', ['strategy'=>$strategy, 'type'=>$type, 'barangay'=>$barangay]),
-    'barangays' => getSimpleValues($con, 'barangay', ['strategy'=>$strategy, 'type'=>$type, 'locality'=>$locality])
+    'strategies' => getSimpleValues($con, 'strategy', ['site_type'=>$type, 'locality'=>$locality, 'barangay'=>$barangay]),
+    'types' => getSimpleValues($con, 'site_type', ['strategy'=>$strategy, 'locality'=>$locality, 'barangay'=>$barangay]),
+    'localities' => getSimpleValues($con, 'locality', ['strategy'=>$strategy, 'site_type'=>$type, 'barangay'=>$barangay]),
+    'barangays' => getSimpleValues($con, 'barangay', ['strategy'=>$strategy, 'site_type'=>$type, 'locality'=>$locality])
 ]);

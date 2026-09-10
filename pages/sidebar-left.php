@@ -93,12 +93,7 @@ if ($_SESSION['role'] == "Administrator") {
                 <li><a href="../report/ilcdb.php"><i class="fa fa-chart-line"></i> Reports/Graphs</a></li>
             </ul>
         </li>
-   <li>
-            <a href="../property_items/property.php">
-                <i class="fa fa-cart-plus"></i> <span>Procurement</span>
-            </a>
-        </li>
-        <li class="treeview">
+   <li class="treeview">
             <a href="#">
                 <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-down pull-right"></i>
             </a>
@@ -106,6 +101,11 @@ if ($_SESSION['role'] == "Administrator") {
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
+        </li>
+        <li>
+            <a href="../property_items/property.php">
+                <i class="fa fa-cart-plus"></i> <span>Procurement</span>
+            </a>
         </li>
         <li>
             <a href="../property_records/purchase_request.php">
@@ -212,12 +212,7 @@ if ($_SESSION['role'] == "Administrator") {
                 <li><a href="../report/ilcdb.php"><i class="fa fa-chart-line"></i> Reports/Graphs</a></li>
             </ul>
         </li>
-   <li>
-            <a href="../property_items/property.php">
-                <i class="fa fa-cart-plus"></i> <span>Procurement</span>
-            </a>
-        </li>
-        <li class="treeview">
+   <li class="treeview">
             <a href="#">
                 <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-down pull-right"></i>
             </a>
@@ -225,6 +220,11 @@ if ($_SESSION['role'] == "Administrator") {
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
+        </li>
+        <li>
+            <a href="../property_items/property.php">
+                <i class="fa fa-cart-plus"></i> <span>Procurement</span>
+            </a>
         </li>
         <li>
             <a href="../property_records/purchase_request.php">

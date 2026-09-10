@@ -28,7 +28,7 @@ if ($strategy !== '') {
     $types .= 's';
 }
 if ($type !== '') {
-    $where[] = "type = ?";
+    $where[] = "site_type = ?";
     $params[] = $type;
     $types .= 's';
 }
@@ -46,7 +46,7 @@ if ($barangay !== '') {
 $whereClause = implode(' AND ', $where);
 
 $query = "SELECT id, latitude, longitude, locality, barangay, district,
-                 locations, type, code, nationwide_id, strategy, status, remarks
+                 site_locations, site_type, site_code, nationwide_id, strategy, status, remarks
           FROM tblfwfa
           WHERE $whereClause
           ORDER BY locality ASC";
@@ -67,9 +67,9 @@ while ($row = mysqli_fetch_assoc($result)) {
         'locality'      => $row['locality'],
         'barangay'      => $row['barangay'],
         'district'      => $row['district'],
-        'locations'     => $row['locations'],
-        'type'          => $row['type'],
-        'code'          => $row['code'],
+        'site_locations'=> $row['site_locations'],
+        'site_type'     => $row['site_type'],
+        'site_code'     => $row['site_code'],
         'nationwide_id' => $row['nationwide_id'],
         'strategy'      => $row['strategy'],
         'status'        => $row['status'],

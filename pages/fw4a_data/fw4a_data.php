@@ -141,7 +141,7 @@ if (!isset($_SESSION['role'])) {
                                                         <span class="info-box-number"><span id="statActive">
                                                                 <?php
                                                                 $strategyFilter = !empty($_POST['strategy']) ? " AND strategy = '" . mysqli_real_escape_string($con, $_POST['strategy']) . "'" : '';
-                                                                $typeFilter = !empty($_POST['type']) ? " AND type = '" . mysqli_real_escape_string($con, $_POST['type']) . "'" : '';
+                                                                $typeFilter = !empty($_POST['type']) ? " AND site_type = '" . mysqli_real_escape_string($con, $_POST['type']) . "'" : '';
                                                                 $localityFilter = !empty($_POST['locality']) ? " AND locality = '" . mysqli_real_escape_string($con, $_POST['locality']) . "'" : '';
                                                                 $barangayFilter = !empty($_POST['barangay']) ? " AND barangay = '" . mysqli_real_escape_string($con, $_POST['barangay']) . "'" : '';
 
@@ -201,7 +201,7 @@ if (!isset($_SESSION['role'])) {
                                     }
                                     if (isset($_POST['type']) && $_POST['type'] != '') {
                                         $type = mysqli_real_escape_string($con, $_POST['type']);
-                                        $strategyQuery .= " AND type = '$type'";
+                                        $strategyQuery .= " AND site_type = '$type'";
                                     }
 
                                     $strategyQuery .= " ORDER BY strategy ASC";
@@ -221,7 +221,7 @@ if (!isset($_SESSION['role'])) {
                                     <option value="">All Type</option>
                                     <?php
                                     // Fetching distinct types based on selected filters
-                                    $typeQuery = "SELECT DISTINCT type FROM tblfwfa WHERE type != ''";
+                                    $typeQuery = "SELECT DISTINCT site_type FROM tblfwfa WHERE site_type != ''";
                                     if (isset($_POST['locality']) && $_POST['locality'] != '') {
                                         $locality = mysqli_real_escape_string($con, $_POST['locality']);
                                         $typeQuery .= " AND locality = '$locality'";
@@ -238,10 +238,10 @@ if (!isset($_SESSION['role'])) {
                                         $strategy = mysqli_real_escape_string($con, $_POST['strategy']);
                                         $typeQuery .= " AND strategy = '$strategy'";
                                     }
-                                    $typeQuery .= " ORDER BY type ASC";
+                                    $typeQuery .= " ORDER BY site_type ASC";
                                     $agenciesQuery = mysqli_query($con, $typeQuery);
                                     while ($type = mysqli_fetch_assoc($agenciesQuery)) {
-                                        echo '<option value="' . $type['type'] . '"' . (isset($_POST['type']) && $_POST['type'] == $type['type'] ? ' selected' : '') . '>' . $type['type'] . '</option>';
+                                        echo '<option value="' . $type['site_type'] . '"' . (isset($_POST['type']) && $_POST['type'] == $type['site_type'] ? ' selected' : '') . '>' . $type['site_type'] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -270,7 +270,7 @@ if (!isset($_SESSION['role'])) {
                                     }
                                     if (isset($_POST['type']) && $_POST['type'] != '') {
                                         $type = mysqli_real_escape_string($con, $_POST['type']);
-                                        $localityQuery .= " AND type = '$type'";
+                                        $localityQuery .= " AND site_type = '$type'";
                                     }
                                     $localityQuery .= " ORDER BY locality ASC";
 
@@ -306,7 +306,7 @@ if (!isset($_SESSION['role'])) {
                                     }
                                     if (isset($_POST['type']) && $_POST['type'] != '') {
                                         $type = mysqli_real_escape_string($con, $_POST['type']);
-                                        $barangayQuery .= " AND type = '$type'";
+                                        $barangayQuery .= " AND site_type = '$type'";
                                     }
                                     // Add ORDER BY clause to sort the results in ascending order
                                     $barangayQuery .= " ORDER BY barangay ASC";
@@ -388,39 +388,54 @@ if (!isset($_SESSION['role'])) {
         <div class="box-body table-responsive">
             <table id="table" class="table table-bordered">
                 <thead>
-                    <tr>
+                    <tr class="grp-row">
                         <?php if ($isAdmin) { ?>
                             <th rowspan="2" style="width: 20px !important;"><input type="checkbox" id="cbxMain" /></th>
-                            <th rowspan="2">Item No.</th>
                         <?php } ?>
+                        <th rowspan="2">Item No.</th>
                         <th rowspan="2">Locality</th>
                         <th rowspan="2">Barangay</th>
                         <th rowspan="2">District</th>
                         <th rowspan="2">Transport Location</th>
                         <th rowspan="2">Transport Type</th>
                         <th rowspan="2">Site Locations</th>
+                        <th rowspan="2" class="grp-narrow">Transfer/New Locations</th>
+                        <th rowspan="2" class="grp-narrow">Remarks</th>
                         <th rowspan="2">Site Code</th>
                         <th rowspan="2">Nationwide ID</th>
                         <th rowspan="2">Site Type</th>
-                        <th colspan="2">Date of Activation</th>
-                        <th colspan="2">Coordinates</th>
+                        <th colspan="2" class="grp">Date of Activation</th>
+                        <th colspan="2" class="grp">Coordinates</th>
+                        <th colspan="2" class="grp">Procurement Initiative</th>
+                        <th colspan="2" class="grp">Documents</th>
                         <th rowspan="2">Strategy</th>
                         <th rowspan="2">Status</th>
-                        <th rowspan="2">Remarks</th>
+                        <th rowspan="2">Link Type</th>
+                        <th rowspan="2">Replacement Form File</th>
+                        <th rowspan="2">Conforme File</th>
+                        <th rowspan="2">UAT File</th>
+                        <th rowspan="2">Additional UAT</th>
+                        <th colspan="2" class="grp">Site Coordinators</th>
                         <?php if ($isAdmin) { ?>
                             <th rowspan="2" style="width: 80px !important;">Option</th>
                         <?php } ?>
                     </tr>
-                    <tr>
+                    <tr class="grp-sub">
                         <th>Date of Activation</th>
                         <th>Current Date of Acceptance</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
+                        <th>Procurement Initiative</th>
+                        <th>Installation Type</th>
+                        <th>UAT</th>
+                        <th>Conforme</th>
+                        <th>Name (Site Coordinators)</th>
+                        <th>Contact Details</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     <tr>
-                        <td colspan="19" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td>
+                        <td colspan="<?php echo $isAdmin ? 31 : 29; ?>" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -443,30 +458,56 @@ if (!isset($_SESSION['role'])) {
         <!-- ========================= EDIT MODAL (Single Dynamic) ======================= -->
         <div id="editModal" class="modal fade">
             <form id="editForm">
-                <div class="modal-dialog modal-lg" style="width:750px !important;">
+                <div class="modal-dialog modal-sdm-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Edit Access Point</h4>
                         </div>
-                        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
                             <div id="editAlert" style="display:none;"></div>
                             <input type="hidden" name="hidden_id" id="edit_hidden_id" />
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="form-group"><label>Item No.:</label><input type="number" min="0" name="txt_edit_item_no" id="edit_item_no" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Locality:</label><input type="text" name="txt_edit_locality" id="edit_locality" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Barangay:</label><input type="text" name="txt_edit_barangay" id="edit_barangay" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>District:</label><input type="text" name="txt_edit_district" id="edit_district" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Transport Location:</label><input type="text" name="txt_edit_transport_location" id="edit_transport_location" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Transport Type:</label><input type="text" name="txt_edit_transport_type" id="edit_transport_type" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Locations:</label><input type="text" name="txt_edit_locations" id="edit_locations" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Site Type:</label><input type="text" name="txt_edit_type" id="edit_type" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Site Code:</label><input type="text" name="txt_edit_code" id="edit_code" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Site Locations:</label><input type="text" name="txt_edit_site_locations" id="edit_site_locations" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Transfer/New Locations:</label><input type="text" name="txt_edit_transfer_new_locations" id="edit_transfer_new_locations" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Site Code:</label><input type="text" name="txt_edit_site_code" id="edit_site_code" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Nationwide ID:</label><input type="text" name="txt_edit_nationwide_id" id="edit_nationwide_id" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Site Type:</label><input type="text" name="txt_edit_site_type" id="edit_site_type" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Date of Activation:</label><input type="date" name="txt_edit_date_of_activation" id="edit_date_of_activation" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Current Date of Acceptance:</label><input type="date" name="txt_edit_current_date_of_acceptance" id="edit_current_date_of_acceptance" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Latitude:</label><input type="text" name="txt_edit_latitude" id="edit_latitude" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Longitude:</label><input type="text" name="txt_edit_longitude" id="edit_longitude" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Latitude:</label><input type="number" step="0.0000001" min="-90" max="90" name="txt_edit_latitude" id="edit_latitude" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Longitude:</label><input type="number" step="0.0000001" min="-180" max="180" name="txt_edit_longitude" id="edit_longitude" class="form-control input-sm" /></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group"><label>Procurement Initiative:</label>
+                                        <select name="txt_edit_procurement_initiative" id="edit_procurement_initiative" class="form-control input-sm">
+                                            <option value="">-- Select --</option>
+                                            <option value="Centrally Procured">Centrally Procured</option>
+                                            <option value="Regional Procured">Regional Procured</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>Installation Type:</label>
+                                        <select name="txt_edit_installation_type" id="edit_installation_type" class="form-control input-sm">
+                                            <option value="">-- Select --</option>
+                                            <option value="Region Initiated">Region Initiated</option>
+                                            <option value="Manage Service">Manage Service</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>UAT:</label><br>
+                                        <input type="hidden" name="uat" value="0" />
+                                        <input type="checkbox" name="uat" id="edit_uat" value="1" />
+                                    </div>
+                                    <div class="form-group"><label>Conforme:</label><br>
+                                        <input type="hidden" name="conforme" value="0" />
+                                        <input type="checkbox" name="conforme" id="edit_conforme" value="1" />
+                                    </div>
                                     <div class="form-group"><label>Strategy:</label><input type="text" name="txt_edit_strategy" id="edit_strategy" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Status:</label>
                                         <select name="txt_edit_status" id="edit_status" class="form-control input-sm">
@@ -474,13 +515,21 @@ if (!isset($_SESSION['role'])) {
                                             <option value="Active">Active</option>
                                             <option value="Inactive">Inactive</option>
                                             <option value="Ongoing">Ongoing</option>
+                                            <option value="Assist">Assist</option>
                                             <option value="Terminated">Terminated</option>
                                             <option value="Deactivated">Deactivated</option>
                                             <option value="Ongoing Acceptance">Ongoing Acceptance</option>
                                             <option value="For Installation">For Installation</option>
-                                            <option value="Other">Other</option>
+                                            <option value="For Transfer">For Transfer</option>
                                         </select>
                                     </div>
+                                    <div class="form-group"><label>Link Type:</label><input type="text" name="txt_edit_link_type" id="edit_link_type" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Replacement Form File:</label><input type="url" name="txt_edit_replacement_form_file" id="edit_replacement_form_file" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Conforme File:</label><input type="url" name="txt_edit_conforme_file" id="edit_conforme_file" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>UAT File:</label><input type="url" name="txt_edit_uat_file" id="edit_uat_file" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Additional UAT:</label><input type="url" name="txt_edit_additional_uat" id="edit_additional_uat" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Name (Site Coordinators):</label><input type="text" name="txt_edit_site_coordinator_name" id="edit_site_coordinator_name" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Contact Details:</label><input type="text" name="txt_edit_contact_details" id="edit_contact_details" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Remarks:</label><textarea name="txt_edit_remarks" id="edit_remarks" class="form-control input-sm"></textarea></div>
                                 </div>
                             </div>
@@ -546,6 +595,19 @@ if (!isset($_SESSION['role'])) {
         </section><!-- /.content -->
         </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
+
+        <!-- ========================= DETAIL SIDE PANEL ======================= -->
+        <div id="detailPanelOverlay" class="detail-overlay" onclick="closeDetailPanel(event)"></div>
+        <div id="detailPanel" class="detail-panel">
+            <div class="detail-header">
+                <div><i class="fa fa-info-circle"></i> Site Details</div>
+                <button type="button" class="close detail-close" onclick="closeDetailPanel()" aria-hidden="true">&times;</button>
+            </div>
+            <div class="detail-body" id="detailBody">
+                <div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+            </div>
+        </div>
+
         <!-- jQuery 2.0.2 -->
     <?php }
 include "../footer.php"; ?>
@@ -641,7 +703,7 @@ include "../footer.php"; ?>
             function loadData(page) {
                 currentPage = page || 1;
                 var f = getFilters();
-                var colspan = isAdmin ? 19 : 16;
+                var colspan = isAdmin ? 31 : 29;
                 var params = 'page=' + currentPage +
                     '&per_page=' + perPage +
                     '&search=' + encodeURIComponent(f.search) +
@@ -672,7 +734,7 @@ include "../footer.php"; ?>
 
             function renderTable(rows) {
                 var tbody = document.getElementById('tableBody');
-                var colspan = isAdmin ? 19 : 16;
+                var colspan = isAdmin ? 31 : 29;
                 if (!rows || rows.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="text-center">No records found.</td></tr>';
                     return;
@@ -680,27 +742,41 @@ include "../footer.php"; ?>
                 var html = '';
                 rows.forEach(function(row) {
                     var id = parseInt(row.id);
+                    var itemNo = (row.item_no !== null && row.item_no !== '' && row.item_no !== undefined) ? row.item_no : row.row_num;
                     html += '<tr>';
                     if (isAdmin) {
                         html += '<td><input type="checkbox" class="chk_delete" data-id="' + id + '"' + (selectedIds[id] ? ' checked' : '') + ' /></td>';
-                        html += '<td>' + row.row_num + '</td>';
                     }
-                    html += '<td>' + escHtml(row.locality) + '</td>' +
-                        '<td>' + escHtml(row.barangay) + '</td>' +
-                        '<td>' + escHtml(row.district) + '</td>' +
-                        '<td>' + escHtml(row.transport_location) + '</td>' +
-                        '<td>' + escHtml(row.transport_type) + '</td>' +
-                        '<td>' + escHtml(row.locations) + '</td>' +
-                        '<td>' + escHtml(row.code) + '</td>' +
-                        '<td>' + escHtml(row.nationwide_id) + '</td>' +
-                        '<td>' + escHtml(row.type) + '</td>' +
-                        '<td>' + escHtml(row.date_of_activation) + '</td>' +
-                        '<td>' + escHtml(row.current_date_of_acceptance) + '</td>' +
-                        '<td>' + escHtml(row.latitude) + '</td>' +
-                        '<td>' + escHtml(row.longitude) + '</td>' +
-                        '<td>' + escHtml(row.strategy) + '</td>' +
-                        '<td>' + escHtml(row.status) + '</td>' +
-                        '<td>' + escHtml(row.remarks) + '</td>';
+                    html +=
+                        cell(itemNo) +
+                        cell(row.locality) +
+                        cell(row.barangay) +
+                        cell(row.district) +
+                        cell(row.transport_location) +
+                        cell(row.transport_type) +
+                        cell(row.site_locations) +
+                        cell(row.transfer_new_locations) +
+                        cell(row.remarks) +
+                        '<td><a href="javascript:void(0);" class="detailLink" data-id="' + id + '" title="' + escHtml(row.site_code) + '">' + disp(row.site_code) + '</a></td>' +
+                        cell(row.nationwide_id) +
+                        cell(row.site_type) +
+                        cell(row.date_of_activation) +
+                        cell(row.current_date_of_acceptance) +
+                        cell(row.latitude) +
+                        cell(row.longitude) +
+                        cell(row.procurement_initiative) +
+                        cell(row.installation_type) +
+                        boolCell(row.uat) +
+                        boolCell(row.conforme) +
+                        cell(row.strategy) +
+                        cell(row.status) +
+                        cell(row.link_type) +
+                        linkCell(row.replacement_form_file) +
+                        linkCell(row.conforme_file) +
+                        linkCell(row.uat_file) +
+                        linkCell(row.additional_uat) +
+                        cell(row.site_coordinator_name) +
+                        cell(row.contact_details);
                     if (isAdmin) {
                         html += '<td class="option-buttons">' +
                             '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
@@ -711,6 +787,34 @@ include "../footer.php"; ?>
                     html += '</tr>';
                 });
                 tbody.innerHTML = html;
+            }
+
+            function disp(v) {
+                if (v === null || v === undefined || v === '') return '&mdash;';
+                return escHtml(v);
+            }
+
+            function cell(v) {
+                return '<td>' + disp(v) + '</td>';
+            }
+
+            function boolCell(v) {
+                if (v === null || v === undefined || v === '') {
+                    return '<td class="text-center" style="color:#aaa;">&mdash;</td>';
+                }
+                if (String(v) === '1' || String(v).toLowerCase() === 'true' || String(v).toLowerCase() === 'yes') {
+                    return '<td class="text-center"><span class="bool-badge bool-yes" title="Yes"><i class="fa fa-check"></i> Yes</span></td>';
+                }
+                return '<td class="text-center"><span class="bool-badge bool-no" title="No"><i class="fa fa-times"></i> No</span></td>';
+            }
+
+            function linkCell(v) {
+                if (v === null || v === undefined || v === '') {
+                    return '<td class="text-center" style="color:#aaa;">&mdash;</td>';
+                }
+                var url = String(v);
+                var label = (url.split('/').filter(Boolean).pop() || url).slice(0, 28);
+                return '<td><a href="' + escHtml(url) + '" target="_blank" rel="noopener" class="file-link" title="' + escHtml(url) + '"><i class="fa fa-external-link"></i> ' + escHtml(label) + '</a></td>';
             }
 
             function renderPagination(page, total, count) {
@@ -934,26 +1038,34 @@ include "../footer.php"; ?>
                 $('#editAlert').hide();
                 $.getJSON(basePath + 'fw4a_get_item.php?action=item&id=' + id, function(item) {
                     $('#edit_hidden_id').val(item.id);
+                    $('#edit_item_no').val(item.item_no || '');
                     $('#edit_locality').val(item.locality);
                     $('#edit_barangay').val(item.barangay);
                     $('#edit_district').val(item.district);
                     $('#edit_transport_location').val(item.transport_location);
                     $('#edit_transport_type').val(item.transport_type);
-                    $('#edit_locations').val(item.locations);
-                    $('#edit_type').val(item.type);
-                    $('#edit_code').val(item.code);
+                    $('#edit_site_locations').val(item.site_locations);
+                    $('#edit_transfer_new_locations').val(item.transfer_new_locations);
+                    $('#edit_site_code').val(item.site_code);
                     $('#edit_nationwide_id').val(item.nationwide_id);
+                    $('#edit_site_type').val(item.site_type);
                     $('#edit_date_of_activation').val(item.date_of_activation || '');
                     $('#edit_current_date_of_acceptance').val(item.current_date_of_acceptance || '');
                     $('#edit_latitude').val(item.latitude);
                     $('#edit_longitude').val(item.longitude);
+                    $('#edit_procurement_initiative').val(item.procurement_initiative || '');
+                    $('#edit_installation_type').val(item.installation_type || '');
+                    $('#edit_uat').prop('checked', String(item.uat) === '1' || item.uat === 1 || item.uat === true);
+                    $('#edit_conforme').prop('checked', String(item.conforme) === '1' || item.conforme === 1 || item.conforme === true);
                     $('#edit_strategy').val(item.strategy);
-                    var knownStatuses = ['Active', 'Inactive', 'Ongoing', 'Terminated', 'Deactivated', 'Ongoing Acceptance', 'For Installation'];
-                    if (item.status && knownStatuses.indexOf(item.status) === -1) {
-                        $('#edit_status').val('Other');
-                    } else {
-                        $('#edit_status').val(item.status);
-                    }
+                    $('#edit_status').val(item.status || '');
+                    $('#edit_link_type').val(item.link_type);
+                    $('#edit_replacement_form_file').val(item.replacement_form_file);
+                    $('#edit_conforme_file').val(item.conforme_file);
+                    $('#edit_uat_file').val(item.uat_file);
+                    $('#edit_additional_uat').val(item.additional_uat);
+                    $('#edit_site_coordinator_name').val(item.site_coordinator_name);
+                    $('#edit_contact_details').val(item.contact_details);
                     $('#edit_remarks').val(item.remarks);
                     $('#editModal').modal('show');
                 }).fail(function() {
@@ -1378,8 +1490,8 @@ include "../footer.php"; ?>
                     var p = currentMapPoints[i];
                     if (activeStatusFilter !== 'All' && p.status !== activeStatusFilter) continue;
                     var haystack = [
-                        p.locations || '', p.locality || '', p.barangay || '',
-                        p.code || '', p.nationwide_id || '', p.strategy || '', p.status || ''
+                        p.site_locations || '', p.locality || '', p.barangay || '',
+                        p.site_code || '', p.nationwide_id || '', p.strategy || '', p.status || ''
                     ].join(' ').toLowerCase();
                     if (haystack.indexOf(q) !== -1) {
                         matches.push(p);
@@ -1394,7 +1506,7 @@ include "../footer.php"; ?>
                 if (localResults.length > 0) {
                     html += '<div class="fw4a-search-section"><span class="fw4a-search-section-label"><i class="fa fa-database"></i> Our Records</span></div>';
                     localResults.forEach(function(p) {
-                        var label = escHtml(p.locations || p.locality || 'Unnamed');
+                        var label = escHtml(p.site_locations || p.locality || 'Unnamed');
                         var sub = escHtml([p.barangay, p.locality].filter(Boolean).join(', '));
                         html += '<div class="fw4a-search-item fw4a-search-record" data-type="record" data-id="' + p.id + '">' +
                             '<span class="fw4a-search-icon"><i class="fa fa-map-marker"></i></span>' +
@@ -1565,12 +1677,12 @@ include "../footer.php"; ?>
 
                     var popupContent =
                         '<div style="font-size:13px; line-height:1.6;">' +
-                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.locations || 'N/A') + '</b><br>' +
+                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.site_locations || 'N/A') + '</b><br>' +
                         '<b>Locality:</b> ' + escHtml(p.locality) + '<br>' +
                         '<b>Barangay:</b> ' + escHtml(p.barangay) + '<br>' +
                         '<b>District:</b> ' + escHtml(p.district || 'N/A') + '<br>' +
-                        '<b>Code:</b> ' + escHtml(p.code || 'N/A') + '<br>' +
-                        '<b>Type:</b> ' + escHtml(p.type) + '<br>' +
+                        '<b>Code:</b> ' + escHtml(p.site_code || 'N/A') + '<br>' +
+                        '<b>Type:</b> ' + escHtml(p.site_type) + '<br>' +
                         '<b>Strategy:</b> ' + escHtml(p.strategy) + '<br>' +
                         '<b>Status:</b> <span style="color:' + statusColor + '; font-weight:bold;">' + escHtml(p.status) + '</span><br>' +
                         '<b>Coordinates:</b> ' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) +
@@ -1645,12 +1757,12 @@ include "../footer.php"; ?>
 
                     var popupContent =
                         '<div style="font-size:13px; line-height:1.6;">' +
-                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.locations || 'N/A') + '</b><br>' +
+                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.site_locations || 'N/A') + '</b><br>' +
                         '<b>Locality:</b> ' + escHtml(p.locality) + '<br>' +
                         '<b>Barangay:</b> ' + escHtml(p.barangay) + '<br>' +
                         '<b>District:</b> ' + escHtml(p.district || 'N/A') + '<br>' +
-                        '<b>Code:</b> ' + escHtml(p.code || 'N/A') + '<br>' +
-                        '<b>Type:</b> ' + escHtml(p.type) + '<br>' +
+                        '<b>Code:</b> ' + escHtml(p.site_code || 'N/A') + '<br>' +
+                        '<b>Type:</b> ' + escHtml(p.site_type) + '<br>' +
                         '<b>Strategy:</b> ' + escHtml(p.strategy) + '<br>' +
                         '<b>Status:</b> <span style="color:' + statusColor + '; font-weight:bold;">' + escHtml(p.status) + '</span><br>' +
                         '<b>Coordinates:</b> ' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) +
@@ -1720,6 +1832,137 @@ include "../footer.php"; ?>
             });
             $('#mapCollapse').on('hidden.bs.collapse', function() {
                 if (fw4aMap) fw4aMap.invalidateSize();
+            });
+
+            // ========== DETAIL SIDE PANEL ==========
+            function escVal(v) {
+                if (v === null || v === undefined || v === '') return '<span class="text-muted">—</span>';
+                return escHtml(String(v));
+            }
+
+            function boolBadge(v) {
+                if (v === null || v === undefined || v === '') return '<span class="text-muted">—</span>';
+                var s = String(v).toLowerCase();
+                return (s === '1' || s === 'true' || s === 'yes') ?
+                    '<span class="label label-success">✔ Yes</span>' :
+                    '<span class="label label-danger">✘ No</span>';
+            }
+
+            function fileLink(v) {
+                if (v === null || v === undefined || v === '') return '<span class="text-muted">—</span>';
+                var url = String(v);
+                if (url === '') return '<span class="text-muted">—</span>';
+                if (/^https?:\/\//i.test(url) === false) { url = 'https://' + url; }
+                return '<a href="' + url + '" target="_blank" rel="noopener"><i class="fa fa-external-link"></i> Open link</a>';
+            }
+
+            function field(label, value, full) {
+                return '<div class="detail-item' + (full ? ' full' : '') + '"><label>' + label + '</label><div class="value">' + value + '</div></div>';
+            }
+
+            function card(title, fieldsHtml) {
+                return '<div class="detail-card"><h5>' + title + '</h5><div class="detail-grid">' + fieldsHtml + '</div></div>';
+            }
+
+            function renderDetailPanel(item) {
+                var statusHtml = escVal(item.status);
+                if (item.status) {
+                    var st = String(item.status).toLowerCase();
+                    var labelMap = {
+                        'active': 'success',
+                        'inactive': 'default',
+                        'ongoing': 'primary',
+                        'assist': 'warning',
+                        'terminated': 'danger',
+                        'deactivated': 'default',
+                        'ongoing acceptance': 'primary',
+                        'for installation': 'warning',
+                        'for transfer': 'warning'
+                    };
+                    var cl = labelMap[st] || 'default';
+                    statusHtml = '<span class="label label-' + cl + '">' + escHtml(item.status) + '</span>';
+                }
+
+                var html = '';
+                html += '<div class="detail-card detail-id-card">' +
+                    '<div class="detail-id-title">' + escVal(item.site_code) + '</div>' +
+                    '<div class="detail-id-sub">' + escVal(item.locality) + (item.barangay ? ' — ' + escHtml(item.barangay) : '') + '</div>' +
+                    '</div>';
+
+                html += card('Location', [
+                    field('Locality', escVal(item.locality)),
+                    field('Barangay', escVal(item.barangay)),
+                    field('District', escVal(item.district)),
+                    field('Transport Location', escVal(item.transport_location)),
+                    field('Transport Type', escVal(item.transport_type)),
+                    field('Site Locations', escVal(item.site_locations)),
+                    field('Transfer/New Locations', escVal(item.transfer_new_locations)),
+                    field('Latitude', escVal(item.latitude)),
+                    field('Longitude', escVal(item.longitude)),
+                    field('Remarks', escVal(item.remarks), true)
+                ].join(''));
+
+                html += card('Site Information', [
+                    field('Item No.', escVal(item.item_no)),
+                    field('Site Code', escVal(item.site_code)),
+                    field('Nationwide ID', escVal(item.nationwide_id)),
+                    field('Site Type', escVal(item.site_type)),
+                    field('Date of Activation', escVal(item.date_of_activation)),
+                    field('Date of Acceptance', escVal(item.current_date_of_acceptance)),
+                    field('Strategy', escVal(item.strategy)),
+                    field('Status', statusHtml),
+                    field('Link Type', escVal(item.link_type))
+                ].join(''));
+
+                html += card('Procurement / Installation', [
+                    field('Procurement Initiative', escVal(item.procurement_initiative)),
+                    field('Installation Type', escVal(item.installation_type)),
+                    field('UAT', boolBadge(item.uat)),
+                    field('Conforme', boolBadge(item.conforme))
+                ].join(''));
+
+                html += card('Files', [
+                    field('Replacement Form File', fileLink(item.replacement_form_file), true),
+                    field('Conforme File', fileLink(item.conforme_file), true),
+                    field('UAT File', fileLink(item.uat_file), true),
+                    field('Additional UAT', fileLink(item.additional_uat), true)
+                ].join(''));
+
+                html += card('Site Coordinator', [
+                    field('Name (Site Coordinators)', escVal(item.site_coordinator_name)),
+                    field('Contact Details', escVal(item.contact_details))
+                ].join(''));
+
+                document.getElementById('detailBody').innerHTML = html;
+            }
+
+            function openDetailPanel(id) {
+                document.getElementById('detailBody').innerHTML = '<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</div>';
+                $('#detailPanel').addClass('open');
+                $('#detailPanelOverlay').addClass('open');
+                document.body.style.overflow = 'hidden';
+                $.getJSON(basePath + 'fw4a_get_item.php?action=item&id=' + id, function(item) {
+                    renderDetailPanel(item);
+                }).fail(function() {
+                    document.getElementById('detailBody').innerHTML = '<div class="alert alert-danger">Failed to load item details.</div>';
+                });
+            }
+
+            window.closeDetailPanel = function(e) {
+                if (e && e.target !== e.currentTarget) return;
+                $('#detailPanel').removeClass('open');
+                $('#detailPanelOverlay').removeClass('open');
+                document.body.style.overflow = '';
+            };
+
+            $(document).on('click', '.detailLink', function() {
+                openDetailPanel($(this).attr('data-id'));
+            });
+
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape' && $('#detailPanel').hasClass('open')) {
+                    closeDetailPanel();
+                }
             });
 
             // ========== INIT ==========
@@ -2223,6 +2466,184 @@ include "../footer.php"; ?>
 
         .fw4a-filter-select:focus {
             box-shadow: inset 0 0 0 2px #3c8dbc;
+        }
+
+        /* ========== DETAIL SIDE PANEL ========== */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -620px;
+            width: 620px;
+            max-width: 100vw;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            box-shadow: -4px 0 14px rgba(0, 0, 0, 0.25);
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-panel.open {
+            right: 0;
+        }
+        .detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 9998;
+            display: none;
+        }
+        .detail-overlay.open {
+            display: block;
+        }
+        .detail-header {
+            padding: 14px 18px;
+            background: #3c8dbc;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .detail-header .detail-close {
+            color: #fff;
+            opacity: 1;
+            font-size: 24px;
+            text-shadow: none;
+        }
+        .detail-body {
+            overflow-y: auto;
+            padding: 16px;
+            flex: 1;
+        }
+        .detail-card {
+            background: #fdfefe;
+            border: 1px solid #dfe4e8;
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+        }
+        .detail-card h5 {
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            color: #3c8dbc;
+            border-bottom: 1px solid #e5eaee;
+            padding-bottom: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+        }
+        .detail-grid .full {
+            grid-column: 1 / -1;
+        }
+        .detail-item label {
+            font-size: 10.5px;
+            color: #8a8f95;
+            display: block;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .detail-item .value {
+            font-size: 13px;
+            color: #333;
+            word-break: break-word;
+            margin-top: 1px;
+        }
+        .detail-item .value a {
+            color: #3c8dbc;
+        }
+        .detail-id-card {
+            background: linear-gradient(135deg, #3c8dbc, #357ca5);
+            border: none;
+        }
+        .detail-id-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .detail-id-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 2px;
+            word-break: break-word;
+        }
+        .detailLink {
+            color: #3c8dbc;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .detailLink:hover {
+            text-decoration: underline;
+        }
+        #table {
+            min-width: 2700px;
+            margin-bottom: 0;
+        }
+        #table th,
+        #table td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        .grp-row th,
+        .grp-sub th {
+            text-align: center;
+            vertical-align: middle !important;
+        }
+        .grp-row th.grp {
+            background-color: #eaf1f8;
+            border-top: 2px solid #3c8dbc;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #234a6b;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .grp-sub th {
+            background-color: #f7f9fc;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            border-top: 1px solid #ddd;
+        }
+        .grp-narrow {
+            max-width: 200px;
+        }
+        .bool-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .bool-yes {
+            background-color: #d4efdf;
+            color: #1e7e34;
+        }
+        .bool-no {
+            background-color: #fdecea;
+            color: #c62828;
+        }
+        .file-link {
+            color: #3c8dbc;
+            word-break: break-all;
+            text-decoration: none;
+        }
+        .file-link:hover {
+            text-decoration: underline;
         }
     </style>
     </body>

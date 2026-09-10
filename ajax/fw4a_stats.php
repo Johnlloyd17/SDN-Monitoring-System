@@ -19,7 +19,7 @@ $locality = isset($_GET['locality']) ? trim($_GET['locality']) : '';
 $barangay = isset($_GET['barangay']) ? trim($_GET['barangay']) : '';
 
 $strategyF = $strategy !== '' ? " AND strategy = '" . mysqli_real_escape_string($con, $strategy) . "'" : '';
-$typeF = $type !== '' ? " AND type = '" . mysqli_real_escape_string($con, $type) . "'" : '';
+$typeF = $type !== '' ? " AND site_type = '" . mysqli_real_escape_string($con, $type) . "'" : '';
 $localityF = $locality !== '' ? " AND locality = '" . mysqli_real_escape_string($con, $locality) . "'" : '';
 $barangayF = $barangay !== '' ? " AND barangay = '" . mysqli_real_escape_string($con, $barangay) . "'" : '';
 

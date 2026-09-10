@@ -32,7 +32,7 @@ if (!isset($_SESSION['role'])) {
 
     // Table 2: type × strategy counts
     $typeData = [];
-    $typeQuery = mysqli_query($con, "SELECT type, strategy, COUNT(*) AS total FROM tblfwfa GROUP BY type, strategy");
+    $typeQuery = mysqli_query($con, "SELECT site_type AS type, strategy, COUNT(*) AS total FROM tblfwfa GROUP BY site_type, strategy");
     while ($row = mysqli_fetch_assoc($typeQuery)) {
         $typeData[$row['type']][$row['strategy']] = $row['total'];
     }

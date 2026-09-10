@@ -113,13 +113,51 @@ if ($action === 'get_item' && isset($_GET['id'])) {
     exit;
 }
 
+$activityIdEnum = [
+    'GOVNET-0001','GOVNET-0002','FW4A-0001','FW4A-0002','FW4A-0003','FW4A-0004','CSB-0001','ILCDB-0001','PNPKI-0001','FW4A-0005','FW4A-0006','FW4A-0007','PNPKI-0002','FW4A-0008','FW4A-0009','FW4A-0010','FW4A-0011','FW4A-0012','ILCDB-0002','FW4A-0013','FW4A-0014','ILCDB-0003','PNPKI-0003','PNPKI-0004','FW4A-0015','OTHERS-0001','CSB-0002','CSB-0003','OTHERS-0002','GOVNET-0003','FW4A-0016','ILCDB-0005','FW4A-0017','FW4A-0018','ILCDB-0009','ILCDB-0006','ILCDB-0007','FW4A-0019','ILCDB-0011','ILCDB-0010','FW4A-0020','FW4A-0021','FW4A-0022','FW4A-0023','PNPKI-0005','FW4A-0024','FW4A-0025','PNPKI-0006','OTHERS-0003','PNPKI-0007','PNPKI-0008','ILCDB-0013','ILCDB-0014','CSB-0006','CSB-0005','ILCDB-0016','CSB-0007','ILCDB-0017','OTHERS-0004','ILCDB-0035','ILCDB-0036','ILCDB-0018','ILCDB-0019','ILCDB-0015','ILCDB-0021','ILCDB-0020','ILCDB-0029','ILCDB-0030','ILCDB-0022','ILCDB-0034','ILCDB-0031','ILCDB-0028','ILCDB-0027','ILCDB-0032','ILCDB-0033','ILCDB-0023','ILCDB-0024','ILCDB-0004','ILCDB-0008','ILCDB-0012','ILCDB-0025','ILCDB-0026'
+];
+
+function validateActivityId($con, $activityId) {
+    global $activityIdEnum;
+    if ($activityId === '') {
+        return ['ok' => true, 'value' => ''];
+    }
+    if (!in_array($activityId, $activityIdEnum, true)) {
+        return ['ok' => false, 'error' => 'Invalid Activity ID selected.'];
+    }
+    return ['ok' => true, 'value' => $activityId];
+}
+
+$typeOfItemsEnum = ['Meals', 'Fuel (Diesel)', 'Office Supplies', 'Plaque', 'Service'];
+
+function validateTypeOfItems($con, $value) {
+    global $typeOfItemsEnum;
+    if ($value === '') {
+        return ['ok' => true, 'value' => ''];
+    }
+    if (!in_array($value, $typeOfItemsEnum, true)) {
+        return ['ok' => false, 'error' => 'Invalid Type of Items selected.'];
+    }
+    return ['ok' => true, 'value' => $value];
+}
+
 if ($action === 'add') {
     $pr_no = mysqli_real_escape_string($con, $_POST['txt_pr_no'] ?? '');
-    $activity_id = mysqli_real_escape_string($con, $_POST['txt_activity_id'] ?? '');
+    $activityCheck = validateActivityId($con, $_POST['txt_activity_id'] ?? '');
+    if (!$activityCheck['ok']) {
+        echo json_encode(['success' => false, 'error' => $activityCheck['error']]);
+        exit;
+    }
+    $activity_id = mysqli_real_escape_string($con, $activityCheck['value']);
+    $typeCheck = validateTypeOfItems($con, $_POST['txt_type_of_items_procured'] ?? '');
+    if (!$typeCheck['ok']) {
+        echo json_encode(['success' => false, 'error' => $typeCheck['error']]);
+        exit;
+    }
+    $type_of_items_procured = mysqli_real_escape_string($con, $typeCheck['value']);
     $activity_name = mysqli_real_escape_string($con, $_POST['txt_activity_name'] ?? '');
     $link_to_file = mysqli_real_escape_string($con, $_POST['txt_link_to_file'] ?? '');
     $project_fund_source = mysqli_real_escape_string($con, $_POST['txt_project_fund_source'] ?? '');
-    $type_of_items_procured = mysqli_real_escape_string($con, $_POST['txt_type_of_items_procured'] ?? '');
     $amount = str_replace(',', '', mysqli_real_escape_string($con, $_POST['txt_amount'] ?? ''));
     $name_of_supplier = mysqli_real_escape_string($con, $_POST['txt_name_of_supplier'] ?? '');
     $jo_po = mysqli_real_escape_string($con, $_POST['txt_jo_po'] ?? '');
@@ -146,11 +184,21 @@ if ($action === 'add') {
 if ($action === 'edit') {
     $id = intval($_POST['hidden_id'] ?? 0);
     $pr_no = mysqli_real_escape_string($con, $_POST['txt_edit_pr_no'] ?? '');
-    $activity_id = mysqli_real_escape_string($con, $_POST['txt_edit_activity_id'] ?? '');
+    $activityCheck = validateActivityId($con, $_POST['txt_edit_activity_id'] ?? '');
+    if (!$activityCheck['ok']) {
+        echo json_encode(['success' => false, 'error' => $activityCheck['error']]);
+        exit;
+    }
+    $activity_id = mysqli_real_escape_string($con, $activityCheck['value']);
+    $typeCheck = validateTypeOfItems($con, $_POST['txt_edit_type_of_items_procured'] ?? '');
+    if (!$typeCheck['ok']) {
+        echo json_encode(['success' => false, 'error' => $typeCheck['error']]);
+        exit;
+    }
+    $type_of_items_procured = mysqli_real_escape_string($con, $typeCheck['value']);
     $activity_name = mysqli_real_escape_string($con, $_POST['txt_edit_activity_name'] ?? '');
     $link_to_file = mysqli_real_escape_string($con, $_POST['txt_edit_link_to_file'] ?? '');
     $project_fund_source = mysqli_real_escape_string($con, $_POST['txt_edit_project_fund_source'] ?? '');
-    $type_of_items_procured = mysqli_real_escape_string($con, $_POST['txt_edit_type_of_items_procured'] ?? '');
     $amount = str_replace(',', '', mysqli_real_escape_string($con, $_POST['txt_edit_amount'] ?? ''));
     $name_of_supplier = mysqli_real_escape_string($con, $_POST['txt_edit_name_of_supplier'] ?? '');
     $jo_po = mysqli_real_escape_string($con, $_POST['txt_edit_jo_po'] ?? '');

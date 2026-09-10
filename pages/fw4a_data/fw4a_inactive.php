@@ -134,9 +134,9 @@ if (!isset($_SESSION['role'])) {
                                                                     <td>' . $row['locality'] . '</td>
                                                                     <td>' . $row['barangay'] . '</td>
                                                                     <td>' . $row['district'] . '</td>
-                                                                    <td>' . $row['locations'] . '</td>
-                                                                    <td>' . $row['type'] . '</td>
-                                                                    <td>' . $row['code'] . '</td>
+                                                                    <td>' . $row['site_locations'] . '</td>
+                                                                    <td>' . $row['site_type'] . '</td>
+                                                                    <td>' . $row['site_code'] . '</td>
                                                                     <td>' . $row['strategy'] . '</td>
                                                                     <td>' . $row['status'] . '</td>
                                                                     <td>' . $row['remarks'] . '</td>

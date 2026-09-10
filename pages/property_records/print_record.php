@@ -41,6 +41,16 @@ if (!$row) {
             background: #fff;
             font-size: 9pt;
             line-height: 1.4;
+            position: relative;
+        }
+        .sticker::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('../../img/logofinal.png') center/contain no-repeat;
+            opacity: 0.12;
+            z-index: 0;
+            pointer-events: none;
         }
         .sticker-header {
             text-align: center;
@@ -50,10 +60,14 @@ if (!$row) {
             padding-bottom: 3px;
             margin-bottom: 5px;
             letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
         .sticker-row {
             display: flex;
             margin-bottom: 3px;
+            position: relative;
+            z-index: 1;
         }
         .sticker-label {
             font-weight: 700;
@@ -76,6 +90,8 @@ if (!$row) {
             border-top: 1px solid #111;
             margin-top: 5px;
             padding-top: 4px;
+            position: relative;
+            z-index: 1;
         }
         .sign-row {
             display: flex;
@@ -92,8 +108,8 @@ if (!$row) {
             border-bottom: 0.5px solid #999;
         }
         @media print {
-            body { background: #fff; padding: 0; margin: 0; }
-            .sticker { box-shadow: none; }
+            body { background: #fff; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .sticker { box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none !important; }
         }
     </style>

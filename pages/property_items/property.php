@@ -10,6 +10,31 @@ if (!isset($_SESSION['role'])) {
 ?>
 <body class="skin-black">
     <?php include '../connection.php'; ?>
+    <?php
+        $activityIdEnum = [
+            'GOVNET-0001','GOVNET-0002','FW4A-0001','FW4A-0002','FW4A-0003','FW4A-0004','CSB-0001','ILCDB-0001','PNPKI-0001','FW4A-0005','FW4A-0006','FW4A-0007','PNPKI-0002','FW4A-0008','FW4A-0009','FW4A-0010','FW4A-0011','FW4A-0012','ILCDB-0002','FW4A-0013','FW4A-0014','ILCDB-0003','PNPKI-0003','PNPKI-0004','FW4A-0015','OTHERS-0001','CSB-0002','CSB-0003','OTHERS-0002','GOVNET-0003','FW4A-0016','ILCDB-0005','FW4A-0017','FW4A-0018','ILCDB-0009','ILCDB-0006','ILCDB-0007','FW4A-0019','ILCDB-0011','ILCDB-0010','FW4A-0020','FW4A-0021','FW4A-0022','FW4A-0023','PNPKI-0005','FW4A-0024','FW4A-0025','PNPKI-0006','OTHERS-0003','PNPKI-0007','PNPKI-0008','ILCDB-0013','ILCDB-0014','CSB-0006','CSB-0005','ILCDB-0016','CSB-0007','ILCDB-0017','OTHERS-0004','ILCDB-0035','ILCDB-0036','ILCDB-0018','ILCDB-0019','ILCDB-0015','ILCDB-0021','ILCDB-0020','ILCDB-0029','ILCDB-0030','ILCDB-0022','ILCDB-0034','ILCDB-0031','ILCDB-0028','ILCDB-0027','ILCDB-0032','ILCDB-0033','ILCDB-0023','ILCDB-0024','ILCDB-0004','ILCDB-0008','ILCDB-0012','ILCDB-0025','ILCDB-0026'
+        ];
+        function activityIdOptions($selected = '') {
+            global $activityIdEnum;
+            $html = '<option value="">-- Select Activity ID --</option>';
+            sort($activityIdEnum);
+            foreach ($activityIdEnum as $val) {
+                $sel = ($val === $selected) ? ' selected' : '';
+                $html .= '<option value="' . htmlspecialchars($val) . '"' . $sel . '>' . htmlspecialchars($val) . '</option>';
+            }
+            return $html;
+        }
+        $typeOfItemsEnum = ['Meals', 'Fuel (Diesel)', 'Office Supplies', 'Plaque', 'Service'];
+        function typeOfItemsOptions($selected = '') {
+            global $typeOfItemsEnum;
+            $html = '<option value="">-- Select Type of Items --</option>';
+            foreach ($typeOfItemsEnum as $val) {
+                $sel = ($val === $selected) ? ' selected' : '';
+                $html .= '<option value="' . htmlspecialchars($val) . '"' . $sel . '>' . htmlspecialchars($val) . '</option>';
+            }
+            return $html;
+        }
+    ?>
     <?php include('../header.php'); ?>
 
     <div class="wrapper row-offcanvas row-offcanvas-left">
@@ -142,6 +167,11 @@ if (!isset($_SESSION['role'])) {
                                                 <button class="btn btn-default btn-sm" id="clearSearchBtn" title="Clear search"><i class="fa fa-times"></i></button>
                                             </span>
                                         </div>
+                                        <?php if ($_SESSION['role'] !== 'staff') { ?>
+                                            <button id="importBtn" class="btn btn-success btn-sm"><i class="fa fa-download"></i> Import</button>
+                                            <input type="file" id="importFile" style="display:none;" accept=".csv, .xlsx" />
+                                            <button id="exportBtn" class="btn btn-primary btn-sm"><i class="fa fa-upload"></i> Export</button>
+                                        <?php } ?>
                                     </div>
                                 </div>
 
@@ -207,11 +237,11 @@ if (!isset($_SESSION['role'])) {
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group"><label>PR No.:</label><input name="txt_pr_no" class="form-control input-sm" type="text" placeholder="PR No." /></div>
-                                    <div class="form-group"><label>Activity ID:</label><input name="txt_activity_id" class="form-control input-sm" type="text" placeholder="Activity ID" /></div>
+                                    <div class="form-group"><label>Activity ID:</label><select name="txt_activity_id" class="form-control input-sm"><?php echo activityIdOptions(); ?></select></div>
                                     <div class="form-group"><label>Activity Name:</label><input name="txt_activity_name" class="form-control input-sm" type="text" placeholder="Activity Name" /></div>
                                     <div class="form-group"><label>Link to File:</label><input name="txt_link_to_file" class="form-control input-sm" type="text" placeholder="Link to File" /></div>
                                     <div class="form-group"><label>Project Fund Source:</label><input name="txt_project_fund_source" class="form-control input-sm" type="text" placeholder="Project Fund Source" /></div>
-                                    <div class="form-group"><label>Type of Items Procured:</label><input name="txt_type_of_items_procured" class="form-control input-sm" type="text" placeholder="Type of Items Procured" /></div>
+                                    <div class="form-group"><label>Type of Items Procured:</label><select name="txt_type_of_items_procured" class="form-control input-sm"><?php echo typeOfItemsOptions(); ?></select></div>
                                     <div class="form-group"><label>Amount:</label><input name="txt_amount" class="form-control input-sm" type="text" placeholder="e.g. 150,000.00" /></div>
                                     <div class="form-group"><label>Name of Supplier:</label><input name="txt_name_of_supplier" class="form-control input-sm" type="text" placeholder="Name of Supplier" /></div>
                                 </div>
@@ -259,11 +289,11 @@ if (!isset($_SESSION['role'])) {
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group"><label>PR No.:</label><input type="text" name="txt_edit_pr_no" id="edit_pr_no" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Activity ID:</label><input type="text" name="txt_edit_activity_id" id="edit_activity_id" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Activity ID:</label><select type="text" name="txt_edit_activity_id" id="edit_activity_id" class="form-control input-sm"><?php echo activityIdOptions(); ?></select></div>
                                     <div class="form-group"><label>Activity Name:</label><input type="text" name="txt_edit_activity_name" id="edit_activity_name" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Link to File:</label><input type="text" name="txt_edit_link_to_file" id="edit_link_to_file" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Project Fund Source:</label><input type="text" name="txt_edit_project_fund_source" id="edit_project_fund_source" class="form-control input-sm" /></div>
-                                    <div class="form-group"><label>Type of Items Procured:</label><input type="text" name="txt_edit_type_of_items_procured" id="edit_type_of_items_procured" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Type of Items Procured:</label><select type="text" name="txt_edit_type_of_items_procured" id="edit_type_of_items_procured" class="form-control input-sm"><?php echo typeOfItemsOptions(); ?></select></div>
                                     <div class="form-group"><label>Amount:</label><input type="text" name="txt_edit_amount" id="edit_amount" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Name of Supplier:</label><input type="text" name="txt_edit_name_of_supplier" id="edit_name_of_supplier" class="form-control input-sm" /></div>
                                 </div>
@@ -675,6 +705,58 @@ if (!isset($_SESSION['role'])) {
                         }
                     }
                 });
+            });
+
+            // ========== IMPORT ==========
+            $('#importBtn').on('click', function() {
+                document.getElementById('importFile').click();
+            });
+            $('#importFile').on('change', function() {
+                var formData = new FormData();
+                formData.append('file', this.files[0]);
+
+                fetch('import.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(function(response) {
+                    return response.text().then(function(text) {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Import raw response:', text);
+                            throw e;
+                        }
+                    });
+                }).then(function(data) {
+                    console.log('IMPORT response:', JSON.parse(JSON.stringify(data)));
+                    if (data.success) {
+                        var msg = data.inserted + ' row(s) inserted';
+                        if (data.skipped > 0) {
+                            msg += ', ' + data.skipped + ' skipped';
+                            if (data.skipped_details && data.skipped_details.length > 0) {
+                                var lines = data.skipped_details.map(function(d) {
+                                    return 'Row ' + d.row + ': ' + d.reason;
+                                });
+                                console.warn('IMPORT: skipped ' + data.skipped + ' row(s):\n' + lines.join('\n'));
+                            }
+                        }
+                        showToast(msg, data.skipped > 0 ? 'warning' : 'success');
+                        loadData(currentPage);
+                        loadFilters();
+                    } else {
+                        showToast(data.error || 'Import failed.', 'danger');
+                    }
+                }).catch(function() { showToast('Import error.', 'danger'); });
+            });
+
+            // ========== EXPORT ==========
+            $('#exportBtn').on('click', function() {
+                var f = getFilters();
+                var url = 'export.php?' +
+                    'project_fund_source=' + encodeURIComponent(f.project_fund_source) +
+                    '&payment_status=' + encodeURIComponent(f.payment_status) +
+                    '&year=' + encodeURIComponent(f.year);
+                window.location.href = url;
             });
 
             // ========== INIT ==========

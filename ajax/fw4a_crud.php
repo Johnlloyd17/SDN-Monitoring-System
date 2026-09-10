@@ -21,32 +21,87 @@ function escf($con, $name) {
     return mysqli_real_escape_string($con, $_POST[$name] ?? '');
 }
 
+$VALID_STATUS = ['Active', 'Inactive', 'Ongoing', 'Assist', 'Terminated', 'Deactivated', 'Ongoing Acceptance', 'For Installation', 'For Transfer'];
+$VALID_PROCUREMENT_INITIATIVE = ['Centrally Procured', 'Regional Procured'];
+$VALID_INSTALLATION_TYPE = ['Region Initiated', 'Manage Service'];
+
+function validateEnumField($value, $allowed, $label) {
+    if ($value === '') {
+        return null;
+    }
+    return in_array($value, $allowed, true) ? null : "Invalid $label value: \"$value\"";
+}
+
+function validateCoord($value, $label, $min, $max) {
+    if ($value === '') {
+        return null;
+    }
+    if (!is_numeric($value)) {
+        return "Invalid $label value: \"$value\" (must be numeric)";
+    }
+    $n = floatval($value);
+    if ($n < $min || $n > $max) {
+        return "$label out of range: \"$value\" (expected $min..$max)";
+    }
+    return null;
+}
+
 if ($action === 'add') {
+    $item_no = escf($con, 'txt_item_no');
     $locality = escf($con, 'txt_locality');
     $barangay = escf($con, 'txt_barangay');
     $district = escf($con, 'txt_district');
     $transport_location = escf($con, 'txt_transport_location');
     $transport_type = escf($con, 'txt_transport_type');
-    $locations = escf($con, 'txt_locations');
-    $type = escf($con, 'txt_type');
-    $code = escf($con, 'txt_code');
+    $site_locations = escf($con, 'txt_site_locations');
+    $transfer_new_locations = escf($con, 'txt_transfer_new_locations');
+    $site_code = escf($con, 'txt_site_code');
     $nationwide_id = escf($con, 'txt_nationwide_id');
+    $site_type = escf($con, 'txt_site_type');
     $date_of_activation = !empty($_POST['txt_date_of_activation']) ? "'" . escf($con, 'txt_date_of_activation') . "'" : 'NULL';
     $current_date_of_acceptance = !empty($_POST['txt_current_date_of_acceptance']) ? "'" . escf($con, 'txt_current_date_of_acceptance') . "'" : 'NULL';
-    $latitude = isset($_POST['txt_latitude']) && $_POST['txt_latitude'] !== '' ? (float)$_POST['txt_latitude'] : 'NULL';
-    $longitude = isset($_POST['txt_longitude']) && $_POST['txt_longitude'] !== '' ? (float)$_POST['txt_longitude'] : 'NULL';
+    $latitude = escf($con, 'txt_latitude');
+    $longitude = escf($con, 'txt_longitude');
+    $procurement_initiative = escf($con, 'txt_procurement_initiative');
+    $installation_type = escf($con, 'txt_installation_type');
+    $uat = (isset($_POST['uat']) && $_POST['uat'] !== '0' && $_POST['uat'] !== '') ? 1 : 0;
+    $conforme = (isset($_POST['conforme']) && $_POST['conforme'] !== '0' && $_POST['conforme'] !== '') ? 1 : 0;
     $strategy = escf($con, 'txt_strategy');
     $status = escf($con, 'txt_status');
+    $link_type = escf($con, 'txt_link_type');
+    $replacement_form_file = escf($con, 'txt_replacement_form_file');
+    $conforme_file = escf($con, 'txt_conforme_file');
+    $uat_file = escf($con, 'txt_uat_file');
+    $additional_uat = escf($con, 'txt_additional_uat');
+    $name = escf($con, 'txt_site_coordinator_name');
+    $contact_details = escf($con, 'txt_contact_details');
     $remarks = escf($con, 'txt_remarks');
 
+    $enumError = validateEnumField($status, $VALID_STATUS, 'Status')
+        ?? validateEnumField($procurement_initiative, $VALID_PROCUREMENT_INITIATIVE, 'Procurement Initiative')
+        ?? validateEnumField($installation_type, $VALID_INSTALLATION_TYPE, 'Installation Type')
+        ?? validateCoord($latitude, 'Latitude', -90, 90)
+        ?? validateCoord($longitude, 'Longitude', -180, 180);
+    if ($enumError !== null) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => $enumError]);
+        exit;
+    }
+
     $query = "INSERT INTO tblfwfa (
-        locality, barangay, district, transport_location, transport_type,
-        locations, type, code, nationwide_id, date_of_activation,
-        current_date_of_acceptance, latitude, longitude, strategy, status, remarks
+        item_no, locality, barangay, district, transport_location, transport_type,
+        site_locations, transfer_new_locations, site_code, nationwide_id, site_type,
+        date_of_activation, current_date_of_acceptance, latitude, longitude,
+        procurement_initiative, installation_type, uat, conforme, strategy, status,
+        link_type, replacement_form_file, conforme_file, uat_file, additional_uat,
+        site_coordinator_name, contact_details, remarks
     ) VALUES (
-        '$locality', '$barangay', '$district', '$transport_location', '$transport_type',
-        '$locations', '$type', '$code', '$nationwide_id', $date_of_activation,
-        $current_date_of_acceptance, $latitude, $longitude, '$strategy', '$status', '$remarks'
+        " . ($item_no !== '' ? intval($item_no) : 'NULL') . ", '$locality', '$barangay', '$district', '$transport_location', '$transport_type',
+        '$site_locations', '$transfer_new_locations', '$site_code', '$nationwide_id', '$site_type',
+        $date_of_activation, $current_date_of_acceptance, " . ($latitude !== '' ? floatval($latitude) : 'NULL') . ", " . ($longitude !== '' ? floatval($longitude) : 'NULL') . ",
+        " . ($procurement_initiative !== '' ? "'$procurement_initiative'" : 'NULL') . ", " . ($installation_type !== '' ? "'$installation_type'" : 'NULL') . ", $uat, $conforme, '$strategy', " . ($status !== '' ? "'$status'" : 'NULL') . ",
+        '$link_type', " . ($replacement_form_file !== '' ? "'$replacement_form_file'" : 'NULL') . ", " . ($conforme_file !== '' ? "'$conforme_file'" : 'NULL') . ", " . ($uat_file !== '' ? "'$uat_file'" : 'NULL') . ", " . ($additional_uat !== '' ? "'$additional_uat'" : 'NULL') . ",
+        '$name', '$contact_details', '$remarks'
     )";
 
     if (mysqli_query($con, $query)) {
@@ -67,39 +122,76 @@ if ($action === 'edit') {
         echo json_encode(['success' => false, 'error' => 'Invalid ID']);
         exit;
     }
+    $item_no = escf($con, 'txt_edit_item_no');
     $locality = escf($con, 'txt_edit_locality');
     $barangay = escf($con, 'txt_edit_barangay');
     $district = escf($con, 'txt_edit_district');
     $transport_location = escf($con, 'txt_edit_transport_location');
     $transport_type = escf($con, 'txt_edit_transport_type');
-    $locations = escf($con, 'txt_edit_locations');
-    $type = escf($con, 'txt_edit_type');
-    $code = escf($con, 'txt_edit_code');
+    $site_locations = escf($con, 'txt_edit_site_locations');
+    $transfer_new_locations = escf($con, 'txt_edit_transfer_new_locations');
+    $site_code = escf($con, 'txt_edit_site_code');
     $nationwide_id = escf($con, 'txt_edit_nationwide_id');
+    $site_type = escf($con, 'txt_edit_site_type');
     $date_of_activation = !empty($_POST['txt_edit_date_of_activation']) ? "'" . escf($con, 'txt_edit_date_of_activation') . "'" : 'NULL';
     $current_date_of_acceptance = !empty($_POST['txt_edit_current_date_of_acceptance']) ? "'" . escf($con, 'txt_edit_current_date_of_acceptance') . "'" : 'NULL';
-    $latitude = isset($_POST['txt_edit_latitude']) && $_POST['txt_edit_latitude'] !== '' ? (float)$_POST['txt_edit_latitude'] : 'NULL';
-    $longitude = isset($_POST['txt_edit_longitude']) && $_POST['txt_edit_longitude'] !== '' ? (float)$_POST['txt_edit_longitude'] : 'NULL';
+    $latitude = escf($con, 'txt_edit_latitude');
+    $longitude = escf($con, 'txt_edit_longitude');
+    $procurement_initiative = escf($con, 'txt_edit_procurement_initiative');
+    $installation_type = escf($con, 'txt_edit_installation_type');
+    $uat = (isset($_POST['uat']) && $_POST['uat'] !== '0' && $_POST['uat'] !== '') ? 1 : 0;
+    $conforme = (isset($_POST['conforme']) && $_POST['conforme'] !== '0' && $_POST['conforme'] !== '') ? 1 : 0;
     $strategy = escf($con, 'txt_edit_strategy');
     $status = escf($con, 'txt_edit_status');
+    $link_type = escf($con, 'txt_edit_link_type');
+    $replacement_form_file = escf($con, 'txt_edit_replacement_form_file');
+    $conforme_file = escf($con, 'txt_edit_conforme_file');
+    $uat_file = escf($con, 'txt_edit_uat_file');
+    $additional_uat = escf($con, 'txt_edit_additional_uat');
+    $name = escf($con, 'txt_edit_site_coordinator_name');
+    $contact_details = escf($con, 'txt_edit_contact_details');
     $remarks = escf($con, 'txt_edit_remarks');
 
+    $enumError = validateEnumField($status, $VALID_STATUS, 'Status')
+        ?? validateEnumField($procurement_initiative, $VALID_PROCUREMENT_INITIATIVE, 'Procurement Initiative')
+        ?? validateEnumField($installation_type, $VALID_INSTALLATION_TYPE, 'Installation Type')
+        ?? validateCoord($latitude, 'Latitude', -90, 90)
+        ?? validateCoord($longitude, 'Longitude', -180, 180);
+    if ($enumError !== null) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => $enumError]);
+        exit;
+    }
+
     $query = "UPDATE tblfwfa SET
+        item_no = " . ($item_no !== '' ? intval($item_no) : 'NULL') . ",
         locality = '$locality',
         barangay = '$barangay',
         district = '$district',
         transport_location = '$transport_location',
         transport_type = '$transport_type',
-        locations = '$locations',
-        type = '$type',
-        code = '$code',
+        site_locations = '$site_locations',
+        transfer_new_locations = '$transfer_new_locations',
+        site_code = '$site_code',
         nationwide_id = '$nationwide_id',
+        site_type = '$site_type',
         date_of_activation = $date_of_activation,
         current_date_of_acceptance = $current_date_of_acceptance,
-        latitude = $latitude,
-        longitude = $longitude,
+        latitude = " . ($latitude !== '' ? floatval($latitude) : 'NULL') . ",
+        longitude = " . ($longitude !== '' ? floatval($longitude) : 'NULL') . ",
+        procurement_initiative = " . ($procurement_initiative !== '' ? "'$procurement_initiative'" : 'NULL') . ",
+        installation_type = " . ($installation_type !== '' ? "'$installation_type'" : 'NULL') . ",
+        uat = $uat,
+        conforme = $conforme,
         strategy = '$strategy',
-        status = '$status',
+        status = " . ($status !== '' ? "'$status'" : 'NULL') . ",
+        link_type = '$link_type',
+        replacement_form_file = " . ($replacement_form_file !== '' ? "'$replacement_form_file'" : 'NULL') . ",
+        conforme_file = " . ($conforme_file !== '' ? "'$conforme_file'" : 'NULL') . ",
+        uat_file = " . ($uat_file !== '' ? "'$uat_file'" : 'NULL') . ",
+        additional_uat = " . ($additional_uat !== '' ? "'$additional_uat'" : 'NULL') . ",
+        site_coordinator_name = '$name',
+        contact_details = '$contact_details',
         remarks = '$remarks'
         WHERE id = $id";
 
