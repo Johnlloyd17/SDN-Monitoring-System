@@ -142,6 +142,47 @@ if ($action === 'edit') {
     exit;
 }
 
+if ($action === 'mark_responded') {
+    $id = intval($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Invalid ID']);
+        exit;
+    }
+
+    $dateResponded = trim($_POST['date_responded'] ?? '');
+    if ($dateResponded === '') {
+        $dateResponded = date('Y-m-d');
+    }
+    $dt = DateTime::createFromFormat('Y-m-d', $dateResponded);
+    if (!$dt || $dt->format('Y-m-d') !== $dateResponded) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Invalid Date Responded']);
+        exit;
+    }
+
+    if (!$stmt = mysqli_prepare($con, "UPDATE letters_monitoring SET date_responded = ? WHERE id = ? AND date_responded IS NULL")) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Prepare failed: ' . mysqli_error($con)]);
+        exit;
+    }
+    mysqli_stmt_bind_param($stmt, 'si', $dateResponded, $id);
+    mysqli_stmt_execute($stmt);
+    $affected = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if ($affected > 0) {
+        $logMsg = 'Marked letter (ID ' . $id . ') as Responded';
+        $logMsgEsc = mysqli_real_escape_string($con, $logMsg);
+        @mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . mysqli_real_escape_string($con, $_SESSION['role']) . "', NOW(), '$logMsgEsc')");
+        ob_clean();
+        echo json_encode(['success' => true, 'message' => 'Letter marked as Responded']);
+    } else {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Letter is already responded to or does not exist']);
+    }
+    exit;
+}
+
 if ($action === 'delete') {
     $ids = isset($_POST['ids']) ? $_POST['ids'] : [];
     if (!is_array($ids)) $ids = [$ids];

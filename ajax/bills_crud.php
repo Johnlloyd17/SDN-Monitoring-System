@@ -130,6 +130,47 @@ if ($action === 'edit') {
     exit;
 }
 
+if ($action === 'mark_paid') {
+    $id = intval($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Invalid ID']);
+        exit;
+    }
+
+    $datePaid = trim($_POST['date_paid'] ?? '');
+    if ($datePaid === '') {
+        $datePaid = date('Y-m-d');
+    }
+    $dt = DateTime::createFromFormat('Y-m-d', $datePaid);
+    if (!$dt || $dt->format('Y-m-d') !== $datePaid) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Invalid Date Paid']);
+        exit;
+    }
+
+    if (!$stmt = mysqli_prepare($con, "UPDATE bills_monitoring SET status = 1, date_paid = ? WHERE id = ? AND status = 0")) {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Prepare failed: ' . mysqli_error($con)]);
+        exit;
+    }
+    mysqli_stmt_bind_param($stmt, 'si', $datePaid, $id);
+    mysqli_stmt_execute($stmt);
+    $affected = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if ($affected > 0) {
+        $logMsg = 'Marked bill (ID ' . $id . ') as Paid';
+        $logMsgEsc = mysqli_real_escape_string($con, $logMsg);
+        @mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . mysqli_real_escape_string($con, $_SESSION['role']) . "', NOW(), '$logMsgEsc')");
+        ob_clean();
+        echo json_encode(['success' => true, 'message' => 'Bill marked as Paid']);
+    } else {
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Bill is already Paid or does not exist']);
+    }
+    exit;
+}
+
 if ($action === 'delete') {
     $ids = isset($_POST['ids']) ? $_POST['ids'] : [];
     if (!is_array($ids)) $ids = [$ids];
