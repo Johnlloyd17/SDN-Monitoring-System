@@ -594,7 +594,7 @@
                 rows.forEach(function(row) {
                     var id = parseInt(row.id);
                     var amount = row.amount !== '' ? '&#8369; ' + escHtml(row.amount) : '';
-                    html += '<tr>';
+                    html += '<tr data-id="' + id + '">';
                     if (isAdmin) {
                         html += '<td><input type="checkbox" class="chk_delete" data-id="' + id + '"' + (selectedIds[id] ? ' checked' : '') + ' /></td>';
                     }
@@ -606,15 +606,18 @@
                         '<td>' + (row.location_office ? escHtml(row.location_office) : '<span class="text-muted">(No location)</span>') + '</td>' +
                         '<td>' + escHtml(row.due_date) + '</td>' +
                         '<td>' + escHtml(row.disconnection_date) + '</td>' +
-                        '<td>' + statusBadge(row.status) + '</td>' +
-                        '<td>' + escHtml(row.date_paid) + '</td>' +
+                        '<td class="col-status">' + statusBadge(row.status) + '</td>' +
+                        '<td class="col-date-paid">' + escHtml(row.date_paid) + '</td>' +
                         '<td>' + escHtml(row.remarks) + '</td>' +
                         '<td>' + linkOrDash(row.link_to_or) + '</td>';
                     if (isAdmin) {
                         html += '<td class="option-buttons">' +
                             '<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">' +
-                            '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>' +
-                            '</div></td>';
+                            '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>';
+                        if (String(row.status) === '0') {
+                            html += '<button class="btn btn-success btn-xs markPaidBtn" data-id="' + id + '" data-amount="' + escHtml(row.amount) + '" title="Mark as Paid"><i class="fa fa-check"></i></button>';
+                        }
+                        html += '</div></td>';
                     }
                     html += '</tr>';
                 });
@@ -878,6 +881,23 @@
                     $('#editModal').modal('show');
                 }).fail(function() {
                     showToast('Failed to load bill data.', 'danger');
+                });
+            });
+
+            // ========== MARK AS PAID (quick action, reuses notification confirm modal) ==========
+            $(document).on('click', '.markPaidBtn', function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var id = parseInt(btn.attr('data-id'), 10);
+                if (!id || !window.SDN_NOTIF || typeof window.SDN_NOTIF.openAction !== 'function') return;
+                window.SDN_NOTIF.openAction('bill', id, btn.attr('data-amount'), function(dateVal) {
+                    var $tr = $('#tableBody tr[data-id="' + id + '"]');
+                    if ($tr.length) {
+                        $tr.find('.col-status').html('<span class="label label-success">Paid</span>');
+                        $tr.find('.col-date-paid').text(dateVal || '');
+                        $tr.find('.markPaidBtn').remove();
+                    }
+                    refreshStats();
                 });
             });
 

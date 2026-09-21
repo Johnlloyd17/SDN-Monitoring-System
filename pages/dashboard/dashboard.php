@@ -337,7 +337,7 @@
                             $qUnpaid = mysqli_query($con, "SELECT COALESCE(SUM(amount), 0) AS unpaid_amount FROM bills_monitoring WHERE status = 0");
                             $rUnpaid = mysqli_fetch_assoc($qUnpaid);
 
-                            $qNeedsResponse = mysqli_query($con, "SELECT SUM(CASE WHEN for_response = 'Y' AND date_responded IS NULL THEN 1 ELSE 0 END) AS needs_response FROM letters_monitoring");
+                            $qNeedsResponse = mysqli_query($con, "SELECT SUM(CASE WHEN date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '') THEN 1 ELSE 0 END) AS needs_response FROM letters_monitoring");
                             $rNeedsResponse = mysqli_fetch_assoc($qNeedsResponse);
 
                             $qInventoryItems = mysqli_query($con, "SELECT COUNT(*) AS total_items FROM inventory WHERE project != ''");

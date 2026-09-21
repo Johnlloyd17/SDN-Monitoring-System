@@ -13,6 +13,7 @@
 
     var known = {};      // source_type:id already seen (baseline seeded on first poll)
     var firstPoll = true;
+    var currentList = []; // most recent server list, reused by the "View All" modal (no duplicate fetch)
 
     function keyOf(it) {
         return it.source_type + ':' + it.id;
@@ -24,12 +25,14 @@
         var countText = $('#notifCountText');
         var listEl = $('#notifList');
         var dismissAll = $('#notifDismissAll');
+        var viewAll = $('#notifViewAll');
         if (!listEl.length) return;
 
         var n = list.length;
         badge.text(n).css('display', n > 0 ? '' : 'none');
         if (countText.length) countText.text(n);
         if (dismissAll.length) dismissAll.toggle(n > 0);
+        if (viewAll.length) viewAll.toggle(n > 0);
 
         listEl.empty();
         if (n === 0) {
@@ -72,6 +75,28 @@
     window.SDN_NOTIF = window.SDN_NOTIF || {};
     window.SDN_NOTIF.renderList = renderInto;
 
+    /* ---- Render: "View All" modal (full list). Reuses currentList + bellItem()
+       so per-row View/Dismiss actions and in-place removals keep working. */
+    function renderAllList() {
+        var $list = $('#notifAllList');
+        if (!$list.length) return;
+        var $count = $('#notifAllCount');
+        var $dismissAllButton = $('#notifAllDismissAll');
+
+        var n = (currentList && currentList.length) || 0;
+        if ($count.length) $count.text(n).toggle(n > 0);
+        if ($dismissAllButton.length) $dismissAllButton.toggle(n > 0);
+
+        $list.empty();
+        if (n === 0) {
+            $list.append('<li class="text-center text-muted" style="padding:15px;">No pending alerts</li>');
+            return;
+        }
+        $.each(currentList, function (i, it) {
+            $list.append(bellItem(it));
+        });
+    }
+
     /* ---- Toast only genuinely-new alerts (never on the first/baseline poll) ---- */
     function checkNew(list) {
         var fresh = [];
@@ -103,9 +128,13 @@
         }).done(function (res) {
             var list = (res && res.items) || [];
             var fresh = checkNew(list);
+            currentList = list;
             renderBell(list);
             if (typeof cfg.onList === 'function') {
                 cfg.onList(list);
+            }
+            if ($('#notifAllModal').hasClass('in')) {
+                renderAllList();
             }
             $.each(fresh, function (i, it) {
                 notify(it);
@@ -244,11 +273,6 @@
             field('Link to OR', linkify(row.link_to_or, 'Open OR')),
             field('Remarks', multilineHtml(row.remarks))
         ]);
-        if (row.status === 0 || row.status === '0') {
-            html += '<div class="notif-view-actions">' +
-                '<button type="button" class="btn btn-success btn-sm" data-notif-action="bill" data-notif-id="' + escHtml(row.id) + '" data-notif-amount="' + escHtml(row.amount) + '">' +
-                '<i class="fa fa-check"></i> Mark as Paid</button></div>';
-        }
         return html;
     }
 
@@ -271,14 +295,36 @@
             field('Remarks', multilineHtml(row.remarks)),
             field('Post Activity Report', linkify(row.post_activity_report, 'Open activity report'))
         ]);
-        var responded = row && row.date_responded;
-        var needsResp = fr === 'Y' && (responded === null || responded === undefined || responded === '');
-        if (needsResp) {
-            html += '<div class="notif-view-actions">' +
-                '<button type="button" class="btn btn-success btn-sm" data-notif-action="letter" data-notif-id="' + escHtml(row.id) + '">' +
-                '<i class="fa fa-check"></i> Mark as Responded</button></div>';
-        }
         return html;
+    }
+
+    /* Single action button rendered into the modal footer; the top-right X is
+       the only way to dismiss the dialog. Returns '' when no action applies. */
+    function resolveActionButton(sourceType, row) {
+        if (!row) return '';
+        if (sourceType === 'bill') {
+            if (row.status === 0 || row.status === '0') {
+                return '<button type="button" class="btn btn-success btn-sm" data-notif-action="bill" data-notif-id="' + escHtml(row.id) + '" data-notif-amount="' + escHtml(row.amount) + '">' +
+                    '<i class="fa fa-check"></i> Mark as Paid</button>';
+            }
+            return '';
+        }
+        if (sourceType === 'letter') {
+            var responded = row && row.date_responded;
+            var needsResp = row && row.for_response === 'Y' &&
+                (responded === null || responded === undefined || responded === '');
+            if (needsResp) {
+                return '<button type="button" class="btn btn-success btn-sm" data-notif-action="letter" data-notif-id="' + escHtml(row.id) + '">' +
+                    '<i class="fa fa-check"></i> Mark as Responded</button>';
+            }
+            return '';
+        }
+        return '';
+    }
+
+    function renderViewFooter(sourceType, row) {
+        var $f = $('#notifViewFooter');
+        if ($f.length) $f.html(resolveActionButton(sourceType, row));
     }
 
     function viewDetail(sourceType, sourceId) {
@@ -298,17 +344,21 @@
             if (!row || row.error) {
                 var msg = (row && row.error) ? String(row.error) : 'Unable to load details.';
                 $body.html('<p class="text-danger text-center" style="margin:0;">' + escHtml(msg) + '</p>');
+                renderViewFooter(null, null);
                 return;
             }
             viewCache = { sourceType: sourceType, row: row };
             $body.html(sourceType === 'bill' ? billDetailHtml(row) : letterDetailHtml(row));
+            renderViewFooter(sourceType, row);
         }).fail(function () {
             $body.html('<p class="text-danger text-center" style="margin:0;">Failed to load details.</p>');
+            renderViewFooter(null, null);
         });
     }
 
     var viewCache = null;      // last-rendered { sourceType, row } so quick actions can update in place
     var actionTarget = null;   // { sourceType, id, amount } for the confirm dialog
+    var pendingActionSuccess = null; // optional page callback run after a successful confirm
 
     function todayStr() {
         var d = new Date();
@@ -332,6 +382,16 @@
         $('#notifActionDate').val(todayStr());
         $('#notifActionConfirmModal').modal('show');
     }
+
+    /* Public entry point for pages outside this closure (e.g. the Bills /
+       Letters monitoring tables) to reuse the same confirm modal and endpoints. */
+    window.SDN_NOTIF = window.SDN_NOTIF || {};
+    window.SDN_NOTIF.openAction = function (sourceType, id, amount, onSuccess) {
+        if ((sourceType === 'bill' || sourceType === 'letter') && parseInt(id, 10) > 0) {
+            pendingActionSuccess = (typeof onSuccess === 'function') ? onSuccess : null;
+            openActionConfirm(sourceType, parseInt(id, 10), amount);
+        }
+    };
 
     function updateMoneyStat(selector, delta) {
         var $el = $(selector);
@@ -445,6 +505,7 @@
                             if ($body.length) {
                                 $body.html(target.sourceType === 'bill' ? billDetailHtml(viewCache.row) : letterDetailHtml(viewCache.row));
                             }
+                            renderViewFooter(target.sourceType, viewCache.row);
                         }
                         if (target.sourceType === 'bill') {
                             var amt = parseFloat(target.amount);
@@ -459,6 +520,9 @@
                         if (typeof showToast === 'function') {
                             showToast(target.sourceType === 'bill' ? 'Bill marked as Paid.' : 'Letter marked as Responded.', 'success');
                         }
+                        if (typeof pendingActionSuccess === 'function') {
+                            pendingActionSuccess(dateVal);
+                        }
                         poll();
                     } else {
                         if (typeof showToast === 'function') {
@@ -471,15 +535,29 @@
                 })
                 .always(function () {
                     actionTarget = null;
+                    pendingActionSuccess = null;
                     $btn.prop('disabled', false);
                 });
         });
 
         $(document).on('hidden.bs.modal', '#notifViewModal', function () {
             $('#notifViewBody').empty();
+            $('#notifViewFooter').empty();
         });
 
         $(document).on('click', '#notifDismissAll', function (e) {
+            e.preventDefault();
+            openDismiss('all');
+        });
+
+        $(document).on('click', '#notifViewAll', function (e) {
+            e.preventDefault();
+            $(this).closest('.dropdown').removeClass('open');
+            renderAllList();
+            if (typeof $.fn.modal === 'function') $('#notifAllModal').modal('show');
+        });
+
+        $(document).on('click', '#notifAllDismissAll', function (e) {
             e.preventDefault();
             openDismiss('all');
         });

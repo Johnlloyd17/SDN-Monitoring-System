@@ -35,6 +35,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +47,11 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             --paper: #ffffff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: "Georgia", "Times New Roman", serif;
@@ -60,7 +65,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             margin: 0 auto;
             background: var(--paper);
             padding: 48px 56px 60px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
         }
 
         .header {
@@ -225,6 +230,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 background: #fff;
                 padding: 0;
             }
+
             .sheet {
                 box-shadow: none;
                 padding: 20px 40px;
@@ -233,103 +239,100 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         }
     </style>
 </head>
+
 <body>
 
-<div class="sheet">
+    <div class="sheet">
 
-    <div class="header">
-        <img class="logo" src="../../img/logofinal.png" alt="DICT Logo">
-        <div class="header-text">
-            <div class="republic">REPUBLIC OF THE PHILIPPINES</div>
-            <div class="dept">Department of Information and<br>Communications Technology</div>
+        <div class="header">
+            <img class="logo" src="../../img/logofinal.png" alt="DICT Logo">
+            <div class="header-text">
+                <div class="republic">REPUBLIC OF THE PHILIPPINES</div>
+                <div class="dept">Department of Information and<br>Communications Technology</div>
+            </div>
         </div>
-    </div>
 
-    <div class="form-title">ACKNOWLEDGEMENT OF RECEIPT</div>
-    <div class="form-subtitle">I hereby acknowledge receipt of the following item(s):</div>
+        <div class="form-title">ACKNOWLEDGEMENT OF RECEIPT</div>
+        <div class="form-subtitle">I hereby acknowledge receipt of the following item(s):</div>
 
-    <div class="slip-info">
-        <span>Reference Pass Slip No.: <strong><?php echo htmlspecialchars($row['pass_slip_no']); ?></strong></span>
-        <span>Date: <strong><?php echo date('F d, Y', strtotime($row['pullout_date'])); ?></strong></span>
-    </div>
-
-    <table class="items">
-        <colgroup>
-            <col style="width: 5%;">
-            <col style="width: 30%;">
-            <col style="width: 8%;">
-            <col style="width: 10%;">
-            <col style="width: 22%;">
-            <col style="width: 25%;">
-        </colgroup>
-        <thead>
-            <tr>
-                <th class="center">NO.</th>
-                <th>ITEM DESCRIPTION</th>
-                <th class="center">QTY.</th>
-                <th class="center">UNIT</th>
-                <th>SERIAL NO.</th>
-                <th>CONDITION ON ISSUE</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            $itemNum = 1;
-            foreach ($allItems as $item):
-            ?>
-            <tr>
-                <td class="center"><?php echo $itemNum++; ?></td>
-                <td class="desc"><?php echo htmlspecialchars($item['item_description']); ?></td>
-                <td class="center"><?php echo $item['qty']; ?></td>
-                <td class="center"><?php echo $item['unit']; ?></td>
-                <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?></td>
-                <td><?php echo htmlspecialchars($item['condition_out'] ?? ''); ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <div class="purpose">
-        <strong>PURPOSE:</strong> <span class="purpose-text"><?php echo htmlspecialchars($row['purpose']); ?></span>
-    </div>
-
-    <div class="declaration">
-        <strong>DECLARATION:</strong> I acknowledge that I have received the above-mentioned item(s) in the condition stated. 
-        I accept full responsibility for the safekeeping and proper use of these items and undertake to return them 
-        in the same condition upon completion of the stated purpose, or as otherwise directed by the authorizing office.
-    </div>
-
-    <div class="sig-group">
-        <div class="sig-block">
-            <div class="sig-label">Received by (Borrower):</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['requested_by_out']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
+        <div class="slip-info">
+            <span>Reference Pass Slip No.: <strong><?php echo htmlspecialchars($row['pass_slip_no']); ?></strong></span>
+            <span>Date: <strong><?php echo date('F d, Y', strtotime($row['pullout_date'])); ?></strong></span>
         </div>
-        <div class="sig-block">
-            <div class="sig-label">Released by:</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['inspected_by_out']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
-        </div>
-    </div>
 
-    <div class="sig-group">
-        <div class="sig-block">
-            <div class="sig-label">Noted by:</div>
-            <div class="sig-name"><?php echo htmlspecialchars($row['approved_by_out']); ?></div>
-            <div class="sig-line"></div>
-            <div class="sig-caption">Signature Over Printed Name</div>
-            <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
-        </div>
-        <div class="sig-block">
-            &nbsp;
-        </div>
-    </div>
+        <table class="items">
+            <colgroup>
+                <col style="width: 5%;">
+                <col style="width: 30%;">
+                <col style="width: 8%;">
+                <col style="width: 10%;">
+                <col style="width: 22%;">
+                <col style="width: 25%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="center">NO.</th>
+                    <th>ITEM DESCRIPTION</th>
+                    <th class="center">QTY.</th>
+                    <th class="center">UNIT</th>
+                    <th>SERIAL NO.</th>
+                    <th>CONDITION ON ISSUE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $itemNum = 1;
+                foreach ($allItems as $item):
+                    ?>
+                    <tr>
+                        <td class="center"><?php echo $itemNum++; ?></td>
+                        <td class="desc"><?php echo htmlspecialchars($item['item_description']); ?></td>
+                        <td class="center"><?php echo $item['qty']; ?></td>
+                        <td class="center"><?php echo $item['unit']; ?></td>
+                        <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($item['condition_out'] ?? ''); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
 
-</div>
+        <div class="purpose">
+            <strong>PURPOSE:</strong> <span class="purpose-text"><?php echo htmlspecialchars($row['purpose']); ?></span>
+        </div>
+
+
+        <div class="sig-group">
+            <div class="sig-block">
+                <div class="sig-label">Received by:</div>
+                <div class="sig-name"><?php echo htmlspecialchars($row['requested_by_out']); ?></div>
+                <div class="sig-line"></div>
+                <div class="sig-caption">Signature Over Printed Name</div>
+                <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">Released by:</div>
+                <div class="sig-name"><?php echo htmlspecialchars($row['inspected_by_out']); ?></div>
+                <div class="sig-line"></div>
+                <div class="sig-caption">Signature Over Printed Name</div>
+                <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
+            </div>
+        </div>
+
+        <div class="sig-group">
+            <div class="sig-block">
+                <div class="sig-label">Noted by:</div>
+                <div class="sig-name"><?php echo htmlspecialchars($row['approved_by_out']); ?></div>
+                <div class="sig-line"></div>
+                <div class="sig-caption">Signature Over Printed Name</div>
+                <div class="date-line" style="margin-top: 16px;">Date: ___________________</div>
+            </div>
+            <div class="sig-block">
+                &nbsp;
+            </div>
+        </div>
+
+    </div>
 
 </body>
+
 </html>

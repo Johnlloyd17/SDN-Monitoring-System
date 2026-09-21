@@ -145,6 +145,10 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             line-height: 1.9;
         }
 
+        table.items tr.item-stretch {
+            height: 100%;
+        }
+
         table.items td.center,
         table.items th.center {
             text-align: center;
@@ -264,10 +268,19 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 background: #fff;
                 padding: 0;
             }
+            @page {
+                margin: 12mm;
+            }
             .sheet {
                 box-shadow: none;
                 padding: 20px 40px;
                 max-width: none;
+                min-height: calc(100vh - 24mm);
+                display: flex;
+                flex-direction: column;
+            }
+            table.items {
+                flex: 1;
             }
         }
     </style>
@@ -315,9 +328,12 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         <tbody>
             <?php
             $itemNum = 1;
+            $totalItems = count($allItems);
+            $itemIndex = 0;
             foreach ($allItems as $item):
+                $isLastItem = (++$itemIndex === $totalItems);
             ?>
-            <tr>
+            <tr class="<?php echo $isLastItem ? 'item-stretch' : ''; ?>">
                 <td class="center"><?php echo $itemNum++; ?></td>
                 <td class="desc"><?php echo htmlspecialchars($item['item_description']); ?></td>
                 <td class="center"><?php echo $item['qty']; ?></td>

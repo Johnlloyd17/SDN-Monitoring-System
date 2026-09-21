@@ -183,10 +183,7 @@ if (!isset($_SESSION['role'])) {
                                 <!-- Toolbar: Add + Delete + Row Filter (left) | Search + Import + Export (right) -->
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                        <?php if ($_SESSION['role'] !== 'staff') { ?>
-                                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus"></i> Add Record</button>
-                                            <button class="btn btn-danger btn-sm" id="deleteSelectedBtn" disabled><i class="fa fa-trash"></i> Delete Selected</button>
-                                        <?php } ?>
+                                      
                                         <label style="margin:0; font-weight:normal;">Show </label>
                                         <select id="perPageSelect" class="form-control input-sm" style="display:inline-block; width:auto;">
                                             <option value="5" selected>5</option>
@@ -198,7 +195,11 @@ if (!isset($_SESSION['role'])) {
                                             <option value="150">150</option>
                                             <option value="200">200</option>
                                         </select>
-                                        <label style="margin:0; font-weight:normal;"> entries</label>
+                                        <label style="margin:0; font-weight:normal;"> records per page</label>
+                                          <?php if ($_SESSION['role'] !== 'staff') { ?>
+                                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus"></i> Add Record</button>
+                                            <button class="btn btn-danger btn-sm" id="deleteSelectedBtn" disabled><i class="fa fa-trash"></i> Delete Selected</button>
+                                        <?php } ?>
                                     </div>
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                         <div class="input-group" style="width:300px;">

@@ -6,7 +6,7 @@ if (!isset($_SESSION['role'])) {
     exit;
 }
 
-include '../connection.php';
+include '../pages/connection.php';
 header('Content-Type: application/json');
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';

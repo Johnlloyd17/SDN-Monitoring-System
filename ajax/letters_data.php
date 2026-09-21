@@ -20,7 +20,7 @@ if (isset($_GET['stats']) && $_GET['stats'] === '1') {
         'request' => 0, 'provision' => 0
     );
     $res = mysqli_query($con, "SELECT
-        SUM(CASE WHEN for_response = 'Y' AND date_responded IS NULL THEN 1 ELSE 0 END) AS needs_response,
+        SUM(CASE WHEN date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '') THEN 1 ELSE 0 END) AS needs_response,
         SUM(CASE WHEN date_responded IS NOT NULL THEN 1 ELSE 0 END) AS responded,
         SUM(CASE WHEN for_response = 'Y' THEN 1 ELSE 0 END) AS resp_yes,
         SUM(CASE WHEN for_response = 'N' THEN 1 ELSE 0 END) AS resp_no,
@@ -114,7 +114,7 @@ $card = isset($_GET['card']) ? trim($_GET['card']) : '';
 $knownCards = ['needs_response','responded','request','provision','not_specified'];
 if ($card !== '' && in_array($card, $knownCards)) {
     if ($card === 'needs_response') {
-        $where[] = "(for_response = 'Y' AND date_responded IS NULL)";
+        $where[] = "(date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = ''))";
     } elseif ($card === 'responded') {
         $where[] = "date_responded IS NOT NULL";
     } elseif ($card === 'request') {

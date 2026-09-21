@@ -203,7 +203,7 @@
                 );
                 $letterTotal = 0;
                 $cardRes = mysqli_query($con, "SELECT
-                    SUM(CASE WHEN for_response = 'Y' AND date_responded IS NULL THEN 1 ELSE 0 END) AS needs_response,
+                    SUM(CASE WHEN date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '') THEN 1 ELSE 0 END) AS needs_response,
                     SUM(CASE WHEN date_responded IS NOT NULL THEN 1 ELSE 0 END) AS responded,
                     SUM(CASE WHEN for_response = 'Y' THEN 1 ELSE 0 END) AS resp_yes,
                     SUM(CASE WHEN for_response = 'N' THEN 1 ELSE 0 END) AS resp_no,
@@ -261,7 +261,7 @@
                                 </div>
                                 <?php
                                 $letterCardMeta = array(
-                                    'needs_response' => array('bg-yellow', 'fa fa-exclamation-circle', 'Needs Response', 'For Response is Yes and no response date yet'),
+                                    'needs_response' => array('bg-yellow', 'fa fa-exclamation-circle', 'Needs Response', 'No response date recorded (For Response not No)'),
                                     'responded'      => array('bg-green',  'fa fa-check-circle-o',      'Responded',      'Has a response date recorded'),
                                     'not_specified'  => array('bg-gray',   'fa fa-minus-circle',        'Not Specified',  'For Response not specified'),
                                     'request'        => array('bg-blue',   'fa fa-paper-plane',         'Request',        'FW4A marked as Request'),
@@ -549,7 +549,7 @@
                 var html = '';
                 rows.forEach(function(row) {
                     var id = parseInt(row.id);
-                    html += '<tr>';
+                    html += '<tr data-id="' + id + '">';
                     if (isAdmin) {
                         html += '<td><input type="checkbox" class="chk_delete" data-id="' + id + '"' + (selectedIds[id] ? ' checked' : '') + ' /></td>';
                     }
@@ -560,17 +560,23 @@
                         '<td>' + escHtml(row.fw4a) + '</td>' +
                         '<td>' + linkOrDash(row.link_incoming) + '</td>' +
                         '<td>' + (row.for_response === 'Y' ? '<span class="label label-warning">Yes</span>' : (row.for_response === 'N' ? '<span class="label label-default">No</span>' : '<span class="text-muted">&mdash;</span>')) + '</td>' +
-                        '<td>' + escHtml(row.date_responded) + '</td>' +
+                        '<td class="col-date-responded">' + escHtml(row.date_responded) + '</td>' +
                         '<td>' + linkOrDash(row.link_outgoing) + '</td>' +
                         '<td>' + escHtml(row.responsible_person) + '</td>' +
                         '<td>' + escHtml(row.who_attended) + '</td>' +
                         '<td>' + escHtml(row.remarks) + '</td>' +
                         '<td>' + linkOrDash(row.post_activity_report) + '</td>';
                     if (isAdmin) {
+                        var letterResponded = row.date_responded;
+                        var needsResp = row.for_response !== 'N' &&
+                            (letterResponded === null || letterResponded === undefined || letterResponded === '');
                         html += '<td class="option-buttons">' +
                             '<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">' +
-                            '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>' +
-                            '</div></td>';
+                            '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>';
+                        if (needsResp) {
+                            html += '<button class="btn btn-success btn-xs markRespondedBtn" data-id="' + id + '" title="Mark as Responded"><i class="fa fa-check"></i></button>';
+                        }
+                        html += '</div></td>';
                     }
                     html += '</tr>';
                 });
@@ -826,6 +832,21 @@
                     $('#editModal').modal('show');
                 }).fail(function() {
                     showToast('Failed to load letter data.', 'danger');
+                });
+            });
+
+            // ========== MARK AS RESPONDED (quick action, reuses notification confirm modal) ==========
+            $(document).on('click', '.markRespondedBtn', function(e) {
+                e.preventDefault();
+                var id = parseInt($(this).attr('data-id'), 10);
+                if (!id || !window.SDN_NOTIF || typeof window.SDN_NOTIF.openAction !== 'function') return;
+                window.SDN_NOTIF.openAction('letter', id, null, function(dateVal) {
+                    var $tr = $('#tableBody tr[data-id="' + id + '"]');
+                    if ($tr.length) {
+                        $tr.find('.col-date-responded').text(dateVal || '');
+                        $tr.find('.markRespondedBtn').remove();
+                    }
+                    refreshStats();
                 });
             });
 

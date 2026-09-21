@@ -928,7 +928,7 @@ include "../footer.php"; ?>
                 loadData(1);
                 loadFilters();
                 loadStats();
-                loadMapData();
+                syncMapWithTable();
             });
 
             // Per-page selector
@@ -944,16 +944,19 @@ include "../footer.php"; ?>
                 searchTimeout = setTimeout(function() {
                     clearSelection();
                     loadData(1);
+                    syncMapWithTable();
                 }, 400);
             });
             $('#searchBtn').on('click', function() {
                 clearSelection();
                 loadData(1);
+                syncMapWithTable();
             });
             $('#clearSearchBtn').on('click', function() {
                 document.getElementById('searchInput').value = '';
                 clearSelection();
                 loadData(1);
+                syncMapWithTable();
             });
 
             // Pagination clicks
@@ -1344,6 +1347,7 @@ include "../footer.php"; ?>
             var mapMode = 'markers';
             var mapLegend = null;
             var currentMapPoints = [];
+            var currentFilteredIds = null;
             var searchHighlightMarker = null;
             var searchDebounceTimer = null;
             var activeStatusFilter = 'All';
@@ -1489,6 +1493,7 @@ include "../footer.php"; ?>
                 for (var i = 0; i < currentMapPoints.length && matches.length < 10; i++) {
                     var p = currentMapPoints[i];
                     if (activeStatusFilter !== 'All' && p.status !== activeStatusFilter) continue;
+                    if (currentFilteredIds && !currentFilteredIds[p.id]) continue;
                     var haystack = [
                         p.site_locations || '', p.locality || '', p.barangay || '',
                         p.site_code || '', p.nationwide_id || '', p.strategy || '', p.status || ''
@@ -1655,12 +1660,62 @@ include "../footer.php"; ?>
                 select.value = activeStatusFilter;
             }
 
+            function getVisiblePoints() {
+                var vis = [];
+                currentMapPoints.forEach(function(p) {
+                    if (activeStatusFilter !== 'All' && p.status !== activeStatusFilter) return;
+                    if (currentFilteredIds && !currentFilteredIds[p.id]) return;
+                    vis.push(p);
+                });
+                return vis;
+            }
+
+            function syncIdSetsEqual(a, b) {
+                if (!a || !b || a === null || b === null) return false;
+                var ak = Object.keys(a);
+                var bk = Object.keys(b);
+                if (ak.length !== bk.length) return false;
+                for (var i = 0; i < ak.length; i++) {
+                    if (!b[ak[i]]) return false;
+                }
+                return true;
+            }
+
+            function syncMapWithTable() {
+                if (!fw4aMap) return;
+                var f = getFilters();
+                var params = 'get_ids=1' +
+                    '&search=' + encodeURIComponent(f.search) +
+                    '&strategy=' + encodeURIComponent(f.strategy) +
+                    '&type=' + encodeURIComponent(f.type) +
+                    '&locality=' + encodeURIComponent(f.locality) +
+                    '&barangay=' + encodeURIComponent(f.barangay);
+
+                $.ajax({
+                    url: basePath + 'fw4a_data.php?' + params,
+                    dataType: 'json',
+                    cache: false,
+                    success: function(res) {
+                        var idSet = {};
+                        (res.ids || []).forEach(function(id) {
+                            idSet[id] = true;
+                        });
+                        if (syncIdSetsEqual(currentFilteredIds, idSet)) return;
+                        currentFilteredIds = idSet;
+                        applyStatusFilter();
+                    },
+                    error: function() {
+                        console.error('Failed to sync map with table filters');
+                    }
+                });
+            }
+
             function applyStatusFilter() {
                 mapMarkersLayer.clearLayers();
 
                 var filteredHeat = [];
                 var filteredMarkers = [];
-                currentMapPoints.forEach(function(p) {
+                getVisiblePoints().forEach(function(p) {
                     if (activeStatusFilter !== 'All' && p.status !== activeStatusFilter) return;
 
                     var statusColor = getStatusColor(p.status);
@@ -1710,20 +1765,25 @@ include "../footer.php"; ?>
                 }
             }
 
+            function fitMapToVisible() {
+                var vis = getVisiblePoints();
+                if (vis.length === 0) return;
+                var group = new L.featureGroup(vis.map(function(p) {
+                    return L.circleMarker([p.lat, p.lng], { radius: 7 });
+                }));
+                fw4aMap.fitBounds(group.getBounds().pad(0.1));
+            }
+
             function loadMapData() {
                 if (!fw4aMap) return;
-                var f = getFilters();
-                var params = 'strategy=' + encodeURIComponent(f.strategy) +
-                    '&type=' + encodeURIComponent(f.type) +
-                    '&locality=' + encodeURIComponent(f.locality) +
-                    '&barangay=' + encodeURIComponent(f.barangay);
 
                 $.ajax({
-                    url: basePath + 'fw4a_map_data.php?' + params,
+                    url: basePath + 'fw4a_map_data.php',
                     dataType: 'json',
                     cache: false,
                     success: function(res) {
                         renderMapPoints(res.points || []);
+                        syncMapWithTable();
                     },
                     error: function() {
                         console.error('Failed to load map data');
@@ -1733,84 +1793,18 @@ include "../footer.php"; ?>
 
             function renderMapPoints(points) {
                 currentMapPoints = points || [];
+                currentFilteredIds = null;
                 fw4aMap.removeLayer(mapMarkersLayer);
                 fw4aMap.removeLayer(mapHeatLayer);
                 mapMarkersLayer.clearLayers();
 
-                if (points.length === 0) return;
-
-                var heatData = [];
-                var markers = [];
-
-                points.forEach(function(p) {
-                    var statusColor = getStatusColor(p.status);
-                    var marker = L.circleMarker([p.lat, p.lng], {
-                        radius: 7,
-                        fillColor: statusColor,
-                        color: '#fff',
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.9
-                    });
-                    marker._fw4aStatus = p.status;
-                    marker._fw4aPointId = p.id;
-
-                    var popupContent =
-                        '<div style="font-size:13px; line-height:1.6;">' +
-                        '<b style="color:darkblue; font-size:14px;">' + escHtml(p.site_locations || 'N/A') + '</b><br>' +
-                        '<b>Locality:</b> ' + escHtml(p.locality) + '<br>' +
-                        '<b>Barangay:</b> ' + escHtml(p.barangay) + '<br>' +
-                        '<b>District:</b> ' + escHtml(p.district || 'N/A') + '<br>' +
-                        '<b>Code:</b> ' + escHtml(p.site_code || 'N/A') + '<br>' +
-                        '<b>Type:</b> ' + escHtml(p.site_type) + '<br>' +
-                        '<b>Strategy:</b> ' + escHtml(p.strategy) + '<br>' +
-                        '<b>Status:</b> <span style="color:' + statusColor + '; font-weight:bold;">' + escHtml(p.status) + '</span><br>' +
-                        '<b>Coordinates:</b> ' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) +
-                        (p.remarks ? '<br><b>Remarks:</b> ' + escHtml(p.remarks) : '') +
-                        '</div>';
-
-                    marker.bindPopup(popupContent, {
-                        maxWidth: 300,
-                        className: 'fw4a-popup'
-                    });
-                    mapMarkersLayer.addLayer(marker);
-                    markers.push(marker);
-
-                    heatData.push([p.lat, p.lng, 1]);
-                });
-
-                mapHeatLayer = L.heatLayer(heatData, {
-                    radius: 25,
-                    blur: 15,
-                    maxZoom: 17,
-                    gradient: {
-                        0.2: 'blue',
-                        0.4: 'cyan',
-                        0.6: 'lime',
-                        0.8: 'yellow',
-                        1.0: 'red'
-                    }
-                });
-
-                if (mapMode === 'heatmap') {
-                    mapHeatLayer.addTo(fw4aMap);
-                } else {
-                    mapMarkersLayer.addTo(fw4aMap);
-                }
-
-                if (markers.length > 0) {
-                    var group = new L.featureGroup(markers);
-                    fw4aMap.fitBounds(group.getBounds().pad(0.1));
-                }
+                buildStatusFilterOptions();
+                applyStatusFilter();
+                fitMapToVisible();
 
                 setTimeout(function() {
                     fw4aMap.invalidateSize();
                 }, 300);
-
-                buildStatusFilterOptions();
-                if (activeStatusFilter !== 'All') {
-                    applyStatusFilter();
-                }
             }
 
             $('#mapToggleView').on('click', function() {
@@ -2290,6 +2284,8 @@ include "../footer.php"; ?>
             border: none !important;
             box-shadow: none !important;
             margin-top: 10px !important;
+            position: relative;
+            z-index: 1100;
         }
 
         .fw4a-search-wrapper {
@@ -2325,7 +2321,7 @@ include "../footer.php"; ?>
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
             max-height: 360px;
             overflow-y: auto;
-            z-index: 10000;
+            z-index: 10001;
             font-size: 13px;
         }
 

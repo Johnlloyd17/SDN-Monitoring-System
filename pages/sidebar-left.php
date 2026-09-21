@@ -24,7 +24,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-shield-alt"></i> <span>Cybersecurity</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-shield-alt"></i> <span>Cybersecurity</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
     <li><a href="../activity/cybersecurity.php"><i class="fa fa-file-alt"></i> Activities Conducted</a></li>
@@ -37,7 +37,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../bpls_data/bpls_monitoring.php"><i class="fa fa-chart-line"></i> Monitoring Status</a></li>
@@ -47,7 +47,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-wifi"></i> <span>FreeWifi4All</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-wifi"></i> <span>FreeWifi4All</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../fw4a_data/fw4a_data.php"><i class="fa fa-chart-line"></i> Monitoring</a></li>
@@ -60,7 +60,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-clipboard-list"></i> <span>GECS</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-clipboard-list"></i> <span>GECS</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/gecs.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -68,7 +68,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-network-wired"></i> <span>GovNet</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-network-wired"></i> <span>GovNet</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <!-- Add relevant links here -->
@@ -76,7 +76,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-database"></i> <span>IIDB</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-database"></i> <span>IIDB</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/iidb.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -84,7 +84,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-desktop"></i> <span>ILCDB</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-desktop"></i> <span>ILCDB</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/ilcdb.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -95,7 +95,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
    <li class="treeview">
             <a href="#">
-                <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
@@ -143,7 +143,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-shield-alt"></i> <span>Cybersecurity</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-shield-alt"></i> <span>Cybersecurity</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
     <li><a href="../activity/cybersecurity.php"><i class="fa fa-file-alt"></i> Activities Conducted</a></li>
@@ -156,7 +156,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-cogs"></i> <span>eLGU BPLS</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../bpls_data/bpls_monitoring.php"><i class="fa fa-chart-line"></i> Monitoring Status</a></li>
@@ -166,7 +166,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-wifi"></i> <span>FreeWifi4All</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-wifi"></i> <span>FreeWifi4All</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../fw4a_data/fw4a_data.php"><i class="fa fa-chart-line"></i> Monitoring</a></li>
@@ -179,7 +179,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-clipboard-list"></i> <span>GECS</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-clipboard-list"></i> <span>GECS</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/gecs.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -187,7 +187,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-network-wired"></i> <span>GovNet</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-network-wired"></i> <span>GovNet</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <!-- Add relevant links here -->
@@ -195,7 +195,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-database"></i> <span>IIDB</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-database"></i> <span>IIDB</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/iidb.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -203,7 +203,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
         <li class="treeview">
             <a href="#">
-                <i class="fa fa-desktop"></i> <span>ILCDB</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-desktop"></i> <span>ILCDB</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../activity/ilcdb.php"><i class="fa fa-clipboard-list"></i> Activities Conducted</a></li>
@@ -214,7 +214,7 @@ if ($_SESSION['role'] == "Administrator") {
         </li>
    <li class="treeview">
             <a href="#">
-                <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-down pull-right"></i>
+                <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>

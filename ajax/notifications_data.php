@@ -52,12 +52,12 @@ if ($action === 'dismiss') {
 if ($action === 'dismiss_all') {
     $combos = [];
 
-    $bq = mysqli_query($con, "SELECT id FROM bills_monitoring WHERE status = 0 AND due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)");
+    $bq = mysqli_query($con, "SELECT id FROM bills_monitoring WHERE status = 0");
     if ($bq) {
         while ($br = mysqli_fetch_assoc($bq)) $combos[] = ['bill', (int)$br['id']];
     }
 
-    $lq = mysqli_query($con, "SELECT id FROM letters_monitoring WHERE for_response = 'Y' AND date_responded IS NULL");
+    $lq = mysqli_query($con, "SELECT id FROM letters_monitoring WHERE date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '')");
     if ($lq) {
         while ($lr = mysqli_fetch_assoc($lq)) $combos[] = ['letter', (int)$lr['id']];
     }
@@ -95,27 +95,37 @@ if ($dq) {
 $items = [];
 $today = strtotime(date('Y-m-d'));
 
-$bq = mysqli_query($con, "SELECT id, type_of_billing, amount, due_date FROM bills_monitoring WHERE status = 0 AND due_date IS NOT NULL AND due_date <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)");
+$bq = mysqli_query($con, "SELECT id, type_of_billing, amount, due_date FROM bills_monitoring WHERE status = 0");
 if ($bq) {
     while ($br = mysqli_fetch_assoc($bq)) {
         $key = 'bill:' . $br['id'];
         if (isset($dismissed[$key])) continue;
 
-        $dueTs     = strtotime($br['due_date']);
-        $days      = (int)ceil(($dueTs - $today) / 86400);
-        $overdue   = $days < 0;
         $type      = $br['type_of_billing'];
         $amountStr = $br['amount'] !== null && $br['amount'] !== '' ? ' ₱' . number_format((float)$br['amount'], 2) : '';
-        $dueFmt    = date('M j, Y', $dueTs);
+        $due       = trim((string)$br['due_date']);
 
-        if ($overdue) {
-            $label = $type . $amountStr . ' — overdue since ' . $dueFmt;
-        } elseif ($days === 0) {
-            $label = $type . $amountStr . ' — due today';
-        } elseif ($days === 1) {
-            $label = $type . $amountStr . ' — due tomorrow';
+        if ($due === '') {
+            $label    = $type . $amountStr . ' — no due date set';
+            $days     = null;
+            $overdue  = false;
+            $dueFmt   = '';
+            $dueTs    = 0;
         } else {
-            $label = $type . $amountStr . ' — due in ' . $days . ' days';
+            $dueTs    = strtotime($due);
+            $days     = (int)ceil(($dueTs - $today) / 86400);
+            $overdue  = $days < 0;
+            $dueFmt   = date('M j, Y', $dueTs);
+
+            if ($overdue) {
+                $label = $type . $amountStr . ' — overdue since ' . $dueFmt;
+            } elseif ($days === 0) {
+                $label = $type . $amountStr . ' — due today';
+            } elseif ($days === 1) {
+                $label = $type . $amountStr . ' — due tomorrow';
+            } else {
+                $label = $type . $amountStr . ' — due in ' . $days . ' days';
+            }
         }
 
         $items[] = [
@@ -124,7 +134,7 @@ if ($bq) {
             'label'       => $label,
             'subject'     => $type,
             'amount'      => $br['amount'] !== null ? (float)$br['amount'] : null,
-            'due_date'    => $br['due_date'],
+            'due_date'    => $due !== '' ? $due : null,
             'days'        => $days,
             'overdue'     => $overdue,
             'link'        => 'pages/bills_monitoring/bills_monitoring.php'
@@ -132,19 +142,23 @@ if ($bq) {
     }
 }
 
-$lq = mysqli_query($con, "SELECT id, subject FROM letters_monitoring WHERE for_response = 'Y' AND date_responded IS NULL");
+$lq = mysqli_query($con, "SELECT id, type, subject, for_response FROM letters_monitoring WHERE date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '')");
 if ($lq) {
     while ($lr = mysqli_fetch_assoc($lq)) {
         $key = 'letter:' . $lr['id'];
         if (isset($dismissed[$key])) continue;
 
+        $ltype   = ($lr['type'] !== null && trim($lr['type']) !== '') ? trim($lr['type']) : '';
         $subject = $lr['subject'];
+        $label   = $ltype !== '' ? $ltype . ' letter needs response' : 'Letter needs response';
 
         $items[] = [
             'source_type' => 'letter',
             'id'          => (int)$lr['id'],
-            'label'       => 'Letter needs response',
+            'label'       => $label,
             'subject'     => $subject,
+            'type'        => $ltype,
+            'for_response'=> $lr['for_response'],
             'amount'      => null,
             'due_date'    => null,
             'days'        => null,

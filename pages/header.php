@@ -34,7 +34,12 @@ echo '<header class="header">
                             <li>
                                 <ul class="menu" id="notifList"></ul>
                             </li>
-                            <li class="footer"><a href="#" id="notifDismissAll" style="display:none;">Dismiss all</a></li>
+                            <li class="footer" style="padding:0;">
+                                <div class="notif-footer-row">
+                                    <a href="#" id="notifViewAll" style="display:none;">View All</a>
+                                    <a href="#" id="notifDismissAll" style="display:none;">Dismiss all</a>
+                                </div>
+                            </li>
                         </ul>
                     </li>
 
@@ -96,9 +101,16 @@ echo '<header class="header">
     #notifList .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
     #notifList .notif-item.notif-due > a.notif-title { color: #f39c12; }
     #notifList .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
+    .notif-footer-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid #f4f4f4; background: #fff; }
+    .notif-footer-row a { color: #3c8dbc; font-size: 12px; font-weight: normal; }
+    .notif-footer-row a:hover, .notif-footer-row a:focus { text-decoration: underline; }
+    #notifAllList { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; }
+    #notifAllList .notif-item { display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #f4f4f4; }
+    #notifAllList .notif-item > a.notif-title { flex: 1; padding: 10px 0; color: #333; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
+    #notifAllList .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
+    #notifAllList .notif-item.notif-due > a.notif-title { color: #f39c12; }
+    #notifAllList .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
     #notifViewModal .notif-view-value { font-size: 13px; color: #333; padding-top: 6px; word-break: break-word; }
-    #notifViewModal .notif-view-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; text-align: right; }
-    #notifViewModal .notif-view-actions .btn { margin-left: 6px; }
 
     /* ============ Administrator account dropdown (list-style menu) ============ */
     .navbar-nav > .user-menu > .dropdown-menu {
@@ -216,8 +228,25 @@ echo '<header class="header">
                 <h4 class="modal-title" id="notifViewTitle"><i class="fa fa-eye"></i> Details</h4>
             </div>
             <div class="modal-body" id="notifViewBody"></div>
+            <div class="modal-footer" id="notifViewFooter"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= ALL PENDING ALERTS MODAL (View all) ======================= -->
+<div id="notifAllModal" class="modal fade">
+    <div class="modal-dialog modal-sdm-lg modal-view">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-bell"></i> All Pending Alerts <span id="notifAllCount" class="label label-warning" style="display:none;"></span></h4>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <ul class="notif-all-list" id="notifAllList"></ul>
+            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                <button type="button" class="btn btn-warning" id="notifAllDismissAll"><i class="fa fa-bell-slash"></i> Dismiss all</button>
             </div>
         </div>
     </div>
