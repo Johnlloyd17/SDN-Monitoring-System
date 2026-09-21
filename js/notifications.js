@@ -75,24 +75,39 @@
     window.SDN_NOTIF = window.SDN_NOTIF || {};
     window.SDN_NOTIF.renderList = renderInto;
 
-    /* ---- Render: "View All" modal (full list). Reuses currentList + bellItem()
-       so per-row View/Dismiss actions and in-place removals keep working. */
+    /* ---- Render: "View All" modal (full list split into Bills/Letters tabs).
+       Reuses currentList + bellItem() so per-row View/Dismiss actions and
+       in-place removals keep working. */
     function renderAllList() {
-        var $list = $('#notifAllList');
-        if (!$list.length) return;
+        var $bills = $('#notifAllBillsList');
+        var $letters = $('#notifAllLettersList');
+        if (!$bills.length && !$letters.length) return;
         var $count = $('#notifAllCount');
         var $dismissAllButton = $('#notifAllDismissAll');
 
-        var n = (currentList && currentList.length) || 0;
+        var list = (currentList && currentList.length) ? currentList : [];
+        var bills = [];
+        var letters = [];
+        $.each(list, function (i, it) {
+            (it.source_type === 'bill' ? bills : letters).push(it);
+        });
+
+        var n = list.length;
         if ($count.length) $count.text(n).toggle(n > 0);
         if ($dismissAllButton.length) $dismissAllButton.toggle(n > 0);
 
+        renderPane($bills, bills, $('#notifAllBillsCount'));
+        renderPane($letters, letters, $('#notifAllLettersCount'));
+    }
+
+    function renderPane($list, items, $countBadge) {
+        if ($countBadge.length) $countBadge.text(items.length).show();
         $list.empty();
-        if (n === 0) {
+        if (!items.length) {
             $list.append('<li class="text-center text-muted" style="padding:15px;">No pending alerts</li>');
             return;
         }
-        $.each(currentList, function (i, it) {
+        $.each(items, function (i, it) {
             $list.append(bellItem(it));
         });
     }
@@ -451,6 +466,42 @@
     $(function () {
         if (!base) return; // notifications wiring not present in this document
 
+        /* Bootstrap 3 gives every .modal the same z-index (1040), so when a second
+           modal opens on top of a visible one the paint order is decided by DOM
+           order - and a modal located earlier in the DOM (e.g. #notifViewModal vs
+           #notifAllModal) would appear BEHIND. Bump each newly-shown modal above
+           whatever is currently visible and raise its (newest) backdrop just below
+           it. Clear the inline z-index on hide so a modal shown later on its own
+           goes back to the CSS default. */
+        $(document).on('show.bs.modal', '.modal', function () {
+            var $shown = $(this);
+            var $open = $('.modal.in').not($shown[0]);
+            if (!$open.length) {
+                $shown.css('z-index', '');
+                return;
+            }
+            var top = 1040;
+            $open.each(function () {
+                var z = parseInt($(this).css('z-index'), 10) || 1040;
+                if (z > top) top = z;
+            });
+            $shown.css('z-index', (top + 10) + '').data('sdmBackdropZ', top + 5);
+        });
+
+        $(document).on('shown.bs.modal', '.modal', function () {
+            var $shown = $(this);
+            var bz = parseInt($shown.data('sdmBackdropZ'), 10);
+            if (!bz) return;
+            $('.modal-backdrop:last').css('z-index', bz + '');
+        });
+
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            var $shown = $(this);
+            if ($shown.data('sdmBackdropZ')) {
+                $shown.css('z-index', '').removeData('sdmBackdropZ');
+            }
+        });
+
         $(document).on('click', '[data-notif-dismiss]', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -555,6 +606,12 @@
             $(this).closest('.dropdown').removeClass('open');
             renderAllList();
             if (typeof $.fn.modal === 'function') $('#notifAllModal').modal('show');
+        });
+
+        /* Always open the "View All" modal on the Bills tab, regardless of the
+           tab that was active the last time it was shown. */
+        $(document).on('show.bs.modal', '#notifAllModal', function () {
+            $('#notifAllModal .nav-tabs a[href="#notifAllBillsPane"]').tab('show');
         });
 
         $(document).on('click', '#notifAllDismissAll', function (e) {

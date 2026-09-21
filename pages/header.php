@@ -104,12 +104,25 @@ echo '<header class="header">
     .notif-footer-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid #f4f4f4; background: #fff; }
     .notif-footer-row a { color: #3c8dbc; font-size: 12px; font-weight: normal; }
     .notif-footer-row a:hover, .notif-footer-row a:focus { text-decoration: underline; }
-    #notifAllList { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; }
-    #notifAllList .notif-item { display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #f4f4f4; }
-    #notifAllList .notif-item > a.notif-title { flex: 1; padding: 10px 0; color: #333; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
-    #notifAllList .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
-    #notifAllList .notif-item.notif-due > a.notif-title { color: #f39c12; }
-    #notifAllList .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
+    .notif-all-list { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; }
+    .notif-all-list .notif-item { display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #f4f4f4; }
+    .notif-all-list .notif-item > a.notif-title { flex: 1; padding: 10px 0; color: #333; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
+    .notif-all-list .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
+    .notif-all-list .notif-item.notif-due > a.notif-title { color: #f39c12; }
+    .notif-all-list .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
+    #notifAllModal .modal-body.modal-tabs .nav-tabs { padding: 12px 24px 0; margin: 0; }
+    /* Bills = blue, Letters = green (tab pills + row text). Overdue bills stay red. */
+    #notifAllModal .notif-tab-bills > a { color: #3c8dbc; }
+    #notifAllModal .notif-tab-letters > a { color: #00a65a; }
+    #notifAllModal .notif-tab-bills.active > a,
+    #notifAllModal .notif-tab-bills.active > a:hover,
+    #notifAllModal .notif-tab-bills.active > a:focus { background: #3c8dbc; color: #fff; }
+    #notifAllModal .notif-tab-letters.active > a,
+    #notifAllModal .notif-tab-letters.active > a:hover,
+    #notifAllModal .notif-tab-letters.active > a:focus { background: #00a65a; color: #fff; }
+    #notifAllBillsPane .notif-item.notif-due > a.notif-title { color: #3c8dbc; }
+    #notifAllBillsPane .notif-item.notif-overdue > a.notif-title { color: #dd4b39; }
+    #notifAllLettersPane .notif-item > a.notif-title { color: #00a65a; }
     #notifViewModal .notif-view-value { font-size: 13px; color: #333; padding-top: 6px; word-break: break-word; }
 
     /* ============ Administrator account dropdown (list-style menu) ============ */
@@ -241,11 +254,21 @@ echo '<header class="header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><i class="fa fa-bell"></i> All Pending Alerts <span id="notifAllCount" class="label label-warning" style="display:none;"></span></h4>
             </div>
-            <div class="modal-body" style="padding:0;">
-                <ul class="notif-all-list" id="notifAllList"></ul>
+            <div class="modal-body modal-tabs" style="padding:0;">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active notif-tab-bills"><a href="#notifAllBillsPane" data-toggle="tab"><i class="fa fa-file-text-o"></i> Bills <span id="notifAllBillsCount" class="label label-warning" style="display:none;"></span></a></li>
+                    <li class="notif-tab-letters"><a href="#notifAllLettersPane" data-toggle="tab"><i class="fa fa-envelope-o"></i> Letters <span id="notifAllLettersCount" class="label label-warning" style="display:none;"></span></a></li>
+                </ul>
+                <div class="tab-content" style="padding:0;">
+                    <div class="tab-pane active" id="notifAllBillsPane" style="padding:0;">
+                        <ul class="notif-all-list" id="notifAllBillsList"></ul>
+                    </div>
+                    <div class="tab-pane" id="notifAllLettersPane" style="padding:0;">
+                        <ul class="notif-all-list" id="notifAllLettersList"></ul>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                 <button type="button" class="btn btn-warning" id="notifAllDismissAll"><i class="fa fa-bell-slash"></i> Dismiss all</button>
             </div>
         </div>

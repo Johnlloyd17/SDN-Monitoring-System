@@ -809,7 +809,7 @@
                                 $calEvents = [];
                                 $minYear = null;
                                 $maxYear = null;
-                                $calQuery = mysqli_query($con, "SELECT id, project, activity, start, end FROM tblactivity WHERE start IS NOT NULL AND start != '' ORDER BY start ASC");
+                                $calQuery = mysqli_query($con, "SELECT id, project, activity, start, end FROM tblactivity WHERE start IS NOT NULL AND start != '' AND start >= '2000-01-01' ORDER BY start ASC");
                                 if ($calQuery) {
                                     while ($ev = mysqli_fetch_assoc($calQuery)) {
                                         $startTs = strtotime($ev['start']);
