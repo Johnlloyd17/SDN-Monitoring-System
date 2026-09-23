@@ -44,6 +44,7 @@ if(isset($_POST['btn_login'])) {
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="css/AdminLTE.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <style>
         body {
             position: relative;
@@ -76,25 +77,6 @@ if(isset($_POST['btn_login'])) {
             border: 1px solid #fff;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
         }
-        .alert-msg {
-            padding: 10px 15px;
-            margin-top: 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            display: none;
-        }
-        .alert-msg.error {
-            background-color: #f2dede;
-            color: #a94442;
-            border: 1px solid #ebccd1;
-            display: block;
-        }
-        .alert-msg.success {
-            background-color: #dff0d8;
-            color: #3c763d;
-            border: 1px solid #d6e9c6;
-            display: block;
-        }
     </style>
 </head>
 <body class="skin-black">
@@ -123,9 +105,6 @@ if(isset($_POST['btn_login'])) {
                                 <input type="password" class="form-control" style="border-radius:0px" name="txt_password" id="txt_password" placeholder="Enter Password" required autocomplete="current-password">
                             </div>
                             <button type="submit" class="btn btn-sm btn-primary" name="btn_login">Log in</button>
-                            <?php if($message !== ''): ?>
-                                <div class="alert-msg <?php echo $message_type; ?>"><?php echo $message; ?></div>
-                            <?php endif; ?>
                         </form>
                     </div>
                 </div>
@@ -133,11 +112,18 @@ if(isset($_POST['btn_login'])) {
         </div>
     </div>
 
-    <?php if($message_type === 'success'): ?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="js/toast-helper.js" type="text/javascript"></script>
+
+    <?php if($message !== ''): ?>
     <script>
+        showToast("<?php echo $message; ?>", "<?php echo $message_type; ?>");
+        <?php if($message_type === 'success'): ?>
         setTimeout(function() {
             window.location.href = "pages/dashboard/dashboard.php";
         }, 1500);
+        <?php endif; ?>
     </script>
     <?php endif; ?>
 </body>

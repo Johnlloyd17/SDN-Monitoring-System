@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 include "../connection.php"; // Include the database connection file
 
 // Get filtering parameters from the query string (GET request)

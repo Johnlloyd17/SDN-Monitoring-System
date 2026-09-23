@@ -1,12 +1,9 @@
 <?php
-session_start();
-header('Content-Type: application/json');
+require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+?>
+<?php
 
-if (!isset($_SESSION['role'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
+header('Content-Type: application/json');
 
 include '../pages/connection.php';
 
@@ -17,32 +14,72 @@ if (!file_exists($photoDir)) {
 
 $action = isset($_POST['action']) ? $_POST['action'] : (isset($_GET['action']) ? $_GET['action'] : '');
 
+// Blank cells are normalized so they never corrupt the data:
+//  - Project gets a placeholder (every list/stats/export query filters
+//    `project != ''`, so a blank Project would otherwise make the record
+//    invisible).
+//  - Description gets a placeholder so downstream features (pass slip,
+//    print sticker, file viewer) have a label.
+//  - Quantity, Life, Cost, Date, etc. are stored as NULL instead of being
+//    coerced to 0 / 0000-00-00 by MySQL.
+$PROJECT_FALLBACK = 'Unspecified';
+$DESCRIPTION_FALLBACK = '(No description)';
+
+function normText($value) {
+    $value = trim((string)$value);
+    return $value === '' ? null : $value;
+}
+function normIntOrNull($value) {
+    $value = trim((string)$value);
+    if ($value === '') return null;
+    $intValue = (int)$value;
+    return $value == $intValue ? $intValue : $value;
+}
+function normDateOrNull($value) {
+    $value = trim((string)$value);
+    if ($value === '') return null;
+    $dt = date_create($value);
+    return $dt ? $dt->format('Y-m-d') : null;
+}
+function sqlVal($con, $value) {
+    if ($value === null) return 'NULL';
+    return "'" . mysqli_real_escape_string($con, $value) . "'";
+}
+
 if ($action === 'add') {
-    $project = mysqli_real_escape_string($con, $_POST['txt_project'] ?? '');
-    $item = mysqli_real_escape_string($con, $_POST['txt_item'] ?? '');
-    $classification = mysqli_real_escape_string($con, $_POST['txt_classification'] ?? '');
-    $quantity = mysqli_real_escape_string($con, $_POST['txt_quantity'] ?? '');
-    $unit = mysqli_real_escape_string($con, $_POST['txt_unit'] ?? '');
-    $description = mysqli_real_escape_string($con, $_POST['txt_description'] ?? '');
-    $received = mysqli_real_escape_string($con, $_POST['txt_received'] ?? '');
-    $property = mysqli_real_escape_string($con, $_POST['txt_property'] ?? '');
-    $ics = mysqli_real_escape_string($con, $_POST['txt_ics'] ?? '');
-    $serial = mysqli_real_escape_string($con, $_POST['txt_serial'] ?? '');
-    $date = mysqli_real_escape_string($con, $_POST['txt_date'] ?? '');
-    $officer = mysqli_real_escape_string($con, $_POST['txt_officer'] ?? '');
-    $cost = str_replace(',', '', mysqli_real_escape_string($con, $_POST['txt_cost'] ?? ''));
-    $life = mysqli_real_escape_string($con, $_POST['txt_life'] ?? '');
-    $transferred = mysqli_real_escape_string($con, $_POST['txt_transferred'] ?? '');
-    $remarks = mysqli_real_escape_string($con, $_POST['txt_remarks'] ?? '');
-    $status = mysqli_real_escape_string($con, $_POST['txt_status'] ?? 'Available');
-    if (!in_array($status, ['Available','For Deployment','Deployed','Temporary Deployed','Defective','Replaced'])) {
-        $status = 'Available';
+    $project = normText($_POST['txt_project'] ?? '');
+    $project = $project === null ? $PROJECT_FALLBACK : $project;
+    $item = normText($_POST['txt_item'] ?? '');
+    $quantity = normIntOrNull($_POST['txt_quantity'] ?? '');
+    $unit = normText($_POST['txt_unit'] ?? '');
+    $description = normText($_POST['txt_description'] ?? '');
+    $description = $description === null ? $DESCRIPTION_FALLBACK : $description;
+    $received = normText($_POST['txt_received'] ?? '');
+    $serial = normText($_POST['txt_serial'] ?? '');
+    $date = normDateOrNull($_POST['txt_date'] ?? '');
+    $cost = normText(str_replace(',', '', $_POST['txt_cost'] ?? ''));
+    $inventoryItemNo = normText($_POST['txt_inventory_item_no'] ?? '');
+    $assignedTo = normText($_POST['txt_assigned_to'] ?? '');
+    $life = normIntOrNull($_POST['txt_life'] ?? '');
+    $remarks = normText($_POST['txt_remarks'] ?? '');
+
+    $serialTrimmed = $serial === null ? '' : $serial;
+    if ($serialTrimmed !== '') {
+        $checkQ = mysqli_query($con, "SELECT description FROM inventory WHERE serial_unique = '" . mysqli_real_escape_string($con, $serialTrimmed) . "' LIMIT 1");
+        if ($checkQ && ($dupRow = mysqli_fetch_assoc($checkQ))) {
+            $dupDesc = ($dupRow['description'] !== null && $dupRow['description'] !== '') ? $dupRow['description'] : 'an existing item';
+            echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to ' . $dupDesc]);
+            exit;
+        }
     }
 
     $action_log = 'Added Item:' . $description;
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
 
-    $query = "INSERT INTO inventory (project, item, classification, quantity, unit, description, received, property, ics, serial, date, officer, cost, life, transferred, remarks, status) VALUES ('$project', '$item', '$classification', '$quantity', '$unit', '$description', '$received', '$property', '$ics', '$serial', '$date', '$officer', '$cost', '$life', '$transferred', '$remarks', '$status')";
+    $query = "INSERT INTO inventory (project, item, quantity, unit, description, received, serial, date, cost, inventory_item_no, assigned_to, life, remarks) VALUES (" .
+        sqlVal($con, $project) . ", " . sqlVal($con, $item) . ", " . sqlVal($con, $quantity) . ", " . sqlVal($con, $unit) . ", " . sqlVal($con, $description) . ", " .
+        sqlVal($con, $received) . ", " . sqlVal($con, $serial) . ", " . sqlVal($con, $date) . ", " . sqlVal($con, $cost) . ", " . sqlVal($con, $inventoryItemNo) . ", " .
+        sqlVal($con, $assignedTo) . ", " . sqlVal($con, $life) . ", " . sqlVal($con, $remarks) . ")";
 
     if (mysqli_query($con, $query)) {
         $id = mysqli_insert_id($con);
@@ -60,6 +97,8 @@ if ($action === 'add') {
         }
 
         echo json_encode(['success' => true, 'message' => 'Item added successfully']);
+    } else if (mysqli_errno($con) === 1062) {
+        echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to another item.']);
     } else {
         echo json_encode(['success' => false, 'error' => 'Failed to add item: ' . mysqli_error($con)]);
     }
@@ -68,33 +107,54 @@ if ($action === 'add') {
 
 if ($action === 'edit') {
     $id = intval($_POST['hidden_id'] ?? 0);
-    $project = mysqli_real_escape_string($con, $_POST['txt_edit_project'] ?? '');
-    $item = mysqli_real_escape_string($con, $_POST['txt_edit_item'] ?? '');
-    $classification = mysqli_real_escape_string($con, $_POST['txt_edit_classification'] ?? '');
-    $quantity = mysqli_real_escape_string($con, $_POST['txt_edit_quantity'] ?? '');
-    $unit = mysqli_real_escape_string($con, $_POST['txt_edit_unit'] ?? '');
-    $description = mysqli_real_escape_string($con, $_POST['txt_edit_description'] ?? '');
-    $received = mysqli_real_escape_string($con, $_POST['txt_edit_received'] ?? '');
-    $property = mysqli_real_escape_string($con, $_POST['txt_edit_property'] ?? '');
-    $ics = mysqli_real_escape_string($con, $_POST['txt_edit_ics'] ?? '');
-    $serial = mysqli_real_escape_string($con, $_POST['txt_edit_serial'] ?? '');
-    $date = mysqli_real_escape_string($con, $_POST['txt_edit_date'] ?? '');
-    $officer = mysqli_real_escape_string($con, $_POST['txt_edit_officer'] ?? '');
-    $cost = str_replace(',', '', mysqli_real_escape_string($con, $_POST['txt_edit_cost'] ?? ''));
-    $life = mysqli_real_escape_string($con, $_POST['txt_edit_life'] ?? '');
-    $transferred = mysqli_real_escape_string($con, $_POST['txt_edit_transferred'] ?? '');
-    $remarks = mysqli_real_escape_string($con, $_POST['txt_edit_remarks'] ?? '');
-    $status = mysqli_real_escape_string($con, $_POST['txt_edit_status'] ?? 'Available');
-    if (!in_array($status, ['Available','For Deployment','Deployed','Temporary Deployed','Defective','Replaced'])) {
-        $status = 'Available';
+    $project = normText($_POST['txt_edit_project'] ?? '');
+    $project = $project === null ? $PROJECT_FALLBACK : $project;
+    $item = normText($_POST['txt_edit_item'] ?? '');
+    $quantity = normIntOrNull($_POST['txt_edit_quantity'] ?? '');
+    $unit = normText($_POST['txt_edit_unit'] ?? '');
+    $description = normText($_POST['txt_edit_description'] ?? '');
+    $description = $description === null ? $DESCRIPTION_FALLBACK : $description;
+    $received = normText($_POST['txt_edit_received'] ?? '');
+    $serial = normText($_POST['txt_edit_serial'] ?? '');
+    $date = normDateOrNull($_POST['txt_edit_date'] ?? '');
+    $cost = normText(str_replace(',', '', $_POST['txt_edit_cost'] ?? ''));
+    $inventoryItemNo = normText($_POST['txt_edit_inventory_item_no'] ?? '');
+    $assignedTo = normText($_POST['txt_edit_assigned_to'] ?? '');
+    $life = normIntOrNull($_POST['txt_edit_life'] ?? '');
+    $remarks = normText($_POST['txt_edit_remarks'] ?? '');
+
+    $serialTrimmed = $serial === null ? '' : $serial;
+    if ($serialTrimmed !== '') {
+        $checkQ = mysqli_query($con, "SELECT description FROM inventory WHERE serial_unique = '" . mysqli_real_escape_string($con, $serialTrimmed) . "' AND id != $id LIMIT 1");
+        if ($checkQ && ($dupRow = mysqli_fetch_assoc($checkQ))) {
+            $dupDesc = ($dupRow['description'] !== null && $dupRow['description'] !== '') ? $dupRow['description'] : 'an existing item';
+            echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to ' . $dupDesc]);
+            exit;
+        }
     }
 
-    $query = "UPDATE inventory SET project='$project', item='$item', classification='$classification', quantity='$quantity', unit='$unit', description='$description', received='$received', property='$property', ics='$ics', serial='$serial', date='$date', officer='$officer', cost='$cost', life='$life', transferred='$transferred', remarks='$remarks', status='$status' WHERE id=$id";
+    $query = "UPDATE inventory SET " .
+        "project=" . sqlVal($con, $project) . ", " .
+        "item=" . sqlVal($con, $item) . ", " .
+        "quantity=" . sqlVal($con, $quantity) . ", " .
+        "unit=" . sqlVal($con, $unit) . ", " .
+        "description=" . sqlVal($con, $description) . ", " .
+        "received=" . sqlVal($con, $received) . ", " .
+        "serial=" . sqlVal($con, $serial) . ", " .
+        "date=" . sqlVal($con, $date) . ", " .
+        "cost=" . sqlVal($con, $cost) . ", " .
+        "inventory_item_no=" . sqlVal($con, $inventoryItemNo) . ", " .
+        "assigned_to=" . sqlVal($con, $assignedTo) . ", " .
+        "life=" . sqlVal($con, $life) . ", " .
+        "remarks=" . sqlVal($con, $remarks) .
+        " WHERE id=$id";
 
     if (mysqli_query($con, $query)) {
         $action_log = 'Edited Item: ' . $description;
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
         echo json_encode(['success' => true, 'message' => 'Item updated successfully']);
+    } else if (mysqli_errno($con) === 1062) {
+        echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to another item.']);
     } else {
         echo json_encode(['success' => false, 'error' => 'Failed to update item: ' . mysqli_error($con)]);
     }

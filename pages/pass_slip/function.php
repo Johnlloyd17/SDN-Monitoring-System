@@ -1,5 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/../auth_check.php'; require_auth_api();
+?>
+<?php
+if (session_status() === PHP_SESSION_NONE) {  }
 include "../connection.php";
 
 // ============================================================
@@ -38,8 +41,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'item_details') {
     header('Content-Type: application/json');
     
     $pass_slip_no = mysqli_real_escape_string($con, $_GET['pass_slip_no']);
-    $query = "SELECT ps.item_description, ps.qty, ps.unit, ps.serial_no, ps.pullout_date, ps.purpose, ps.requested_by_out, ps.inspected_by_out, ps.approved_by_out, ps.pass_slip_no, ps.status,
-              i.property AS property_no, i.serial AS serial_no_inv, i.ics AS ics_no
+    $query = "SELECT ps.id, ps.item_description, ps.qty, ps.unit, ps.serial_no, ps.pullout_date, ps.return_date, ps.inventory_id, ps.status,
+              ps.purpose, ps.remarks, ps.requested_by_out, ps.inspected_by_out, ps.approved_by_out, ps.pass_slip_no,
+              i.inventory_item_no AS inventory_item_no, i.serial AS serial_no_inv
               FROM pass_slip ps 
               LEFT JOIN inventory i ON ps.inventory_id = i.id 
               WHERE ps.pass_slip_no = '$pass_slip_no' ORDER BY ps.id ASC";
@@ -70,101 +74,161 @@ if (isset($_GET['action']) && $_GET['action'] == 'inspector_list') {
 }
 
 // ============================================================
+// ACTION: Inventory Search for Create Pass Slip (AJAX type-ahead)
+// Matches description or serial, flags on-loan / deployed items.
+// ============================================================
+if (isset($_GET['action']) && $_GET['action'] == 'inventory_search') {
+    header('Content-Type: application/json');
+
+    $q = mysqli_real_escape_string($con, trim($_GET['q'] ?? ''));
+    if (strlen($q) < 2) {
+        echo json_encode([]);
+        exit;
+    }
+
+    $query = "SELECT id,
+                     TRIM(description) AS name,
+                     serial,
+                     unit,
+                     CASE WHEN EXISTS (SELECT 1 FROM pass_slip ps
+                                       WHERE ps.inventory_id = inventory.id
+                                         AND ps.status IN ('borrowed','overdue')) THEN 1 ELSE 0 END AS on_loan,
+                     CASE WHEN assigned_to IS NOT NULL AND TRIM(assigned_to) <> '' THEN 1 ELSE 0 END AS deployed
+              FROM inventory
+              WHERE (description LIKE '%$q%' OR serial LIKE '%$q%')
+              ORDER BY deployed ASC, on_loan ASC, TRIM(description) ASC
+              LIMIT 20";
+    $result = mysqli_query($con, $query);
+
+    $data = array();
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = array(
+                'id'          => $row['id'],
+                'name'        => $row['name'] ?? '',
+                'serial'      => $row['serial'] ?? '',
+                'unit'        => $row['unit'] ?? '',
+                'on_loan'     => intval($row['on_loan']),
+                'deployed'    => intval($row['deployed'])
+            );
+        }
+    }
+
+    echo json_encode($data);
+    exit;
+}
+
+// ============================================================
 // ACTION: Create New Pass Slip (supports multiple items)
 // ============================================================
 if (isset($_POST['create_pass_slip'])) {
     $purpose = mysqli_real_escape_string($con, $_POST['purpose']);
-    $condition_out = mysqli_real_escape_string($con, $_POST['condition_out']);
     $requested_by_out = mysqli_real_escape_string($con, $_POST['requested_by_out']);
     $inspected_by_out = mysqli_real_escape_string($con, $_POST['inspected_by_out']);
     $approved_by_out = mysqli_real_escape_string($con, $_POST['approved_by_out']);
     $remarks = mysqli_real_escape_string($con, $_POST['remarks']);
 
     $inventory_ids = $_POST['inventory_id'] ?? [];
-    $descriptions = $_POST['item_description'] ?? [];
+    $descriptions = $_POST['description'] ?? [];
     $qtys = $_POST['qty'] ?? [];
     $units = $_POST['unit'] ?? [];
     $serial_nos = $_POST['serial_no'] ?? [];
     $pullout_dates = $_POST['pullout_date'] ?? [];
     $return_dates = $_POST['return_date'] ?? [];
 
-    if (empty($inventory_ids) || count($inventory_ids) == 0) {
+    if (empty($descriptions) || count($descriptions) == 0) {
         echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
         exit;
     }
 
-    foreach ($inventory_ids as $index => $inv_id) {
-        if (empty($inv_id)) {
-            echo "<script>alert('Please select an item for row " . ($index + 1) . ".'); window.history.back();</script>";
+    foreach ($descriptions as $index => $desc) {
+        if (empty(trim($desc))) {
+            echo "<script>alert('Please enter a description for row " . ($index + 1) . ".'); window.history.back();</script>";
             exit;
         }
     }
 
     if (!empty($_POST['pass_slip_no'])) {
-        $pass_slip_no = mysqli_real_escape_string($con, $_POST['pass_slip_no']);
+        $pass_slip_no = mysqli_real_escape_string($con, trim($_POST['pass_slip_no']));
+        $dupeCheck = mysqli_query($con, "SELECT 1 FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' LIMIT 1");
+        if ($dupeCheck && mysqli_num_rows($dupeCheck) > 0) {
+            echo "<script>alert('Pass Slip No. already exists. Choose another or leave it empty to auto-generate.'); window.history.back();</script>";
+            exit;
+        }
     } else {
         $year = date('Y');
-        $getLast = mysqli_query($con, "SELECT pass_slip_no FROM pass_slip WHERE pass_slip_no LIKE 'PS-$year-%' ORDER BY id DESC LIMIT 1");
-        if ($getLast && mysqli_num_rows($getLast) > 0) {
-            $lastRow = mysqli_fetch_assoc($getLast);
-            $lastNum = intval(substr($lastRow['pass_slip_no'], -4)) + 1;
-            $pass_slip_no = "PS-$year-" . str_pad($lastNum, 4, '0', STR_PAD_LEFT);
-        } else {
-            $pass_slip_no = "PS-$year-0001";
+        $maxNum = 0;
+        $getAll = mysqli_query($con, "SELECT pass_slip_no FROM pass_slip WHERE pass_slip_no LIKE 'PS-$year-%'");
+        if ($getAll && mysqli_num_rows($getAll) > 0) {
+            while ($row = mysqli_fetch_assoc($getAll)) {
+                if (preg_match('/^PS-\d{4}-(\d+)$/', $row['pass_slip_no'], $m)) {
+                    $maxNum = max($maxNum, intval($m[1]));
+                }
+            }
         }
+        do {
+            $maxNum++;
+            $pass_slip_no = "PS-$year-" . str_pad($maxNum, 4, '0', STR_PAD_LEFT);
+            $dupCheck = mysqli_query($con, "SELECT 1 FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' LIMIT 1");
+        } while ($dupCheck && mysqli_num_rows($dupCheck) > 0);
     }
 
     $insertedCount = 0;
     $itemSummaries = array();
 
-    foreach ($inventory_ids as $index => $inv_id) {
-        $inv_id = mysqli_real_escape_string($con, $inv_id);
-        $item_desc = mysqli_real_escape_string($con, $descriptions[$index] ?? '');
+    foreach ($descriptions as $index => $item_desc) {
+        $item_desc = mysqli_real_escape_string($con, $item_desc);
+        $inv_id = isset($inventory_ids[$index]) ? mysqli_real_escape_string($con, $inventory_ids[$index]) : '';
         $qty = intval($qtys[$index]);
         $unit = mysqli_real_escape_string($con, $units[$index] ?? '');
         $serial_no = mysqli_real_escape_string($con, $serial_nos[$index] ?? '');
         $item_pullout_date = mysqli_real_escape_string($con, $pullout_dates[$index] ?? date('Y-m-d'));
         $item_return_date = !empty($return_dates[$index]) ? "'" . mysqli_real_escape_string($con, $return_dates[$index]) . "'" : "NULL";
 
-        if ($qty <= 0) {
+        if ($qty < 0) {
             echo "<script>alert('Invalid quantity for row " . ($index + 1) . ".'); window.history.back();</script>";
             exit;
         }
 
-        $checkQuery = "SELECT quantity, status, item_type FROM inventory WHERE id = '$inv_id'";
-        $checkResult = mysqli_query($con, $checkQuery);
-        $item = mysqli_fetch_assoc($checkResult);
+        $inventoryValue = "NULL";
+        $updateInventory = false;
 
-        if (!$item) {
-            echo "<script>alert('Item not found for row " . ($index + 1) . ".'); window.history.back();</script>";
-            exit;
-        }
+        if (!empty($inv_id)) {
+            $checkQuery = "SELECT quantity, assigned_to FROM inventory WHERE id = '$inv_id'";
+            $checkResult = mysqli_query($con, $checkQuery);
+            $item = mysqli_fetch_assoc($checkResult);
 
-        if ($item['item_type'] === 'consumable') {
-            echo "<script>alert('Cannot create pass slip for consumable item: $item_desc. Only equipment items are allowed.'); window.history.back();</script>";
-            exit;
-        }
+            if (!$item) {
+                echo "<script>alert('Item not found for row " . ($index + 1) . ".'); window.history.back();</script>";
+                exit;
+            }
 
-        if (!in_array($item['status'] ?? '', ['Available', 'For Deployment'])) {
-            echo "<script>alert('Cannot create pass slip for item: $item_desc. Status is \"" . ($item['status'] ?? 'Unknown') . "\" — only Available or For Deployment items can be borrowed.'); window.history.back();</script>";
-            exit;
-        }
+            if (!empty($item['assigned_to'])) {
+                echo "<script>alert('Cannot create pass slip for item: $item_desc. The item is already assigned/deployed to \"" . $item['assigned_to'] . "\" — only unassigned items can be borrowed.'); window.history.back();</script>";
+                exit;
+            }
 
-        if ($item['quantity'] < $qty) {
-            echo "<script>alert('Insufficient quantity for: $item_desc. Available: " . ($item['quantity'] ?? 0) . "); window.history.back();</script>";
-            exit;
+            if ($item['quantity'] < $qty) {
+                echo "<script>alert('Insufficient quantity for: $item_desc. Available: " . ($item['quantity'] ?? 0) . "); window.history.back();</script>";
+                exit;
+            }
+
+            $inventoryValue = "'$inv_id'";
+            $updateInventory = true;
         }
 
         $insertQuery = "INSERT INTO pass_slip (pass_slip_no, inventory_id, item_description, qty, unit, serial_no,
                         pullout_date, return_date, requested_by_out, inspected_by_out, approved_by_out,
                         purpose, condition_out, remarks, status, created_by)
-                        VALUES ('$pass_slip_no', '$inv_id', '$item_desc', '$qty', '$unit', '$serial_no',
+                        VALUES ('$pass_slip_no', $inventoryValue, '$item_desc', '$qty', '$unit', '$serial_no',
                         '$item_pullout_date', $item_return_date, '$requested_by_out', '$inspected_by_out', '$approved_by_out',
-                        '$purpose', '$condition_out', '$remarks', 'borrowed', '" . ($_SESSION['username'] ?? 'admin') . "')";
+                        '$purpose', NULL, '$remarks', 'borrowed', '" . ($_SESSION['username'] ?? 'admin') . "')";
 
         if (mysqli_query($con, $insertQuery)) {
-            $newQty = $item['quantity'] - $qty;
-            mysqli_query($con, "UPDATE inventory SET quantity = $newQty WHERE id = '$inv_id'");
+            if ($updateInventory) {
+                $newQty = $item['quantity'] - $qty;
+                mysqli_query($con, "UPDATE inventory SET quantity = $newQty WHERE id = '$inv_id'");
+            }
             $insertedCount++;
             $itemSummaries[] = "$item_desc ($qty $unit)";
         } else {
@@ -178,10 +242,176 @@ if (isset($_POST['create_pass_slip'])) {
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
             VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Created Pass Slip: $pass_slip_no - $summary')");
 
-        echo "<script>alert('Pass Slip $pass_slip_no created successfully with $insertedCount item(s)!'); window.location.href = 'pass_slip.php';</script>";
+        $_SESSION['added'] = 1;
+        header("Location: pass_slip.php");
+        exit;
     } else {
         echo "<script>alert('Error: No items were added.'); window.history.back();</script>";
     }
+    exit;
+}
+
+// ============================================================
+// ACTION: Edit Pass Slip (full form: header + items reconciliation)
+// ============================================================
+if (isset($_POST['edit_pass_slip'])) {
+    $pass_slip_no = mysqli_real_escape_string($con, trim($_POST['pass_slip_no'] ?? ''));
+    $purpose = mysqli_real_escape_string($con, trim($_POST['purpose'] ?? ''));
+    $requested_by_out = mysqli_real_escape_string($con, trim($_POST['requested_by_out'] ?? ''));
+    $inspected_by_out = mysqli_real_escape_string($con, trim($_POST['inspected_by_out'] ?? ''));
+    $approved_by_out = mysqli_real_escape_string($con, trim($_POST['approved_by_out'] ?? ''));
+    $remarks = mysqli_real_escape_string($con, trim($_POST['remarks'] ?? ''));
+
+    $row_ids = $_POST['id'] ?? [];
+    $inventory_ids = $_POST['inventory_id'] ?? [];
+    $descriptions = $_POST['description'] ?? [];
+    $qtys = $_POST['qty'] ?? [];
+    $units = $_POST['unit'] ?? [];
+    $serial_nos = $_POST['serial_no'] ?? [];
+    $pullout_dates = $_POST['pullout_date'] ?? [];
+    $return_dates = $_POST['return_date'] ?? [];
+
+    if (empty($pass_slip_no)) {
+        echo "<script>alert('Invalid Pass Slip Number.'); window.history.back();</script>";
+        exit;
+    }
+    if (empty($descriptions) || count($descriptions) == 0) {
+        echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
+        exit;
+    }
+    foreach ($descriptions as $index => $desc) {
+        if (empty(trim($desc))) {
+            echo "<script>alert('Please enter a description for row " . ($index + 1) . ".'); window.history.back();</script>";
+            exit;
+        }
+    }
+
+    $check = mysqli_query($con, "SELECT 1 FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' LIMIT 1");
+    if (!$check || mysqli_num_rows($check) == 0) {
+        echo "<script>alert('Pass Slip not found.'); window.history.back();</script>";
+        exit;
+    }
+
+    // Load existing rows for reconciliation
+    $oldRows = array();
+    $oldQ = mysqli_query($con, "SELECT id, inventory_id, qty, status FROM pass_slip WHERE pass_slip_no = '$pass_slip_no'");
+    if ($oldQ) {
+        while ($row = mysqli_fetch_assoc($oldQ)) {
+            $oldRows[intval($row['id'])] = $row;
+        }
+    }
+
+    $submittedIds = array();
+    $newRows = 0;
+
+    foreach ($descriptions as $index => $item_desc) {
+        $item_desc = mysqli_real_escape_string($con, $item_desc);
+        $row_id = isset($row_ids[$index]) ? intval($row_ids[$index]) : 0;
+        $inv_id = mysqli_real_escape_string($con, $inventory_ids[$index] ?? '');
+        $qty = intval($qtys[$index]);
+        $unit = mysqli_real_escape_string($con, $units[$index] ?? '');
+        $serial_no = mysqli_real_escape_string($con, $serial_nos[$index] ?? '');
+        $item_pullout_date = mysqli_real_escape_string($con, $pullout_dates[$index] ?? date('Y-m-d'));
+        $item_return_date = !empty($return_dates[$index]) ? "'" . mysqli_real_escape_string($con, $return_dates[$index]) . "'" : "NULL";
+
+        if ($qty < 0) {
+            echo "<script>alert('Invalid quantity for row " . ($index + 1) . ".'); window.history.back();</script>";
+            exit;
+        }
+
+        $old = (isset($oldRows[$row_id]) && $row_id > 0) ? $oldRows[$row_id] : null;
+        if ($old) $submittedIds[] = $row_id;
+
+        // Inventory stock validation (mirrors create); skipped for existing returned rows (text-only update, status preserved)
+        if (!empty($inv_id) && (!$old || $old['status'] === 'borrowed')) {
+            $checkItem = mysqli_query($con, "SELECT quantity, assigned_to FROM inventory WHERE id = '$inv_id'");
+            $itemRow = mysqli_fetch_assoc($checkItem);
+            if (!$itemRow) {
+                echo "<script>alert('Item not found for row " . ($index + 1) . ".'); window.history.back();</script>";
+                exit;
+            }
+            if (!empty($itemRow['assigned_to'])) {
+                echo "<script>alert('Cannot edit pass slip for item: $item_desc. The item is already assigned/deployed to \"" . $itemRow['assigned_to'] . "\" — only unassigned items can be borrowed.'); window.history.back();</script>";
+                exit;
+            }
+            $available = intval($itemRow['quantity']);
+            $needed = $qty;
+            if ($old && !empty($old['inventory_id']) && intval($old['inventory_id']) === intval($inv_id) && $old['status'] === 'borrowed') {
+                $needed = $qty - intval($old['qty']);
+            }
+            if ($needed > 0 && $available < $needed) {
+                echo "<script>alert('Insufficient quantity for: $item_desc. Available: " . ($itemRow['quantity'] ?? 0) . "); window.history.back();</script>";
+                exit;
+            }
+        }
+
+        $inventoryValue = (!empty($inv_id)) ? "'$inv_id'" : "NULL";
+
+        if ($old) {
+            $update = "UPDATE pass_slip SET inventory_id = $inventoryValue, item_description = '$item_desc', qty = '$qty',
+                       unit = '$unit', serial_no = '$serial_no', pullout_date = '$item_pullout_date', return_date = $item_return_date
+                       WHERE id = $row_id AND pass_slip_no = '$pass_slip_no'";
+            if (mysqli_query($con, $update)) {
+                $oldInv = (!empty($old['inventory_id'])) ? intval($old['inventory_id']) : 0;
+                $newInv = (!empty($inv_id)) ? intval($inv_id) : 0;
+                if ($old['status'] === 'borrowed') {
+                    if ($oldInv > 0 && $oldInv === $newInv) {
+                        $delta = $qty - intval($old['qty']);
+                        if ($delta !== 0) {
+                            mysqli_query($con, "UPDATE inventory SET quantity = quantity - $delta WHERE id = $oldInv");
+                        }
+                    } elseif ($oldInv !== $newInv) {
+                        if ($oldInv > 0) {
+                            mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($old['qty']) . " WHERE id = $oldInv");
+                        }
+                        if ($newInv > 0) {
+                            mysqli_query($con, "UPDATE inventory SET quantity = quantity - $qty WHERE id = $newInv");
+                        }
+                    }
+                }
+            } else {
+                echo "<script>alert('Error updating item row " . ($index + 1) . ": " . mysqli_error($con) . "'); window.history.back();</script>";
+                exit;
+            }
+        } else {
+            $insert = "INSERT INTO pass_slip (pass_slip_no, inventory_id, item_description, qty, unit, serial_no,
+                        pullout_date, return_date, requested_by_out, inspected_by_out, approved_by_out,
+                        purpose, condition_out, remarks, status, created_by)
+                       VALUES ('$pass_slip_no', $inventoryValue, '$item_desc', '$qty', '$unit', '$serial_no',
+                        '$item_pullout_date', $item_return_date, '$requested_by_out', '$inspected_by_out', '$approved_by_out',
+                        '$purpose', NULL, '$remarks', 'borrowed', '" . ($_SESSION['username'] ?? 'admin') . "')";
+            if (mysqli_query($con, $insert)) {
+                if (!empty($inv_id)) {
+                    mysqli_query($con, "UPDATE inventory SET quantity = quantity - $qty WHERE id = '$inv_id'");
+                }
+                $newRows++;
+            } else {
+                echo "<script>alert('Error adding item row " . ($index + 1) . ": " . mysqli_error($con) . "'); window.history.back();</script>";
+                exit;
+            }
+        }
+    }
+
+    // Delete removed rows (restore inventory for still-borrowed items)
+    foreach ($oldRows as $rid => $old) {
+        if (!in_array($rid, $submittedIds)) {
+            if ($old['status'] === 'borrowed' && !empty($old['inventory_id'])) {
+                mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($old['qty']) . " WHERE id = " . intval($old['inventory_id']));
+            }
+            mysqli_query($con, "DELETE FROM pass_slip WHERE id = $rid AND pass_slip_no = '$pass_slip_no'");
+        }
+    }
+
+    // Header fields across all rows
+    mysqli_query($con, "UPDATE pass_slip SET purpose = '$purpose', requested_by_out = '$requested_by_out',
+                        inspected_by_out = '$inspected_by_out', approved_by_out = '$approved_by_out', remarks = '$remarks'
+                        WHERE pass_slip_no = '$pass_slip_no'");
+
+    mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
+        VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Edited Pass Slip: $pass_slip_no (full)')");
+
+    $_SESSION['edited'] = 1;
+    header("Location: pass_slip.php");
     exit;
 }
 
@@ -1145,7 +1375,7 @@ if (isset($_POST['btn_delete'])) {
         $psItems = mysqli_query($con, "SELECT id, inventory_id, qty, status FROM pass_slip WHERE pass_slip_no = '$pass_slip_no'");
         if ($psItems) {
             while ($psRow = mysqli_fetch_assoc($psItems)) {
-                if ($psRow['status'] === 'borrowed') {
+                if ($psRow['status'] === 'borrowed' && !empty($psRow['inventory_id'])) {
                     mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($psRow['qty']) . " WHERE id = " . intval($psRow['inventory_id']));
                 }
             }
@@ -1163,7 +1393,7 @@ if (isset($_POST['btn_delete'])) {
         $id = intval($_POST['delete_single_id']);
         $psQuery = mysqli_query($con, "SELECT pass_slip_no, item_description, inventory_id, qty, status FROM pass_slip WHERE id = $id");
         if ($psRow = mysqli_fetch_assoc($psQuery)) {
-            if ($psRow['status'] === 'borrowed') {
+            if ($psRow['status'] === 'borrowed' && !empty($psRow['inventory_id'])) {
                 mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($psRow['qty']) . " WHERE id = " . intval($psRow['inventory_id']));
             }
             mysqli_query($con, "DELETE FROM pass_slip WHERE id = $id");
@@ -1182,7 +1412,7 @@ if (isset($_POST['btn_delete'])) {
             $psItems = mysqli_query($con, "SELECT inventory_id, qty, status FROM pass_slip WHERE pass_slip_no = '$pass_slip_no'");
             if ($psItems) {
                 while ($psRow = mysqli_fetch_assoc($psItems)) {
-                    if ($psRow['status'] === 'borrowed') {
+                    if ($psRow['status'] === 'borrowed' && !empty($psRow['inventory_id'])) {
                         mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($psRow['qty']) . " WHERE id = " . intval($psRow['inventory_id']));
                     }
                 }
@@ -1230,7 +1460,9 @@ if (isset($_POST['process_return'])) {
             WHERE id = " . intval($ps['id']);
 
         if (mysqli_query($con, $updateQuery)) {
-            mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($ps['qty']) . " WHERE id = " . intval($ps['inventory_id']));
+            if (!empty($ps['inventory_id'])) {
+                mysqli_query($con, "UPDATE inventory SET quantity = quantity + " . intval($ps['qty']) . " WHERE id = " . intval($ps['inventory_id']));
+            }
             $itemCount++;
         }
     }

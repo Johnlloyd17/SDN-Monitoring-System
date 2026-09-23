@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 include "../connection.php";
 
 $filterType = isset($_GET['type']) ? mysqli_real_escape_string($con, $_GET['type']) : '';

@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <div id="viewModal" class="modal fade" role="dialog">
     <form method="post" enctype="multipart/form-data" id="viewActivityForm">
         <div class="modal-dialog modal-sdm-xl">

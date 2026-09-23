@@ -1,5 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
+
 include "../connection.php";
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -15,7 +18,7 @@ if (!$psQuery || mysqli_num_rows($psQuery) == 0) {
 $psData = mysqli_fetch_assoc($psQuery);
 $pass_slip_no = mysqli_real_escape_string($con, $psData['pass_slip_no']);
 
-$query = "SELECT ps.*, i.description AS item_desc, i.property AS property_no, i.serial AS serial_no_inv, i.ics AS ics_no 
+$query = "SELECT ps.*, i.description AS item_desc, i.serial AS serial_no_inv
           FROM pass_slip ps 
           LEFT JOIN inventory i ON ps.inventory_id = i.id 
           WHERE ps.pass_slip_no = '$pass_slip_no'
@@ -32,6 +35,9 @@ $allItems[] = $row;
 while ($nextRow = mysqli_fetch_assoc($result)) {
     $allItems[] = $nextRow;
 }
+
+require_once __DIR__ . '/serial_matcher.php';
+$knownSerials = load_known_serials($con);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -225,6 +231,19 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             margin-bottom: 6px;
         }
 
+        .serial-match-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #fff;
+            background: #28a745;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+
         @media print {
             body {
                 background: #fff;
@@ -235,6 +254,10 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 box-shadow: none;
                 padding: 20px 40px;
                 max-width: none;
+            }
+
+            .serial-match-badge {
+                display: none !important;
             }
         }
     </style>
@@ -289,7 +312,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                         <td class="desc"><?php echo htmlspecialchars($item['item_description']); ?></td>
                         <td class="center"><?php echo $item['qty']; ?></td>
                         <td class="center"><?php echo $item['unit']; ?></td>
-                        <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?><?php if (is_matched_serial($knownSerials, $item['serial_no'] ?? '')) { echo ' <span class="serial-match-badge">Matched</span>'; } ?></td>
                         <td><?php echo htmlspecialchars($item['condition_out'] ?? ''); ?></td>
                     </tr>
                 <?php endforeach; ?>

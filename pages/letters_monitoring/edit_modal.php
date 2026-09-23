@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!-- ========================= EDIT LETTER MODAL ======================= -->
 <div id="editModal" class="modal fade">
     <form id="editForm">

@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/auth_check.php'; require_auth();
+?>
 <?php if(isset($_SESSION['delete'])){
     echo '<script>$(document).ready(function (){deleted();});</script>';
     unset($_SESSION['delete']);

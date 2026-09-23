@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 error_reporting(E_ERROR | E_PARSE);
 ini_set('memory_limit', '256M');
 set_time_limit(300);

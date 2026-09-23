@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 include "../connection.php";
 
 $filterProjectFundSource = isset($_GET['project_fund_source']) ? trim($_GET['project_fund_source']) : '';

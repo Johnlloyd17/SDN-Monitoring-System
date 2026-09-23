@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+?>
+<?php
 sleep(1.2);
 ?>
 <div class="pad">This data has been loaded via ajax using the custom boxResfresh plugin.</div>

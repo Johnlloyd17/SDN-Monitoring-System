@@ -1,8 +1,11 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php
-    session_start();
+    
     if (!isset($_SESSION['role'])) {
         header("Location: ../../login.php"); 
         exit();
@@ -176,18 +179,12 @@
         #dashNotifList .notif-item > a.notif-title {
             flex: 1;
             padding: 10px 0;
-            color: #333;
             white-space: normal;
             overflow-wrap: break-word;
             word-break: break-word;
         }
-        #dashNotifList .notif-item.notif-overdue > a.notif-title {
-            color: #dd4b39;
-            font-weight: bold;
-        }
-        #dashNotifList .notif-item.notif-due > a.notif-title {
-            color: #f39c12;
-        }
+        /* Alert row colors come from the shared .notif-bill/.notif-letter rules
+           defined in pages/header.php (see js/notifications.js bellItem()). */
         /* Activities calendar widget */
         #dashCalendar {
             margin: 0 auto;

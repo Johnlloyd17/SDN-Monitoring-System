@@ -1,5 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
+
 include "../connection.php";
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -23,7 +26,7 @@ if (!$row) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Sticker - <?php echo htmlspecialchars($row['property']); ?></title>
+    <title>Property Sticker - <?php echo htmlspecialchars($row['inventory_item_no']); ?></title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -119,15 +122,11 @@ if (!$row) {
     <div class="sticker-header">PROPERTY RECORD</div>
 
     <div class="sticker-row sticker-row-line">
-        <span class="sticker-label">Property No:</span>
-        <span class="sticker-value"><?php echo htmlspecialchars($row['property']); ?></span>
+        <span class="sticker-label">Inventory Item no:</span>
+        <span class="sticker-value"><?php echo htmlspecialchars($row['inventory_item_no']); ?></span>
     </div>
     <div class="sticker-row sticker-row-line">
-        <span class="sticker-label">Classification:</span>
-        <span class="sticker-value"><?php echo htmlspecialchars($row['classification']); ?></span>
-    </div>
-    <div class="sticker-row sticker-row-line">
-        <span class="sticker-label">Description/Model:</span>
+        <span class="sticker-label">Description:</span>
         <span class="sticker-value"><?php echo htmlspecialchars($row['description']); ?></span>
     </div>
     <div class="sticker-row sticker-row-line">
@@ -143,12 +142,8 @@ if (!$row) {
         <span class="sticker-value"><?php echo htmlspecialchars($row['date']); ?></span>
     </div>
     <div class="sticker-row sticker-row-line">
-        <span class="sticker-label">Location:</span>
-        <span class="sticker-value"><?php echo htmlspecialchars($row['location'] ?? ''); ?></span>
-    </div>
-    <div class="sticker-row sticker-row-line">
-        <span class="sticker-label">Accountable Officer:</span>
-        <span class="sticker-value"><?php echo htmlspecialchars($row['officer']); ?></span>
+        <span class="sticker-label">Assigned / Deployed:</span>
+        <span class="sticker-value"><?php echo htmlspecialchars($row['assigned_to']); ?></span>
     </div>
 
     <div class="sign-section">

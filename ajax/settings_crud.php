@@ -1,5 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+?>
+<?php
+
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Administrator') {

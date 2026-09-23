@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!-- Add Inventory Custodian Slip Modal -->
 <div class="modal fade" id="addIcsModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-sdm-xl" role="document">

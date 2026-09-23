@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <?php if (!isset($con)) include "../connection.php";
 $selected_year = isset($_POST['selected_year']) ? $_POST['selected_year'] : date("Y"); // Default to current year if no year is selected
 

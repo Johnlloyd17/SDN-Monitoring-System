@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <?php if (!isset($con)) include "../connection.php";
 echo '<div id="viewModal'.$row['id'].'" class="modal fade" role="dialog">
 <form method="post" enctype="multipart/form-data">

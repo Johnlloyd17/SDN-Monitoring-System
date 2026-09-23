@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/auth_check.php'; require_auth();
+?>
 <!-- ===== DELETE MODAL ==== -->
 <div id="deleteModal" class="modal fade modal-confirm">
   <div class="modal-dialog modal-sdm-sm">

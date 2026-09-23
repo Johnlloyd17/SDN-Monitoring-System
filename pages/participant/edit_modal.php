@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <div id="editModal" class="modal fade">
     <form method="post">
         <div class="modal-dialog modal-sdm-lg">

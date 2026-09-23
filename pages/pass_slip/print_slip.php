@@ -1,5 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
+
 include "../connection.php";
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -15,7 +18,7 @@ if (!$psQuery || mysqli_num_rows($psQuery) == 0) {
 $psData = mysqli_fetch_assoc($psQuery);
 $pass_slip_no = mysqli_real_escape_string($con, $psData['pass_slip_no']);
 
-$query = "SELECT ps.*, i.description AS item_desc, i.property AS property_no, i.serial AS serial_no, i.ics AS ics_no 
+$query = "SELECT ps.*, i.description AS item_desc, i.serial AS serial_no_inv
           FROM pass_slip ps 
           LEFT JOIN inventory i ON ps.inventory_id = i.id 
           WHERE ps.pass_slip_no = '$pass_slip_no'
@@ -32,6 +35,9 @@ $allItems[] = $row;
 while ($nextRow = mysqli_fetch_assoc($result)) {
     $allItems[] = $nextRow;
 }
+
+require_once __DIR__ . '/serial_matcher.php';
+$uatLocations = load_uat_transport_locations($con);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -122,6 +128,7 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
 
         table.items {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
@@ -129,24 +136,54 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
         table.items th,
         table.items td {
             border: 1.5px solid var(--line);
-            padding: 12px 14px;
-            font-size: 16px;
+            padding: 6px 8px;
+            font-size: 12px;
             vertical-align: top;
+            overflow-wrap: normal;
+            word-break: normal;
         }
 
         table.items th {
             text-align: center;
             font-weight: 700;
             background: #fff;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         table.items td.desc {
-            line-height: 1.9;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        table.items td.serial {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .uat-location-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #fff;
+            background: #28a745;
+            border-radius: 3px;
+            vertical-align: middle;
         }
 
         table.items tr.item-stretch {
             height: 100%;
+        }
+
+        table.items tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        table.items tbody.merge-group {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         table.items td.center,
@@ -269,11 +306,11 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 padding: 0;
             }
             @page {
-                margin: 12mm;
+                margin: 8mm;
             }
             .sheet {
                 box-shadow: none;
-                padding: 20px 40px;
+                padding: 16px 24px;
                 max-width: none;
                 min-height: calc(100vh - 24mm);
                 display: flex;
@@ -281,6 +318,11 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
             }
             table.items {
                 flex: 1;
+                font-size: 11px;
+            }
+            table.items th,
+            table.items td {
+                padding: 4px 6px;
             }
         }
     </style>
@@ -306,13 +348,14 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
 
     <table class="items">
         <colgroup>
-            <col style="width: 4%;">
-            <col style="width: 32%;">
-            <col style="width: 7%;">
-            <col style="width: 10%;">
-            <col style="width: 14%;">
+            <col style="width: 6%;">
+            <col style="width: 19%;">
+            <col style="width: 8%;">
+            <col style="width: 8%;">
             <col style="width: 16%;">
-            <col style="width: 17%;">
+            <col style="width: 14%;">
+            <col style="width: 14%;">
+            <col style="width: 15%;">
         </colgroup>
         <thead>
             <tr>
@@ -323,32 +366,148 @@ while ($nextRow = mysqli_fetch_assoc($result)) {
                 <th>SERIAL NO.</th>
                 <th>PULLED&#8209;OUT DATE</th>
                 <th>RETURNED DATE</th>
+                <th>REMARKS</th>
             </tr>
         </thead>
-        <tbody>
-            <?php
+        <?php
             $itemNum = 1;
             $totalItems = count($allItems);
+
+            $descriptions = array();
+            $units = array();
+            $qtys = array();
+            $serials = array();
+            $pulloutText = array();
+            $returnText = array();
+            $remarkText = array();
+
+            for ($pi = 0; $pi < $totalItems; $pi++) {
+                $pit = $allItems[$pi];
+                $descriptions[$pi] = (string)($pit['item_description'] ?? '');
+                $units[$pi] = (string)($pit['unit'] ?? '');
+                $qtys[$pi] = $pit['qty'];
+                $psn = (string)($pit['serial_no'] ?? '');
+                $serials[$pi] = $psn;
+                $pulloutText[$pi] = date('F d, Y', strtotime($pit['pullout_date']));
+                $returnText[$pi] = $pit['return_date'] ? date('F d, Y', strtotime($pit['return_date'])) : '';
+                $premark = '';
+                if (trim($psn) !== '') {
+                    $pk = normalize_serial($psn);
+                    if (isset($uatLocations[$pk])) {
+                        $premark = $uatLocations[$pk];
+                    }
+                }
+                $remarkText[$pi] = $premark;
+            }
+
+            $groupSpan = array();
+            for ($gi = 0; $gi < $totalItems; ) {
+                $gkey = trim($descriptions[$gi]) . "\0" . trim($units[$gi]);
+                $gspan = 1;
+                while ($gi + $gspan < $totalItems) {
+                    $gnext = trim($descriptions[$gi + $gspan]) . "\0" . trim($units[$gi + $gspan]);
+                    if ($gnext !== $gkey) break;
+                    $gspan++;
+                }
+                $groupSpan[$gi] = $gspan;
+                $gi += $gspan;
+            }
+
+            $descSkip = array();
+            $qtySkip = array();
+            $unitSkip = array();
+            $qtyDisplay = array();
+            $pulledSpan = array();
+            $pulledSkip = array();
+            $returnSpan = array();
+            $returnSkip = array();
+            $remarkSpan = array();
+            $remarkSkip = array();
+
+            $buildRuns = function ($start, $span, $values, &$spanArr, &$skipArr) {
+                $ro = 0;
+                while ($ro < $span) {
+                    $rlen = 1;
+                    while ($ro + $rlen < $span && $values[$start + $ro + $rlen] === $values[$start + $ro]) {
+                        $rlen++;
+                    }
+                    if ($rlen > 1) {
+                        $spanArr[$start + $ro] = $rlen;
+                    }
+                    for ($rc = 1; $rc < $rlen; $rc++) {
+                        $skipArr[$start + $ro + $rc] = true;
+                    }
+                    $ro += $rlen;
+                }
+            };
+
+            foreach ($groupSpan as $gstart => $gspan) {
+                for ($go = 1; $go < $gspan; $go++) {
+                    $descSkip[$gstart + $go] = true;
+                    $qtySkip[$gstart + $go] = true;
+                    $unitSkip[$gstart + $go] = true;
+                }
+                $qtyDisplay[$gstart] = $gspan > 1 ? $gspan : $qtys[$gstart];
+                $buildRuns($gstart, $gspan, $pulloutText, $pulledSpan, $pulledSkip);
+                $buildRuns($gstart, $gspan, $returnText, $returnSpan, $returnSkip);
+                $buildRuns($gstart, $gspan, $remarkText, $remarkSpan, $remarkSkip);
+            }
+
             $itemIndex = 0;
+            $openedTbody = false;
             foreach ($allItems as $item):
-                $isLastItem = (++$itemIndex === $totalItems);
+                $idx = $itemIndex++;
+                $isLastItem = ($itemIndex === $totalItems);
+                $sn = $serials[$idx];
+                $isGroupStart = isset($groupSpan[$idx]);
+                $rowspanAttr = ($isGroupStart && $groupSpan[$idx] > 1) ? ' rowspan="' . $groupSpan[$idx] . '"' : '';
+                if ($isGroupStart) {
+                    if ($openedTbody) {
+                        echo '</tbody>';
+                    }
+                    echo '<tbody class="merge-group">';
+                    $openedTbody = true;
+                }
             ?>
             <tr class="<?php echo $isLastItem ? 'item-stretch' : ''; ?>">
                 <td class="center"><?php echo $itemNum++; ?></td>
-                <td class="desc"><?php echo htmlspecialchars($item['item_description']); ?></td>
-                <td class="center"><?php echo $item['qty']; ?></td>
-                <td class="center"><?php echo $item['unit']; ?></td>
-                <td><?php echo htmlspecialchars($item['serial_no'] ?? ''); ?></td>
-                <td><?php echo date('F d, Y', strtotime($item['pullout_date'])); ?></td>
-                <td><?php echo $item['return_date'] ? date('F d, Y', strtotime($item['return_date'])) : ''; ?></td>
+                <?php if (empty($descSkip[$idx])): ?>
+                <td class="desc"<?php echo $rowspanAttr; ?>><?php echo htmlspecialchars($descriptions[$idx]); ?></td>
+                <?php endif; ?>
+                <?php if (empty($qtySkip[$idx])): ?>
+                <td class="center"<?php echo $rowspanAttr; ?>><?php echo htmlspecialchars((string)$qtyDisplay[$idx]); ?></td>
+                <?php endif; ?>
+                <?php if (empty($unitSkip[$idx])): ?>
+                <td class="center"<?php echo $rowspanAttr; ?>><?php echo htmlspecialchars($units[$idx]); ?></td>
+                <?php endif; ?>
+                <td class="serial"><?php echo htmlspecialchars($sn); ?></td>
+                <?php if (empty($pulledSkip[$idx])): ?>
+                <td<?php echo isset($pulledSpan[$idx]) ? ' rowspan="' . $pulledSpan[$idx] . '"' : ''; ?>><?php echo $pulloutText[$idx]; ?></td>
+                <?php endif; ?>
+                <?php if (empty($returnSkip[$idx])): ?>
+                <td<?php echo isset($returnSpan[$idx]) ? ' rowspan="' . $returnSpan[$idx] . '"' : ''; ?>><?php echo $returnText[$idx]; ?></td>
+                <?php endif; ?>
+                <?php if (empty($remarkSkip[$idx])): ?>
+                <td<?php echo isset($remarkSpan[$idx]) ? ' rowspan="' . $remarkSpan[$idx] . '"' : ''; ?>><?php if ($remarkText[$idx] !== '') { echo '<span class="uat-location-badge">' . htmlspecialchars($remarkText[$idx]) . '</span>'; } ?></td>
+                <?php endif; ?>
             </tr>
-            <?php endforeach; ?>
-        </tbody>
+            <?php
+                if ($idx + 1 >= $totalItems && $openedTbody) {
+                    echo '</tbody>';
+                    $openedTbody = false;
+                }
+            endforeach; ?>
     </table>
 
     <div class="purpose">
         <strong>PURPOSE:</strong> <span class="purpose-text"><?php echo htmlspecialchars($row['purpose']); ?></span>
     </div>
+
+    <?php if (!empty(trim($row['remarks'] ?? ''))): ?>
+    <div class="remarks-box">
+        <strong>REMARKS:</strong> <span class="remarks-text"><?php echo htmlspecialchars($row['remarks']); ?></span>
+    </div>
+    <?php endif; ?>
 
     <div class="sig-group">
         <div class="sig-block">

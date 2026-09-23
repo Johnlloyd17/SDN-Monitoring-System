@@ -1,12 +1,9 @@
 <?php
-session_start();
-header('Content-Type: application/json');
+require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+?>
+<?php
 
-if (!isset($_SESSION['role'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
+header('Content-Type: application/json');
 
 include '../pages/connection.php';
 
@@ -15,14 +12,12 @@ $perPage = isset($_GET['per_page']) ? min(100, max(5, intval($_GET['per_page']))
 $offset = ($page - 1) * $perPage;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $project = isset($_GET['project']) ? trim($_GET['project']) : '';
-$ics = isset($_GET['ics']) ? trim($_GET['ics']) : '';
 $year = isset($_GET['year']) ? trim($_GET['year']) : '';
 $remarks = isset($_GET['remarks']) ? trim($_GET['remarks']) : '';
-$status = isset($_GET['status']) ? trim($_GET['status']) : '';
 $sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'project';
 $order = isset($_GET['order']) ? strtoupper($_GET['order']) : 'DESC';
 
-$allowedSorts = ['project','item','classification','quantity','unit','description','received','property','ics','serial','date','officer','cost','life','transferred','remarks','status'];
+$allowedSorts = ['project','item','quantity','unit','description','serial','cost','total_cost','date','received','inventory_item_no','assigned_to','life','remarks'];
 if (!in_array($sort, $allowedSorts)) $sort = 'project';
 if (!in_array($order, ['ASC','DESC'])) $order = 'DESC';
 
@@ -31,19 +26,14 @@ $params = [];
 $types = '';
 
 if ($search !== '') {
-    $where[] = "(project LIKE ? OR item LIKE ? OR classification LIKE ? OR description LIKE ? OR property LIKE ? OR ics LIKE ? OR serial LIKE ? OR officer LIKE ? OR remarks LIKE ?)";
+    $where[] = "(project LIKE ? OR item LIKE ? OR unit LIKE ? OR description LIKE ? OR serial LIKE ? OR inventory_item_no LIKE ? OR assigned_to LIKE ? OR remarks LIKE ?)";
     $s = "%$search%";
-    $params = array_merge($params, [$s,$s,$s,$s,$s,$s,$s,$s,$s]);
-    $types .= str_repeat('s', 9);
+    $params = array_merge($params, [$s,$s,$s,$s,$s,$s,$s,$s]);
+    $types .= str_repeat('s', 8);
 }
 if ($project !== '') {
     $where[] = "project = ?";
     $params[] = $project;
-    $types .= 's';
-}
-if ($ics !== '') {
-    $where[] = "ics = ?";
-    $params[] = $ics;
     $types .= 's';
 }
 if ($year !== '') {
@@ -54,11 +44,6 @@ if ($year !== '') {
 if ($remarks !== '') {
     $where[] = "remarks = ?";
     $params[] = $remarks;
-    $types .= 's';
-}
-if ($status !== '') {
-    $where[] = "status = ?";
-    $params[] = $status;
     $types .= 's';
 }
 

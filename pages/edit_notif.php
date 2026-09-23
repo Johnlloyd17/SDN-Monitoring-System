@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/auth_check.php'; require_auth();
+?>
 <?php if(isset($_SESSION['edited'])){
     echo '<script>$(document).ready(function (){success();});</script>';
     unset($_SESSION['edited']);

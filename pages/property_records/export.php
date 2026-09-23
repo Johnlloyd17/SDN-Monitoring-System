@@ -1,36 +1,31 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 include "../connection.php"; // Include the database connection file
 
 // Get filtering parameters from the query string (GET request)
 $filterProject = isset($_GET['project']) ? mysqli_real_escape_string($con, $_GET['project']) : '';
-$filterICS = isset($_GET['ics']) ? mysqli_real_escape_string($con, $_GET['ics']) : '';
 $filterYear = isset($_GET['year']) ? mysqli_real_escape_string($con, $_GET['year']) : '';
 $filterRemarks = isset($_GET['remarks']) ? mysqli_real_escape_string($con, $_GET['remarks']) : '';
-$filterStatus = isset($_GET['status']) ? mysqli_real_escape_string($con, $_GET['status']) : '';
 
-// Initialize the base SQL query
-$query = "SELECT 
-            project, item, classification, quantity, unit, description, 
-            received, property, ics, serial, date, officer, cost, life, 
-            transferred, remarks, status 
-          FROM inventory 
+// Initialize the base SQL query (column order matches the CSV header order)
+$query = "SELECT
+            project, item, quantity, unit, description,
+            serial, cost, total_cost, date, received,
+            inventory_item_no, assigned_to, life, remarks
+          FROM inventory
           WHERE project != ''"; // Start with a base query that retrieves all records
 
 // Apply filters if provided
 if (!empty($filterProject)) {
     $query .= " AND project = '$filterProject'";
 }
-if (!empty($filterICS)) {
-    $query .= " AND ics = '$filterICS'";
-}
 if (!empty($filterYear)) {
     $query .= " AND YEAR(date) = '$filterYear'";
 }
 if (!empty($filterRemarks)) {
     $query .= " AND remarks = '$filterRemarks'";
-}
-if (!empty($filterStatus)) {
-    $query .= " AND status = '$filterStatus'";
 }
 
 // Set headers to trigger download as a CSV file
@@ -42,11 +37,9 @@ $output = fopen('php://output', 'w');
 
 // Output column headers for the CSV file
 fputcsv($output, array(
-    'Project', 'Item No.', 'Classification', 'Quantity', 'Unit', 
-    'Description/Model', 'Received From', 'Property Number', 
-    'ICS/PAR Number', 'Serial Number', 'Date Acquired', 
-    'Accountable Officer', 'Unit Cost', 'Estimated Useful Life', 
-    'Received/Transferred', 'Remarks', 'Status'
+    'Project', 'Item No.', 'Quantity', 'Unit', 'Description',
+    'Serial Number', 'Unit Cost', 'Total Cost', 'Date Acquired', 'Received From',
+    'Inventory Item no.', 'Assigned/Deployed', 'Estimated Useful Life', 'Remarks'
 ));
 
 // Execute the query
@@ -55,7 +48,7 @@ $result = mysqli_query($con, $query);
 // Check if the query was successful and output the data to the CSV
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
-        fputcsv($output, $row); // Write each row to the CSV without the ID
+        fputcsv($output, $row); // Write each row to the CSV
     }
 } else {
     // Handle query error and display a message

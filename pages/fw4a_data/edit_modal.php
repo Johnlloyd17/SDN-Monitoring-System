@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <?php echo '
 <div id="editModal' . $row['id'] . '" class="modal fade">
     <form method="post">

@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/auth_check.php'; require_auth();
+?>
 <?php if(isset($_SESSION['added'])){
     echo '<script>$(document).ready(function (){save_success();});</script>';
     unset($_SESSION['added']);

@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!-- ========================= MODAL ======================= -->
             <div id="addZoneModal" class="modal fade">
             <form method="post">

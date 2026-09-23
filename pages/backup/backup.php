@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!DOCTYPE html>
 <html>
     <?php include('../head_css.php'); ?>

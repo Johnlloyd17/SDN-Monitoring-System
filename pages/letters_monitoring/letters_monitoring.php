@@ -1,8 +1,11 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <?php
-    session_start();
+    
     if (!isset($_SESSION['role'])) {
         header("Location: ../../login.php");
         exit();

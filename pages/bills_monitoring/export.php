@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
+<?php
 include "../connection.php";
 
 $filterStatus = isset($_GET['status']) ? trim($_GET['status']) : '';

@@ -1,7 +1,10 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <!DOCTYPE html>
 <html>
 <?php
-session_start();
+
 if (!isset($_SESSION['role'])) {
     header("Location: ../../login.php");
 } else {
@@ -272,9 +275,11 @@ if (!isset($_SESSION['role'])) {
                             <td>
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">';
 
-                                                                                echo '<button type="button" class="btn btn-info btn-xs" onclick="viewPassSlip(\'' . $slipNo . '\')" title="View Details"><i class="fa fa-eye"></i></button>';
+                                                                                if (!isset($_SESSION['staff'])) {
+                                                                                    echo '<button type="button" class="btn btn-primary btn-xs" onclick="openEditSlip(\'' . $slipNo . '\')" title="Edit Purpose / Remarks"><i class="fa fa-pencil"></i></button>';
+                                                                                }
 
-                                                                                if ($row['status'] == 'borrowed' && $_SESSION['role'] !== 'staff') {
+                                                                                if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
                                                                                     echo '<button type="button" class="btn btn-success btn-xs" onclick="openReturnModal(\'' . $slipNo . '\')" title="Process Return"><i class="fa fa-undo"></i></button>';
                                                                                 }
                                                                                 echo '
@@ -492,12 +497,21 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                     </div>
 
-                                    <?php include "../edit_notif.php"; ?>
-                                    <?php include "../added_notif.php"; ?>
-                                    <?php include "../delete_notif.php"; ?>
+                                    <?php
+                                    $psToast = '';
+                                    if (isset($_SESSION['added'])) { unset($_SESSION['added']); $psToast = 'Record added successfully!'; }
+                                    elseif (isset($_SESSION['edited'])) { unset($_SESSION['edited']); $psToast = 'Record updated successfully!'; }
+                                    elseif (isset($_SESSION['delete'])) { unset($_SESSION['delete']); $psToast = 'Record deleted successfully!'; }
+                                    ?>
+                                    <?php if ($psToast !== ''): ?>
+                                    <script type="text/javascript">
+                                        $(document).ready(function () { showToast('<?php echo $psToast; ?>', 'success'); });
+                                    </script>
+                                    <?php endif; ?>
 
                                     <?php include "add_modal.php"; ?>
                                     <?php include "add_ics_modal.php"; ?>
+                                    <?php include "edit_slip_modal.php"; ?>
                                     <?php include "function.php"; ?>
 
                                     <?php if (isset($_SESSION['new_ics'])) {
@@ -513,24 +527,9 @@ if (!isset($_SESSION['role'])) {
                                         </script>
                                     <?php } ?>
 
-                                    <!-- View Pass Slip Detail Modal -->
-                                    <div class="modal fade" id="viewPassSlipModal" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog modal-sdm-xl" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%); color: #fff;">
-                                                    <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
-                                                    <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Pass Slip Preview</h4>
-                                                </div>
-                                                <div class="modal-body" style="padding: 0; height: 700px; background: #e9e9e9;">
-                                                    <iframe id="viewSlipFrame" src="" style="width: 100%; height: 100%; border: none;"></iframe>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Return Pass Slip Modal -->
                                     <div class="modal fade" id="returnPassSlipModal" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog modal-sdm-lg" role="document">
+                                        <div class="modal-dialog modal-sdm-xl" role="document">
                                             <div class="modal-content">
                                                 <form method="POST" action="function.php">
                                                     <div class="modal-header">
@@ -814,12 +813,49 @@ include dirname(__DIR__) . '/scripts.php'; ?>
         }
         ?>
 
-        function viewPassSlip(slipNo) {
+        function openEditSlip(slipNo) {
             var d = passSlipData[slipNo];
             if (!d) return;
-            var frame = document.getElementById('viewSlipFrame');
-            frame.src = 'print_slip.php?id=' + d.first_id;
-            $('#viewPassSlipModal').modal('show');
+
+            document.getElementById('editSlipNo').textContent = d.pass_slip_no;
+            document.getElementById('editPassSlipNo').value = d.pass_slip_no;
+
+            var tbody = document.getElementById('editItemsBody');
+            tbody.innerHTML = '';
+
+            $.getJSON('function.php?action=item_details&pass_slip_no=' + encodeURIComponent(slipNo), function(items) {
+                if (!items || !items.length) return;
+
+                document.getElementById('editPurpose').value = items[0].purpose || '';
+                document.getElementById('editRemarks').value = items[0].remarks || '';
+                document.getElementById('editRequestedBy').value = items[0].requested_by_out || '';
+                document.getElementById('editInspectedBy').value = items[0].inspected_by_out || '';
+                document.getElementById('editApprovedBy').value = items[0].approved_by_out || '';
+
+                items.forEach(function(it) {
+                    var row = document.createElement('tr');
+                    row.className = 'item-row';
+                    row.innerHTML = window.itemRowHtml();
+
+                    var set = function(name, val) {
+                        var el = row.querySelector('input[name="' + name + '[]"]');
+                        if (el) el.value = (val === null || val === undefined) ? '' : val;
+                    };
+                    set('id', it.id);
+                    set('inventory_id', it.inventory_id);
+                    set('description', it.item_description);
+                    set('serial_no', it.serial_no);
+                    set('qty', it.qty);
+                    set('unit', it.unit);
+                    set('pullout_date', it.pullout_date);
+                    set('return_date', it.return_date);
+
+                    tbody.appendChild(row);
+                });
+
+                if (window.editItemEditor) window.editItemEditor.setActiveRow(tbody.lastElementChild);
+                $('#editPassSlipModal').modal('show');
+            });
         }
 
         function openReturnModal(slipNo) {

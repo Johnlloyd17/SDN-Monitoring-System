@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/auth_check.php'; require_auth();
+?>
 <?php if (!isset($con)) include "connection.php";
 $_notifBase = '../../';
 $settingsRow = '';
@@ -36,8 +39,8 @@ echo '<header class="header">
                             </li>
                             <li class="footer" style="padding:0;">
                                 <div class="notif-footer-row">
-                                    <a href="#" id="notifViewAll" style="display:none;">View All</a>
-                                    <a href="#" id="notifDismissAll" style="display:none;">Dismiss all</a>
+                                    <a href="#" id="notifViewAll" class="btn btn-xs btn-notif-view" style="display:none;"><i class="fa fa-list"></i> View All</a>
+                                    <a href="#" id="notifDismissAll" class="btn btn-xs btn-warning" style="display:none;"><i class="fa fa-bell-slash"></i> Dismiss all</a>
                                 </div>
                             </li>
                         </ul>
@@ -91,24 +94,27 @@ echo '<header class="header">
         -ms-scroll-chaining: none;
     }
     #notifList .notif-item { display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #f4f4f4; }
-    #notifList .notif-item > a.notif-title { flex: 1; padding: 10px 0; color: #333; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
+    #notifList .notif-item > a.notif-title { flex: 1; padding: 10px 0; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
     #notifList .notif-item .notif-view,
     #notifList .notif-item .notif-x,
     .notif-action { color: #999; font-size: 12px; padding: 2px 6px; white-space: nowrap; text-decoration: none; background: transparent; border: 0; }
     .notif-action:hover, .notif-action:focus { text-decoration: underline; }
     .notif-action.notif-view:hover, .notif-action.notif-view:focus { color: #3c8dbc; }
     .notif-action.notif-x:hover, .notif-action.notif-x:focus { color: #dd4b39; }
-    #notifList .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
-    #notifList .notif-item.notif-due > a.notif-title { color: #f39c12; }
     #notifList .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
-    .notif-footer-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid #f4f4f4; background: #fff; }
-    .notif-footer-row a { color: #3c8dbc; font-size: 12px; font-weight: normal; }
-    .notif-footer-row a:hover, .notif-footer-row a:focus { text-decoration: underline; }
+    .notif-footer-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid #f4f4f4; background: #fff; }
+    .notif-footer-row .btn { font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .notif-footer-row .btn:hover,
+    .notif-footer-row .btn:focus { text-decoration: none; }
+    .notif-footer-row .btn > .fa { margin-right: 4px; }
+    /* "Dismiss all" reuses the modal's btn.btn-warning (orange, white text). */
+    /* "View All" — brand navy outline button, visually distinct from Dismiss all. */
+    .notif-footer-row .btn-notif-view { color: #001f3f; background: #fff; border: 1px solid #001f3f; }
+    .notif-footer-row .btn-notif-view:hover,
+    .notif-footer-row .btn-notif-view:focus { color: #001f3f; background: #eaeff7; border-color: #001f3f; }
     .notif-all-list { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; }
     .notif-all-list .notif-item { display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #f4f4f4; }
-    .notif-all-list .notif-item > a.notif-title { flex: 1; padding: 10px 0; color: #333; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
-    .notif-all-list .notif-item.notif-overdue > a.notif-title { color: #dd4b39; font-weight: bold; }
-    .notif-all-list .notif-item.notif-due > a.notif-title { color: #f39c12; }
+    .notif-all-list .notif-item > a.notif-title { flex: 1; padding: 10px 0; white-space: normal; overflow-wrap: break-word; word-break: break-word; }
     .notif-all-list .notif-item .label { display: inline-block; margin-left: 4px; white-space: nowrap; }
     #notifAllModal .modal-body.modal-tabs .nav-tabs { padding: 12px 24px 0; margin: 0; }
     /* Bills = blue, Letters = green (tab pills + row text). Overdue bills stay red. */
@@ -120,9 +126,22 @@ echo '<header class="header">
     #notifAllModal .notif-tab-letters.active > a,
     #notifAllModal .notif-tab-letters.active > a:hover,
     #notifAllModal .notif-tab-letters.active > a:focus { background: #00a65a; color: #fff; }
-    #notifAllBillsPane .notif-item.notif-due > a.notif-title { color: #3c8dbc; }
-    #notifAllBillsPane .notif-item.notif-overdue > a.notif-title { color: #dd4b39; }
-    #notifAllLettersPane .notif-item > a.notif-title { color: #00a65a; }
+    /* SHARED source of truth for alert row TEXT color-coding. The color lives on the
+       row's <li> (classes emitted by js/notifications.js bellItem()) and the
+       title link inherits it, so the bell dropdown, the "View All" modal and the
+       dashboard all reference ONE rule set:
+           bills due (incl. no due date)  -> #3c8dbc (blue)
+           bills overdue                  -> #dd4b39 (red)
+           letters                        -> #00a65a (green) */
+    .notif-item.notif-bill.notif-due { color: #3c8dbc; }
+    .notif-item.notif-bill.notif-overdue { color: #dd4b39; }
+    .notif-item.notif-letter { color: #00a65a; }
+    .notif-item > a.notif-title { color: inherit; }
+    /* Dropdown only: neutralizes AdminLTE's .notifications-menu a{color:#444}
+       (specificity 0,4,3), which otherwise wins over the shared class rules
+       inside the navbar. The ID scope is what beats that selector; color
+       composition still comes solely from the shared <li> rules above. */
+    #notifList .notif-item > a.notif-title { color: inherit; }
     #notifViewModal .notif-view-value { font-size: 13px; color: #333; padding-top: 6px; word-break: break-word; }
 
     /* ============ Administrator account dropdown (list-style menu) ============ */

@@ -45,9 +45,10 @@
     }
 
     function bellItem(it) {
-        var cls = it.overdue ? 'notif-overdue' : 'notif-due';
+        var cls = 'notif-item ' + (it.source_type === 'letter' ? 'notif-letter' : 'notif-bill') +
+            ' ' + (it.overdue ? 'notif-overdue' : 'notif-due');
         var tag = it.overdue ? ' <span class="label label-danger">OVERDUE</span>' : '';
-        return '<li class="notif-item ' + cls + '">' +
+        return '<li class="' + cls + '">' +
             '<a href="' + base + it.link + '" class="notif-title">' + escHtml(it.label) + tag + '</a>' +
             '<a href="#" class="notif-action notif-view" data-notif-view="' + keyOf(it) + '" title="View details">View</a>' +
             '<a href="#" class="notif-action notif-x" data-notif-dismiss="' + keyOf(it) + '" title="Dismiss">&times;</a>' +

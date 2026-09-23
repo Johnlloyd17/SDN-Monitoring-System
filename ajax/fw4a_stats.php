@@ -1,15 +1,12 @@
 <?php
-session_start();
+require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+?>
+<?php
+
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
-
-if (!isset($_SESSION['role'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
 
 include '../pages/connection.php';
 

@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../auth_check.php'; require_auth();
+?>
 <?php if (!isset($con)) include "../connection.php";
 if (isset($_POST['btn_add'])) {
     $region = $_POST['txt_region'];
