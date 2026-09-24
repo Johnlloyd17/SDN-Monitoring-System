@@ -103,8 +103,8 @@ if ($_SESSION['role'] == "Administrator") {
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
                 <li><a href="../property_records/classifications.php"><i class="fa fa-tags"></i> Classifications</a></li>
-                <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
                 <li><a href="../uat/uat.php"><i class="fa fa-file-signature"></i> UAT Management</a></li>
+                <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
         </li>
         <li>
@@ -125,6 +125,11 @@ if ($_SESSION['role'] == "Administrator") {
         <li>
             <a href="../letters_monitoring/letters_monitoring.php">
                 <i class="fa fa-file-text-o"></i> <span>Letters Monitoring</span>
+            </a>
+        </li>
+        <li>
+            <a href="../employee_records/employee_records.php">
+                <i class="fa fa-users"></i> <span>Employee Records</span>
             </a>
         </li>
         <li>
@@ -224,8 +229,8 @@ if ($_SESSION['role'] == "Administrator") {
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
                 <li><a href="../property_records/classifications.php"><i class="fa fa-tags"></i> Classifications</a></li>
-                <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
                 <li><a href="../uat/uat.php"><i class="fa fa-file-signature"></i> UAT Management</a></li>
+                <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
         </li>
         <li>
@@ -246,6 +251,11 @@ if ($_SESSION['role'] == "Administrator") {
         <li>
             <a href="../letters_monitoring/letters_monitoring.php">
                 <i class="fa fa-file-text-o"></i> <span>Letters Monitoring</span>
+            </a>
+        </li>
+        <li>
+            <a href="../employee_records/employee_records.php">
+                <i class="fa fa-users"></i> <span>Employee Records</span>
             </a>
         </li>
     </ul>';

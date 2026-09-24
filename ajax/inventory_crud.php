@@ -15,14 +15,12 @@ if (!file_exists($photoDir)) {
 $action = isset($_POST['action']) ? $_POST['action'] : (isset($_GET['action']) ? $_GET['action'] : '');
 
 // Blank cells are normalized so they never corrupt the data:
-//  - Project gets a placeholder (every list/stats/export query filters
-//    `project != ''`, so a blank Project would otherwise make the record
-//    invisible).
+//  - Project is stored as NULL when blank (the list/stats/export queries
+//    no longer exclude blank-project records).
 //  - Description gets a placeholder so downstream features (pass slip,
 //    print sticker, file viewer) have a label.
 //  - Quantity, Life, Cost, Date, etc. are stored as NULL instead of being
 //    coerced to 0 / 0000-00-00 by MySQL.
-$PROJECT_FALLBACK = 'Unspecified';
 $DESCRIPTION_FALLBACK = '(No description)';
 
 function normText($value) {
@@ -46,9 +44,34 @@ function sqlVal($con, $value) {
     return "'" . mysqli_real_escape_string($con, $value) . "'";
 }
 
+function fieldsFilled(array $values) {
+    foreach ($values as $value) {
+        if (trim((string)$value) !== '') return true;
+    }
+    return false;
+}
+
 if ($action === 'add') {
+    $filled = fieldsFilled(array(
+        $_POST['txt_project'] ?? '',
+        $_POST['txt_item'] ?? '',
+        $_POST['txt_quantity'] ?? '',
+        $_POST['txt_unit'] ?? '',
+        $_POST['txt_description'] ?? '',
+        $_POST['txt_received'] ?? '',
+        $_POST['txt_serial'] ?? '',
+        $_POST['txt_date'] ?? '',
+        str_replace(',', '', $_POST['txt_cost'] ?? ''),
+        $_POST['txt_inventory_item_no'] ?? '',
+        $_POST['txt_assigned_to'] ?? '',
+        $_POST['txt_life'] ?? '',
+        $_POST['txt_remarks'] ?? '',
+    ));
+    if (!$filled) {
+        echo json_encode(['success' => false, 'error' => 'Please fill in at least one field before saving.']);
+        exit;
+    }
     $project = normText($_POST['txt_project'] ?? '');
-    $project = $project === null ? $PROJECT_FALLBACK : $project;
     $item = normText($_POST['txt_item'] ?? '');
     $quantity = normIntOrNull($_POST['txt_quantity'] ?? '');
     $unit = normText($_POST['txt_unit'] ?? '');
@@ -107,8 +130,26 @@ if ($action === 'add') {
 
 if ($action === 'edit') {
     $id = intval($_POST['hidden_id'] ?? 0);
+    $filled = fieldsFilled(array(
+        $_POST['txt_edit_project'] ?? '',
+        $_POST['txt_edit_item'] ?? '',
+        $_POST['txt_edit_quantity'] ?? '',
+        $_POST['txt_edit_unit'] ?? '',
+        $_POST['txt_edit_description'] ?? '',
+        $_POST['txt_edit_received'] ?? '',
+        $_POST['txt_edit_serial'] ?? '',
+        $_POST['txt_edit_date'] ?? '',
+        str_replace(',', '', $_POST['txt_edit_cost'] ?? ''),
+        $_POST['txt_edit_inventory_item_no'] ?? '',
+        $_POST['txt_edit_assigned_to'] ?? '',
+        $_POST['txt_edit_life'] ?? '',
+        $_POST['txt_edit_remarks'] ?? '',
+    ));
+    if (!$filled) {
+        echo json_encode(['success' => false, 'error' => 'Please fill in at least one field before saving.']);
+        exit;
+    }
     $project = normText($_POST['txt_edit_project'] ?? '');
-    $project = $project === null ? $PROJECT_FALLBACK : $project;
     $item = normText($_POST['txt_edit_item'] ?? '');
     $quantity = normIntOrNull($_POST['txt_edit_quantity'] ?? '');
     $unit = normText($_POST['txt_edit_unit'] ?? '');

@@ -145,7 +145,7 @@ if (!isset($_SESSION['role'])) {
                                                                 </select>
                                                                 <label style="margin:0; font-weight:normal;"> records per page</label>
                                                                 <?php if ($isAdminUat) { ?>
-                                                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#addUatModal" title="Add New UAT Record"><i class="fa fa-file-signature"></i> Add UAT</button>
+                                                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#addUatModal" title="Create New UAT Record"><i class="fa fa-file-signature"></i> Create UAT</button>
                                                                     <button type="button" class="btn btn-danger btn-sm" id="btnDeleteSelectedUat" onclick="deleteSelectedUat()" disabled><i class="fa fa-trash"></i> Delete Selected (<span id="uatSelectedCount">0</span>)</button>
                                                                 <?php } ?>
                                                             </div>
@@ -225,7 +225,6 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                     </div>
 
-                                    <?php include "../added_notif.php"; ?>
                                     <?php include "../edit_notif.php"; ?>
 
                                     <?php include "add_modal.php"; ?>
@@ -233,14 +232,11 @@ if (!isset($_SESSION['role'])) {
                                     <?php include "function.php"; ?>
 
                                     <?php if (isset($_SESSION['new_uat'])) {
-                                        $newUatId = intval($_SESSION['new_uat']);
                                         unset($_SESSION['new_uat']);
                                     ?>
                                         <script type="text/javascript">
                                             $(document).ready(function() {
-                                                if (confirm('UAT record created successfully. Print it now?')) {
-                                                    openPrintUat('<?php echo $newUatId; ?>');
-                                                }
+                                                showToast('UAT record created successfully.', 'success');
                                             });
                                         </script>
                                     <?php } ?>

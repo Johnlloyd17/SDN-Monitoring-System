@@ -73,19 +73,22 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Requested By <span class="text-danger">*</span></label>
-                                <input type="text" name="requested_by_out" id="editRequestedBy" class="form-control" required placeholder="Name">
+                                <input type="text" name="requested_by_out" id="editRequestedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="requested_by_out_emp_id" id="editRequestedByEmpId" value="">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Inspected By <span class="text-danger">*</span></label>
-                                <input type="text" name="inspected_by_out" id="editInspectedBy" class="form-control" required placeholder="Name">
+                                <input type="text" name="inspected_by_out" id="editInspectedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="inspected_by_out_emp_id" id="editInspectedByEmpId" value="">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Approved By <span class="text-danger">*</span></label>
-                                <input type="text" name="approved_by_out" id="editApprovedBy" class="form-control" required placeholder="Name">
+                                <input type="text" name="approved_by_out" id="editApprovedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="approved_by_out_emp_id" id="editApprovedByEmpId" value="">
                             </div>
                         </div>
                     </div>

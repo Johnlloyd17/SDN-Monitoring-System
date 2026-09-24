@@ -130,8 +130,9 @@ if (!isset($_SESSION['role'])) {
                                                                         <label for="statusSelect">Filter by Status</label>
                                                                         <select id="statusSelect" name="status" class="form-control" onchange="this.form.submit()">
                                                                             <option value="">All Status</option>
-                                                                            <option value="borrowed" <?php echo (isset($_POST['status']) && $_POST['status'] == 'borrowed') ? 'selected' : ''; ?>>Borrowed</option>
-                                                                            <option value="returned" <?php echo (isset($_POST['status']) && $_POST['status'] == 'returned') ? 'selected' : ''; ?>>Returned</option>
+<option value="borrowed" <?php echo (isset($_POST['status']) && $_POST['status'] == 'borrowed') ? 'selected' : ''; ?>>Borrowed</option>
+            <option value="deployed" <?php echo (isset($_POST['status']) && $_POST['status'] == 'deployed') ? 'selected' : ''; ?>>Deployed</option>
+            <option value="returned" <?php echo (isset($_POST['status']) && $_POST['status'] == 'returned') ? 'selected' : ''; ?>>Returned</option>
                                                                             <option value="overdue" <?php echo (isset($_POST['status']) && $_POST['status'] == 'overdue') ? 'selected' : ''; ?>>Overdue</option>
                                                                         </select>
                                                                     </div>
@@ -165,7 +166,7 @@ if (!isset($_SESSION['role'])) {
                                                         <div style="padding:10px; display: flex; justify-content: space-between;">
                                                             <div>
                                                                 <?php if ($_SESSION['role'] !== 'staff') { ?>
-                                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addPassSlipModal"><i class="fa fa-plus"></i> Create Pass Slip</button>
+                                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addPassSlipModal"><i class="fa fa-plus"></i> Generate Pass Slip</button>
                                                                 <?php } ?>
                                                             </div>
                                                             <div>
@@ -248,6 +249,10 @@ if (!isset($_SESSION['role'])) {
                                                                                         $statusClass = 'label label-warning';
                                                                                         $statusLabel = 'Borrowed';
                                                                                         break;
+                                                                                    case 'deployed':
+                                                                                        $statusClass = 'label label-primary';
+                                                                                        $statusLabel = 'Deployed';
+                                                                                        break;
                                                                                     case 'returned':
                                                                                         $statusClass = 'label label-success';
                                                                                         $statusLabel = 'Returned';
@@ -279,8 +284,11 @@ if (!isset($_SESSION['role'])) {
                                                                                     echo '<button type="button" class="btn btn-primary btn-xs" onclick="openEditSlip(\'' . $slipNo . '\')" title="Edit Purpose / Remarks"><i class="fa fa-pencil"></i></button>';
                                                                                 }
 
-                                                                                if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
-                                                                                    echo '<button type="button" class="btn btn-success btn-xs" onclick="openReturnModal(\'' . $slipNo . '\')" title="Process Return"><i class="fa fa-undo"></i></button>';
+if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
+                    echo '<button type="button" class="btn btn-success btn-xs" onclick="openReturnModal(\'' . $slipNo . '\')" title="Process Return"><i class="fa fa-undo"></i></button>';
+                }
+                                                                                if (!isset($_SESSION['staff'])) {
+                                                                                    echo '<button type="button" class="btn btn-default btn-xs" onclick="openChangeStatus(\'' . $slipNo . '\')" title="Change Status"><i class="fa fa-exchange"></i></button>';
                                                                                 }
                                                                                 echo '
                                     <button type="button" class="btn btn-default btn-xs" onclick="openPrintSlip(\'' . $slipNo . '\')" title="Print Pass Slip"><i class="fa fa-print"></i></button>
@@ -499,13 +507,20 @@ if (!isset($_SESSION['role'])) {
 
                                     <?php
                                     $psToast = '';
-                                    if (isset($_SESSION['added'])) { unset($_SESSION['added']); $psToast = 'Record added successfully!'; }
+                                    $psToastType = 'success';
+                                    if (isset($_SESSION['ps_msg_delete'])) {
+                                        $psToast = $_SESSION['ps_msg_delete']['text'];
+                                        $psToastType = $_SESSION['ps_msg_delete']['type'];
+                                        unset($_SESSION['ps_msg_delete']);
+                                    }
+                                    elseif (isset($_SESSION['ps_generated'])) { unset($_SESSION['ps_generated']); $psToast = 'Pass Slip generated successfully!'; }
+                                    elseif (isset($_SESSION['added'])) { unset($_SESSION['added']); $psToast = 'Record added successfully!'; }
                                     elseif (isset($_SESSION['edited'])) { unset($_SESSION['edited']); $psToast = 'Record updated successfully!'; }
                                     elseif (isset($_SESSION['delete'])) { unset($_SESSION['delete']); $psToast = 'Record deleted successfully!'; }
                                     ?>
                                     <?php if ($psToast !== ''): ?>
                                     <script type="text/javascript">
-                                        $(document).ready(function () { showToast('<?php echo $psToast; ?>', 'success'); });
+                                        $(document).ready(function () { showToast(<?php echo json_encode($psToast); ?>, '<?php echo $psToastType; ?>'); });
                                     </script>
                                     <?php endif; ?>
 
@@ -589,19 +604,21 @@ if (!isset($_SESSION['role'])) {
                                                                 <div class="form-group">
                                                                     <label>Requested By (Return) <span class="text-danger">*</span></label>
                                                                     <input type="text" name="requested_by_return" id="returnRequestedBy" class="form-control" required placeholder="Auto-filled from pull-out" autocomplete="off">
+                                                                    <input type="hidden" name="requested_by_return_emp_id" id="returnRequestedByEmpId" value="">
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label>Inspected By (Return) <span class="text-danger">*</span></label>
-                                                                    <input type="text" name="inspected_by_return" id="returnInspectedBy" class="form-control" required placeholder="Choose or type name" list="inspectorList" autocomplete="off">
-                                                                    <datalist id="inspectorList"></datalist>
+                                                                    <input type="text" name="inspected_by_return" id="returnInspectedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                                                    <input type="hidden" name="inspected_by_return_emp_id" id="returnInspectedByEmpId" value="">
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label>Approved By (Return) <span class="text-danger">*</span></label>
-                                                                    <input type="text" name="approved_by_return" id="returnApprovedBy" class="form-control" required readonly style="background-color: #f0f0f0;">
+                                                                    <input type="text" name="approved_by_return" id="returnApprovedBy" class="form-control" required placeholder="Auto-filled from pull-out" autocomplete="off">
+                                                                    <input type="hidden" name="approved_by_return_emp_id" id="returnApprovedByEmpId" value="">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -619,6 +636,42 @@ if (!isset($_SESSION['role'])) {
                                                         <button type="submit" name="process_return" class="btn btn-success"><i class="fa fa-check"></i> Confirm Return</button>
                                                     </div>
                                                 </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Change Status Modal (single control for all 4 enum statuses) -->
+                                    <div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    <h4 class="modal-title"><i class="fa fa-exchange"></i> Change Status - <span id="chgStatusSlipNo"></span></h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" id="chgCurrentStatus">
+                                                    <div class="form-group">
+                                                        <label>Current Status</label>
+                                                        <p id="chgCurrentStatusLabel" style="margin-bottom:0; font-weight:600;"></p>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>New Status <span class="text-danger">*</span></label>
+                                                        <select id="chgStatusSelect" class="form-control">
+                                                            <option value="borrowed">Borrowed</option>
+                                                            <option value="deployed">Deployed</option>
+                                                            <option value="overdue">Overdue</option>
+                                                            <option value="returned">Returned</option>
+                                                        </select>
+                                                        <small id="chgStatusHint" class="text-muted"></small>
+                                                    </div>
+                                                    <div class="alert alert-warning" id="chgStatusReturnAlert" style="display:none;">
+                                                        <i class="fa fa-info-circle"></i> "Returned" opens the full Return form (signature info required). Status is not changed directly here.
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-primary" id="chgStatusSaveBtn"><i class="fa fa-save"></i> Save</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -831,6 +884,9 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                 document.getElementById('editRequestedBy').value = items[0].requested_by_out || '';
                 document.getElementById('editInspectedBy').value = items[0].inspected_by_out || '';
                 document.getElementById('editApprovedBy').value = items[0].approved_by_out || '';
+                document.getElementById('editRequestedByEmpId').value = items[0].requested_by_out_emp_id || '';
+                document.getElementById('editInspectedByEmpId').value = items[0].inspected_by_out_emp_id || '';
+                document.getElementById('editApprovedByEmpId').value = items[0].approved_by_out_emp_id || '';
 
                 items.forEach(function(it) {
                     var row = document.createElement('tr');
@@ -872,6 +928,10 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             document.getElementById('returnInspectedBy').value = d.inspected_by_out || '';
             document.getElementById('returnApprovedBy').value = d.approved_by_out || '';
 
+            document.getElementById('returnRequestedByEmpId').value = d.requested_by_out_emp_id || '';
+            document.getElementById('returnInspectedByEmpId').value = d.inspected_by_out_emp_id || '';
+            document.getElementById('returnApprovedByEmpId').value = d.approved_by_out_emp_id || '';
+
             $.getJSON('function.php?action=item_details&pass_slip_no=' + encodeURIComponent(slipNo), function(data) {
                 var tbody = document.getElementById('returnItemsBody');
                 tbody.innerHTML = '';
@@ -879,23 +939,75 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                     for (var i = 0; i < data.length; i++) {
                         tbody.innerHTML += '<tr><td style="text-align:center;">' + (i + 1) + '</td><td>' + data[i].item_description + '</td><td>' + data[i].qty + '</td><td>' + data[i].unit + '</td><td>' + (data[i].serial_no || '-') + '</td><td>' + (data[i].pullout_date || '-') + '</td></tr>';
                     }
-                }
-            });
-
-            $.getJSON('function.php?action=inspector_list', function(list) {
-                var datalist = document.getElementById('inspectorList');
-                datalist.innerHTML = '';
-                if (list && list.length > 0) {
-                    for (var j = 0; j < list.length; j++) {
-                        var opt = document.createElement('option');
-                        opt.value = list[j];
-                        datalist.appendChild(opt);
-                    }
+                    document.getElementById('returnRequestedByEmpId').value = data[0].requested_by_out_emp_id || '';
+                    document.getElementById('returnInspectedByEmpId').value = data[0].inspected_by_out_emp_id || '';
+                    document.getElementById('returnApprovedByEmpId').value = data[0].approved_by_out_emp_id || '';
                 }
             });
 
             $('#returnPassSlipModal').modal('show');
         }
+
+        function openChangeStatus(slipNo) {
+            var d = passSlipData[slipNo];
+            if (!d) return;
+
+            var current = d.status || 'borrowed';
+            document.getElementById('chgStatusSlipNo').textContent = d.pass_slip_no;
+            document.getElementById('chgCurrentStatus').value = current;
+            document.getElementById('chgCurrentStatusLabel').textContent = current.charAt(0).toUpperCase() + current.slice(1);
+
+            var sel = document.getElementById('chgStatusSelect');
+            Array.prototype.forEach.call(sel.options, function(o) { o.disabled = false; });
+            sel.value = current;
+            Array.prototype.forEach.call(sel.options, function(o) {
+                if (o.value === current) o.disabled = true;
+            });
+
+            var hint = document.getElementById('chgStatusHint');
+            var retAlert = document.getElementById('chgStatusReturnAlert');
+            retAlert.style.display = 'none';
+            if (current === 'deployed') {
+                sel.querySelector('option[value="returned"]').disabled = true;
+                hint.textContent = 'This slip is deployed (installed / non-returnable), so Returned is not selectable.';
+            } else {
+                hint.textContent = '';
+            }
+            $('#changeStatusModal').modal('show');
+        }
+
+        document.getElementById('chgStatusSaveBtn').addEventListener('click', function() {
+            var slipNo = document.getElementById('chgStatusSlipNo').textContent;
+            var current = document.getElementById('chgCurrentStatus').value;
+            var target = document.getElementById('chgStatusSelect').value;
+
+            if (target === current) {
+                showToast('No status change selected.', 'warning');
+                return;
+            }
+            if (target === 'returned') {
+                $('#changeStatusModal').modal('hide');
+                openReturnModal(slipNo);
+                return;
+            }
+            $.post('function.php', { action: 'update_status', pass_slip_no: slipNo, status: target }, function(resp) {
+                if (resp && resp.success) {
+                    $('#changeStatusModal').modal('hide');
+                    showToast(resp.message, 'success');
+                    setTimeout(function() { location.reload(); }, 600);
+                } else {
+                    showToast((resp && resp.message) || 'Failed to update status.', 'error');
+                }
+            }, 'json').fail(function() {
+                showToast('Network error updating status.', 'error');
+            });
+        });
+
+        document.getElementById('chgStatusSelect').addEventListener('change', function() {
+            var retAlert = document.getElementById('chgStatusReturnAlert');
+            var sel = document.getElementById('chgStatusSelect');
+            retAlert.style.display = (sel.value === 'returned') ? 'block' : 'none';
+        });
 
         function confirmDeleteSlip(slipNo) {
             if (confirm('Are you sure you want to delete Pass Slip ' + slipNo + '? This will remove all items in this slip.')) {

@@ -94,14 +94,12 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
 
                 // 3) All rows validated - import them all.
                 // Blank cells are normalized so they never corrupt the data:
-                //  - Project gets a placeholder (every list/stats/export query
-                //    filters `project != ''`, so a blank Project would otherwise
-                //    make the imported row invisible).
+                //  - Project is stored as NULL when blank (the list/stats/
+                //    export queries no longer exclude blank-project records).
                 //  - Description gets a placeholder so downstream features
                 //    (pass slip, print sticker, file viewer) have a label.
                 //  - Quantity, Life, Cost, Date, etc. are stored as NULL instead
                 //    of being coerced to 0 / 0000-00-00 by MySQL.
-                $PROJECT_FALLBACK = 'Unspecified';
                 $DESCRIPTION_FALLBACK = '(No description)';
 
                 $normText = function ($value) {
@@ -140,7 +138,7 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
                         serial, cost, date, received, inventory_item_no,
                         assigned_to, life, remarks
                     ) VALUES (
-                        " . $sqlVal($normText($data[0]) === null ? $PROJECT_FALLBACK : $normText($data[0])) . ",
+                        " . $sqlVal($normText($data[0])) . ",
                         " . $sqlVal($normText($data[1])) . ",
                         " . $sqlVal($normQtyOrLife($data[2])) . ",
                         " . $sqlVal($normText($data[3])) . ",

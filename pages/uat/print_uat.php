@@ -70,65 +70,57 @@ if ($itemQuery) {
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
         }
 
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            margin-bottom: 8px;
+        .print-header {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid var(--line);
+            margin-bottom: 16px;
         }
 
-        .logo {
-            width: 74px;
-            height: 74px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .print-header td {
+            border: 1.5px solid var(--line);
+            padding: 6px 10px;
+            vertical-align: middle;
         }
 
-        .header-text { text-align: left; }
-
-        .republic {
-            font-size: 15px;
-            letter-spacing: 1px;
-            color: var(--navy);
-            font-weight: 700;
-            border-bottom: 2px solid var(--navy);
-            padding-bottom: 4px;
-            margin-bottom: 4px;
-            display: inline-block;
+        .print-header td.ph-left {
+            width: 20%;
+            text-align: left;
         }
 
-        .dept {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--navy);
-            line-height: 1.25;
-            text-transform: uppercase;
-        }
-
-        .form-title {
+        .print-header td.ph-center {
+            width: 55%;
             text-align: center;
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin: 34px 0 8px;
         }
 
-        .form-subtitle {
-            text-align: center;
+        .print-header td.ph-right {
+            width: 25%;
+            text-align: right;
+        }
+
+        .ph-dict-logo {
+            width: 130px;
+            height: auto;
+            max-height: 46px;
+            vertical-align: middle;
+        }
+
+        .ph-title {
             font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .ph-subtitle {
+            font-size: 12px;
             color: #555;
-            margin-bottom: 6px;
+            margin-top: 2px;
         }
 
-        .form-brand {
-            text-align: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--navy);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 30px;
+        .ph-fwfa-logo {
+            width: 90px;
+            height: auto;
+            vertical-align: middle;
         }
 
         .info-block {
@@ -201,17 +193,20 @@ if ($itemQuery) {
 
 <div class="sheet">
 
-    <div class="header">
-        <img class="logo" src="../../img/logofinal.png" alt="DICT Logo">
-        <div class="header-text">
-            <div class="republic">REPUBLIC OF THE PHILIPPINES</div>
-            <div class="dept">Department of Information and<br>Communications Technology</div>
-        </div>
-    </div>
-
-    <div class="form-title">USER ACCEPTANCE FORM (UAT)</div>
-    <div class="form-subtitle">Attachments — Free WiFi For All Equipment</div>
-    <div class="form-brand">Free WiFi For All Program</div>
+    <table class="print-header">
+        <tr>
+            <td class="ph-left">
+                <img class="ph-dict-logo" src="../../img/dict_logo.png" alt="DICT Logo">
+            </td>
+            <td class="ph-center">
+                <div class="ph-title">USER ACCEPTANCE FORM (UAT) ATTACHMENTS</div>
+                <div class="ph-subtitle">Free Wifi for All Province of Surigao del Norte</div>
+            </td>
+            <td class="ph-right">
+                <img class="ph-fwfa-logo" src="../../img/freewifi_logo.png" alt="Free WiFi FOR ALL">
+            </td>
+        </tr>
+    </table>
 
     <table class="info-block">
         <tr>

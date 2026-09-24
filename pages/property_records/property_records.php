@@ -37,7 +37,7 @@ if (!isset($_SESSION['role'])) {
                             <div class="panel-body">
                                 <div class="row">
                                     <?php
-                                    $qTotal = mysqli_query($con, "SELECT COUNT(*) AS total FROM inventory WHERE project != ''");
+                                    $qTotal = mysqli_query($con, "SELECT COUNT(*) AS total FROM inventory");
                                     $rTotal = mysqli_fetch_assoc($qTotal);
 
                                     $passSlipExists = @mysqli_query($con, "SELECT 1 FROM pass_slip LIMIT 0") ? true : false;
@@ -52,7 +52,7 @@ if (!isset($_SESSION['role'])) {
                                         $rOverdue = ['total' => 0];
                                     }
 
-                                    $qValue = mysqli_query($con, "SELECT SUM(CAST(REPLACE(cost, ',', '') AS DECIMAL(15,2)) * quantity) AS total FROM inventory WHERE cost IS NOT NULL AND cost != '' AND project != ''");
+                                    $qValue = mysqli_query($con, "SELECT SUM(CAST(REPLACE(cost, ',', '') AS DECIMAL(15,2)) * quantity) AS total FROM inventory WHERE cost IS NOT NULL AND cost != ''");
                                     $rValue = mysqli_fetch_assoc($qValue);
                                     ?>
                                     <div class="col-md-4 col-sm-6 col-xs-12">
@@ -679,6 +679,16 @@ if (!isset($_SESSION['role'])) {
             // ========== ADD ITEM ==========
             $('#addForm').on('submit', function(e) {
                 e.preventDefault();
+
+                var filled = false;
+                $('#addForm input:not([type=file]):not([readonly]):not([type=hidden]), #addForm textarea').each(function() {
+                    if (String(this.value).trim() !== '') filled = true;
+                });
+                if (!filled) {
+                    $('#addAlert').html('<div class="alert alert-danger">Please fill in at least one field before saving.</div>').show();
+                    return;
+                }
+
                 var btn = document.getElementById('addSubmitBtn');
                 btn.disabled = true;
                 btn.value = 'Adding...';
@@ -741,6 +751,16 @@ if (!isset($_SESSION['role'])) {
 
             $('#editForm').on('submit', function(e) {
                 e.preventDefault();
+
+                var filled = false;
+                $('#editForm input:not([type=file]):not([readonly]):not([type=hidden]), #editForm textarea').each(function() {
+                    if (String(this.value).trim() !== '') filled = true;
+                });
+                if (!filled) {
+                    $('#editAlert').html('<div class="alert alert-danger">Please fill in at least one field before saving.</div>').show();
+                    return;
+                }
+
                 var btn = document.getElementById('editSubmitBtn');
                 btn.disabled = true;
                 btn.value = 'Saving...';

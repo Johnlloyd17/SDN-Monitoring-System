@@ -14,8 +14,7 @@ $query = "SELECT
             project, item, quantity, unit, description,
             serial, cost, total_cost, date, received,
             inventory_item_no, assigned_to, life, remarks
-          FROM inventory
-          WHERE project != ''"; // Start with a base query that retrieves all records
+          FROM inventory";
 
 // Apply filters if provided
 if (!empty($filterProject)) {

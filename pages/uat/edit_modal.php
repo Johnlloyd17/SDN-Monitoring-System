@@ -55,6 +55,15 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
 
                     <div class="modal-section-header"><i class="fa fa-boxes"></i> Equipment / CPE Details</div>
 
+                    <!-- Equipment search (read-only inventory lookup, fills active row) -->
+                    <div id="editUatInvSearchWrap" class="uat-inv-search-wrap">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="editUatInvSearchInput" class="form-control uat-inv-search-input" placeholder="Search inventory by description or serial no. (min 2 chars)...">
+                        </div>
+                        <div id="editUatInvSearchResults" class="uat-inv-search-results list-group"></div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered" id="editUatItemsTable" style="margin-bottom: 5px;">
                             <thead>
@@ -70,7 +79,10 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             <tbody id="editUatItemsBody"></tbody>
                         </table>
                     </div>
-                    <button type="button" class="btn btn-success btn-sm" id="addEditUatRowBtn"><i class="fa fa-plus"></i> Add Row</button>
+                    <div class="items-toolbar" style="display: flex; align-items: center; justify-content: space-between;">
+                        <button type="button" class="btn btn-success btn-sm" id="addEditUatRowBtn"><i class="fa fa-plus"></i> Add Row</button>
+                        <span class="text-muted" id="editUatItemCount" style="font-size: 12px;">0 Items</span>
+                    </div>
 
                 </div>
                 <div class="modal-footer">
@@ -126,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var td = function(html) { var d = document.createElement('td'); d.innerHTML = html; return d; };
 
-        tr.appendChild(td('<input type="number" name="qty[]" class="form-control uat-qty" min="1" value="' + (data.qty || 1) + '">'));
+        tr.appendChild(td('<input type="hidden" name="pass_slip_item_id[]" value="' + (data.pass_slip_item_id || '') + '"><input type="hidden" name="inventory_id[]" value="' + (data.inventory_id || '') + '"><input type="number" name="qty[]" class="form-control uat-qty" min="1" value="' + (data.qty || 1) + '">'));
         tr.appendChild(td('<input type="text" name="unit[]" class="form-control" value="' + (data.unit || '') + '">'));
         tr.appendChild(td('<input type="text" name="item_name[]" class="form-control uat-item-name" value="' + (data.item_name || '') + '">'));
         tr.appendChild(td('<input type="text" name="description[]" class="form-control" value="' + (data.description || '') + '">'));
@@ -177,20 +189,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    document.getElementById('addEditUatRowBtn').addEventListener('click', function() {
-        addEditRow({});
-    });
-
-    document.getElementById('editUatItemsBody').addEventListener('click', function(e) {
-        var btn = e.target.closest('.uat-remove-row');
-        if (btn && !uatViewMode) {
-            var tbody = document.getElementById('editUatItemsBody');
-            if (tbody.querySelectorAll('.uat-item-row').length > 1) {
-                btn.closest('.uat-item-row').remove();
-            } else {
-                showToast('At least one equipment row must remain. Clear its fields instead.', 'warning');
-            }
-        }
+    window.uatEditEditor = initUatItemEditor({
+        searchInputId: 'editUatInvSearchInput',
+        searchResultsId: 'editUatInvSearchResults',
+        tbodyId: 'editUatItemsBody',
+        addBtnId: 'addEditUatRowBtn',
+        wrapId: 'editUatInvSearchWrap',
+        countLabelId: 'editUatItemCount'
     });
 
     document.getElementById('editUatLatitude').addEventListener('input', updateCoordsHint);

@@ -23,6 +23,16 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
         text-overflow: ellipsis;
         max-width: 100%;
     }
+    .emp-autocomplete-results .emp-name-item {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    .emp-autocomplete-results .emp-name-item.active {
+        background: #eef4fb;
+    }
     .items-table-scroll {
         max-height: 300px;
         overflow-y: auto;
@@ -44,7 +54,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
             <form method="POST" action="function.php" id="addPassSlipForm">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Create Office Equipment Pass Slip</h4>
+                    <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Generate Office Equipment Pass Slip</h4>
                 </div>
                 <div class="modal-body">
                     <!-- Pass Slip Number -->
@@ -55,6 +65,16 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                 <input type="text" name="pass_slip_no" class="form-control"
                                     placeholder="e.g., PS-2026-0001" id="passSlipNo">
                                 <small class="text-muted">Auto-generated if left empty</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="deployed" selected>Deployed</option>
+                                    <option value="borrowed">Borrowed</option>
+                                </select>
+                                <small class="text-muted">Deployed = installed/issued (non-returnable); Borrowed = out on loan with a return date</small>
                             </div>
                         </div>
                     </div>
@@ -125,19 +145,22 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Requested By <span class="text-danger">*</span></label>
-                                <input type="text" name="requested_by_out" class="form-control" required placeholder="Name">
+                                <input type="text" name="requested_by_out" id="createRequestedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="requested_by_out_emp_id" id="createRequestedByEmpId" value="">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Inspected By <span class="text-danger">*</span></label>
-                                <input type="text" name="inspected_by_out" class="form-control" required placeholder="Name">
+                                <input type="text" name="inspected_by_out" id="createInspectedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="inspected_by_out_emp_id" id="createInspectedByEmpId" value="">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Approved By <span class="text-danger">*</span></label>
-                                <input type="text" name="approved_by_out" class="form-control" required placeholder="Name">
+                                <input type="text" name="approved_by_out" id="createApprovedBy" class="form-control" required placeholder="Type to search employee or type manually" autocomplete="off">
+                                <input type="hidden" name="approved_by_out_emp_id" id="createApprovedByEmpId" value="">
                             </div>
                         </div>
                     </div>
@@ -153,7 +176,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" name="create_pass_slip" class="btn btn-primary"><i class="fa fa-save"></i> Create Pass Slip</button>
+                    <button type="submit" name="create_pass_slip" class="btn btn-primary"><i class="fa fa-save"></i> Generate Pass Slip</button>
                 </div>
             </form>
         </div>
@@ -227,7 +250,9 @@ window.initItemEditor = function(cfg) {
     function buildResultRow(item) {
         var d = document.createElement('div');
         d.className = 'list-group-item inv-res-item';
-        var unavailable = !!(item.on_loan || item.deployed);
+        var qty = parseInt(item.quantity, 10);
+        var noStock = isNaN(qty) || qty <= 0;
+        var unavailable = !!(item.on_loan || item.deployed || item.on_deployed_slip || noStock);
         if (unavailable) d.classList.add('disabled-item');
 
         var name = document.createElement('div');
@@ -236,9 +261,11 @@ window.initItemEditor = function(cfg) {
         name.title = item.name || '';
 
         var meta = document.createElement('div');
-        meta.appendChild(document.createTextNode('S/N: ' + (item.serial || '-') + ' | Unit: ' + (item.unit || '-')));
+        meta.appendChild(document.createTextNode('S/N: ' + (item.serial || '-') + ' | Unit: ' + (item.unit || '-') + ' | Available: ' + (isNaN(qty) ? '0' : qty)));
         if (item.on_loan) meta.appendChild(makeLabel('label-danger', 'On loan'));
         if (item.deployed) meta.appendChild(makeLabel('label-warning', 'Deployed'));
+        if (item.on_deployed_slip) meta.appendChild(makeLabel('label-warning', 'On deployed slip'));
+        if (noStock) meta.appendChild(makeLabel('label-danger', 'No stock'));
 
         d.appendChild(name);
         d.appendChild(meta);
@@ -276,16 +303,22 @@ window.initItemEditor = function(cfg) {
                 return;
             }
             data.forEach(function(item) {
+                var qty = parseInt(item.quantity, 10);
+                var noStock = isNaN(qty) || qty <= 0;
                 var d = buildResultRow(item);
-                if (!item.on_loan && !item.deployed) {
+                if (!item.on_loan && !item.deployed && !item.on_deployed_slip && !noStock) {
                     d.addEventListener('click', function(e) {
                         e.preventDefault();
                         fillRow(currentRow(), item);
                     });
                 } else if (item.on_loan) {
                     d.title = 'This item is currently on loan to another pass slip.';
-                } else {
+                } else if (item.deployed) {
                     d.title = 'This item is deployed (assigned to someone).';
+                } else if (item.on_deployed_slip) {
+                    d.title = 'This item is already on a deployed pass slip.';
+                } else {
+                    d.title = 'This item has no available stock (quantity is 0).';
                 }
                 invSearchResults.appendChild(d);
             });
@@ -342,6 +375,113 @@ window.initItemEditor = function(cfg) {
     };
 };
 
+window.initEmployeeNameAutocomplete = function(inputId, hiddenId) {
+    var input = document.getElementById(inputId);
+    if (!input || !document.getElementById(hiddenId)) return null;
+    var hiddenEl = document.getElementById(hiddenId);
+    var parent = input.closest('.form-group') || input.parentNode;
+    if (!parent) return null;
+
+    parent.style.position = 'relative';
+
+    var results = document.createElement('div');
+    results.className = 'inv-search-results emp-autocomplete-results';
+    results.style.cssText = 'position:absolute; z-index:1060; top:100%; left:0; right:0; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.2); display:none; max-height:220px; overflow-y:auto;';
+    parent.appendChild(results);
+
+    var timer = null;
+    var items = [];
+    var activeIndex = -1;
+
+    function hide() {
+        results.style.display = 'none';
+        results.innerHTML = '';
+        items = [];
+        activeIndex = -1;
+    }
+
+    function applyHighlight() {
+        var nodes = results.querySelectorAll('.emp-name-item');
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].classList.toggle('active', i === activeIndex);
+        }
+        if (activeIndex >= 0 && nodes[activeIndex]) {
+            nodes[activeIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function selectItem(item) {
+        if (!item) return;
+        input.value = item.name;
+        hiddenEl.value = item.id;
+        hide();
+        input.focus();
+    }
+
+    input.addEventListener('input', function() {
+        hiddenEl.value = '';
+        var q = input.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) { hide(); return; }
+        timer = setTimeout(function() {
+            $.getJSON('function.php?action=employee_search&q=' + encodeURIComponent(q), function(data) {
+                results.innerHTML = '';
+                items = data || [];
+                activeIndex = -1;
+                if (!items.length) {
+                    var e = document.createElement('div');
+                    e.className = 'list-group-item disabled-item text-center text-muted';
+                    e.textContent = 'No matching employee - you can still type the name manually.';
+                    results.appendChild(e);
+                    results.style.display = 'block';
+                    return;
+                }
+                items.forEach(function(item, i) {
+                    var d = document.createElement('div');
+                    d.className = 'list-group-item emp-name-item';
+                    d.textContent = item.name;
+                    d.title = item.name;
+                    d.addEventListener('click', function(ev) {
+                        ev.preventDefault();
+                        selectItem(item);
+                    });
+                    results.appendChild(d);
+                });
+                results.style.display = 'block';
+            }).fail(function() { hide(); });
+        }, 250);
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (results.style.display === 'none' || !items.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            applyHighlight();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+            applyHighlight();
+        } else if (e.key === 'Enter') {
+            if (activeIndex >= 0 && items[activeIndex]) {
+                e.preventDefault();
+                selectItem(items[activeIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            hide();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!parent.contains(e.target)) hide();
+    });
+
+    return {
+        hide: hide,
+        getSelectedId: function() { return hiddenEl.value; }
+    };
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     window.createItemEditor = initItemEditor({
         searchInputId: 'invSearchInput',
@@ -358,6 +498,59 @@ document.addEventListener('DOMContentLoaded', function() {
         addBtnId: 'editAddRowBtn',
         wrapId: 'editInvSearchWrap',
         countLabelId: 'editItemCount'
+    });
+
+    initEmployeeNameAutocomplete('createRequestedBy', 'createRequestedByEmpId');
+    initEmployeeNameAutocomplete('createInspectedBy', 'createInspectedByEmpId');
+    initEmployeeNameAutocomplete('createApprovedBy', 'createApprovedByEmpId');
+
+    initEmployeeNameAutocomplete('editRequestedBy', 'editRequestedByEmpId');
+    initEmployeeNameAutocomplete('editInspectedBy', 'editInspectedByEmpId');
+    initEmployeeNameAutocomplete('editApprovedBy', 'editApprovedByEmpId');
+
+    initEmployeeNameAutocomplete('returnRequestedBy', 'returnRequestedByEmpId');
+    initEmployeeNameAutocomplete('returnInspectedBy', 'returnInspectedByEmpId');
+    initEmployeeNameAutocomplete('returnApprovedBy', 'returnApprovedByEmpId');
+
+    function guardSubmit(formId, btnName) {
+        var form = document.getElementById(formId);
+        if (!form) return;
+        form.addEventListener('submit', function(e) {
+            var btn = form.querySelector('button[name="' + btnName + '"]');
+            if (!btn) return;
+            if (form.dataset.submitting === '1') {
+                e.preventDefault();
+                return;
+            }
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = btnName;
+            hidden.value = btn.value || btn.textContent.trim();
+            form.appendChild(hidden);
+            form.dataset.submitting = '1';
+            if (!btn.dataset.originalLabel) {
+                btn.dataset.originalLabel = btn.innerHTML;
+            }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+        });
+    }
+    guardSubmit('addPassSlipForm', 'create_pass_slip');
+    guardSubmit('editPassSlipForm', 'edit_pass_slip');
+
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            document.querySelectorAll('form[data-submitting="1"]').forEach(function(f) {
+                f.removeAttribute('data-submitting');
+                var b = f.querySelector('button[type="submit"]');
+                if (b) {
+                    b.disabled = false;
+                    if (b.dataset.originalLabel) {
+                        b.innerHTML = b.dataset.originalLabel;
+                    }
+                }
+            });
+        }
     });
 });
 </script>

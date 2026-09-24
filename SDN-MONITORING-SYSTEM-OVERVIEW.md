@@ -264,7 +264,7 @@ Office equipment borrowing/pass slip records.
 | requested_by_return | varchar(255) DEFAULT NULL | |
 | inspected_by_return | varchar(255) DEFAULT NULL | |
 | approved_by_return | varchar(255) DEFAULT NULL | |
-| status | enum('borrowed','returned','overdue') DEFAULT 'borrowed' | |
+| status | enum('borrowed','returned','overdue','deployed') DEFAULT 'borrowed' — deployed = installed at a municipality/location via UAT (non-returnable); since the source-toggle removal, new UAT rows only link Inventory (uat_items.inventory_id), while legacy pass_slip_item_id links are preserved/displayed | |
 | purpose | text DEFAULT NULL | |
 | condition_out | varchar(100) DEFAULT NULL | |
 | condition_return | varchar(100) DEFAULT NULL | |
@@ -1038,7 +1038,7 @@ Data source: `tblactivity` + `cybersecurity_metrics` targets
 **Stat Cards (6):**
 | Label | Description |
 |-------|-------------|
-| Total Items | Count where project != '' |
+| Total Items | Total count of all inventory records |
 | Total Asset Value | SUM(cost * quantity) |
 | Currently Borrowed | Pass slips with status = 'borrowed' |
 | Overdue Returns | Pass slips where return_date < CURDATE() |

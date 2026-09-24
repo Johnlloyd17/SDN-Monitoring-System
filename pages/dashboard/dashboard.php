@@ -337,7 +337,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             $qNeedsResponse = mysqli_query($con, "SELECT SUM(CASE WHEN date_responded IS NULL AND (for_response = 'Y' OR for_response IS NULL OR for_response = '') THEN 1 ELSE 0 END) AS needs_response FROM letters_monitoring");
                             $rNeedsResponse = mysqli_fetch_assoc($qNeedsResponse);
 
-                            $qInventoryItems = mysqli_query($con, "SELECT COUNT(*) AS total_items FROM inventory WHERE project != ''");
+                            $qInventoryItems = mysqli_query($con, "SELECT COUNT(*) AS total_items FROM inventory");
                             $rInventoryItems = mysqli_fetch_assoc($qInventoryItems);
 
                             $qProcurementRecords = mysqli_query($con, "SELECT COUNT(*) AS total_records FROM procurement_tracking");
@@ -575,7 +575,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             $rProcurementSpend = mysqli_fetch_assoc($qProcurementSpend);
 
                             // Inventory Value (query-time CAST for TEXT cost column)
-                            $qInventoryValue = mysqli_query($con, "SELECT COALESCE(SUM(CAST(REPLACE(cost, ',', '') AS DECIMAL(15,2)) * quantity), 0) AS inventory_value FROM inventory WHERE cost IS NOT NULL AND cost != '' AND project != ''");
+                            $qInventoryValue = mysqli_query($con, "SELECT COALESCE(SUM(CAST(REPLACE(cost, ',', '') AS DECIMAL(15,2)) * quantity), 0) AS inventory_value FROM inventory WHERE cost IS NOT NULL AND cost != ''");
                             $rInventoryValue = mysqli_fetch_assoc($qInventoryValue);
                             ?>
                             <div class="col-md-4 col-sm-6 col-xs-12">
@@ -676,7 +676,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             $moduleCounts['ilcdb'] = (int)$r['cnt'];
 
                             // Property Management - inventory items
-                            $q = mysqli_query($con, "SELECT COUNT(*) AS cnt FROM inventory WHERE project != ''");
+                            $q = mysqli_query($con, "SELECT COUNT(*) AS cnt FROM inventory");
                             $r = mysqli_fetch_assoc($q);
                             $moduleCounts['property'] = (int)$r['cnt'];
 
