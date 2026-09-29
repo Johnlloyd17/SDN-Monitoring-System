@@ -186,7 +186,7 @@ if (isset($_POST['btn_save'])) {
         bpls_json_out(array('success' => false, 'error' => 'Not authorized.'), 403);
     }
 
-    $id = isset($_POST['hidden_id']) ? (int) $_POST['hidden_id'] : 0;
+    $id = bpls_id(isset($_POST['hidden_id']) ? $_POST['hidden_id'] : 0);
     if ($id <= 0 || !bpls_row_exists($con, $id)) {
         bpls_json_out(array('success' => false, 'error' => 'Item not found.'), 404);
     }
@@ -230,7 +230,7 @@ if (isset($_POST['btn_delete'])) {
     $ids = isset($_POST['chk_delete']) && is_array($_POST['chk_delete']) ? $_POST['chk_delete'] : array();
     $deleted = 0;
     foreach ($ids as $raw) {
-        $id = (int) $raw;
+        $id = bpls_id($raw);
         if ($id <= 0) { continue; }
         $existing = bpls_row_exists($con, $id);
         if (!$existing) { continue; }
@@ -261,7 +261,7 @@ if (isset($_POST['btn_addimage'])) {
         bpls_json_out(array('success' => false, 'error' => 'Not authorized.'), 403);
     }
 
-    $id = isset($_POST['hidden_id']) ? (int) $_POST['hidden_id'] : 0;
+    $id = bpls_id(isset($_POST['hidden_id']) ? $_POST['hidden_id'] : 0);
     if ($id <= 0 || !bpls_row_exists($con, $id)) {
         bpls_json_out(array('success' => false, 'error' => 'Item not found.'), 404);
     }
@@ -290,7 +290,7 @@ if (isset($_POST['btn_remove'])) {
         bpls_json_out(array('success' => false, 'error' => 'Not authorized.'), 403);
     }
 
-    $id = isset($_POST['hidden_id']) ? (int) $_POST['hidden_id'] : 0;
+    $id = bpls_id(isset($_POST['hidden_id']) ? $_POST['hidden_id'] : 0);
     if ($id <= 0 || !bpls_row_exists($con, $id)) {
         bpls_json_out(array('success' => false, 'error' => 'Item not found.'), 404);
     }
@@ -298,7 +298,7 @@ if (isset($_POST['btn_remove'])) {
     $ids = isset($_POST['chk_deletephoto']) && is_array($_POST['chk_deletephoto']) ? $_POST['chk_deletephoto'] : array();
     $removed = 0;
     foreach ($ids as $raw) {
-        $pid = (int) $raw;
+        $pid = bpls_id($raw);
         if ($pid <= 0) { continue; }
 
         // tblactivityphoto is shared with the activity, planned and letter

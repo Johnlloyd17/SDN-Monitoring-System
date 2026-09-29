@@ -1,7 +1,5 @@
 <?php
 require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
-?>
-<?php
 
 header('Content-Type: application/json');
 
@@ -43,6 +41,66 @@ function validateCoord($value, $label, $min, $max) {
     return null;
 }
 
+/**
+ * Write access follows the page's own gate: the page only draws the Add, Edit,
+ * Delete, checkbox and photo controls for the Administrator role or the
+ * fwfasdn account, so the endpoint refuses the same writes for everyone else.
+ */
+function fw4a_can_manage()
+{
+    return isset($_SESSION['role'])
+        && ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'fwfasdn');
+}
+
+/** Same-session CSRF token; the page reads it through a script variable. */
+function fw4a_csrf_token()
+{
+    if (empty($_SESSION['fw4a_csrf'])) {
+        $_SESSION['fw4a_csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['fw4a_csrf'];
+}
+
+function fw4a_csrf_ok()
+{
+    $sent = isset($_POST['csrf_token']) ? (string) $_POST['csrf_token'] : '';
+    return isset($_SESSION['fw4a_csrf'])
+        && $sent !== ''
+        && hash_equals($_SESSION['fw4a_csrf'], $sent);
+}
+
+/** Whether another row already holds the given value in a natural-key column. */
+function fw4a_dup_value($con, $field, $value, $excludeId = 0)
+{
+    if ($value === '') {
+        return false;
+    }
+    $stmt = mysqli_prepare($con, "SELECT id FROM tblfwfa WHERE $field = ? AND id <> ? LIMIT 1");
+    if (!$stmt) {
+        return false;
+    }
+    mysqli_stmt_bind_param($stmt, 'si', $value, $excludeId);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = $res ? mysqli_fetch_assoc($res) : null;
+    mysqli_stmt_close($stmt);
+    return $row ? true : false;
+}
+
+$WRITE_ACTIONS = ['add', 'edit', 'delete', 'add_photo', 'remove_photo'];
+if (in_array($action, $WRITE_ACTIONS, true)) {
+    if (!fw4a_can_manage()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Not authorized.']);
+        exit;
+    }
+    if (!fw4a_csrf_ok()) {
+        http_response_code(419);
+        echo json_encode(['success' => false, 'error' => 'Invalid or missing security token. Reload the page and try again.']);
+        exit;
+    }
+}
+
 if ($action === 'add') {
     $item_no = escf($con, 'txt_item_no');
     $locality = escf($con, 'txt_locality');
@@ -80,8 +138,19 @@ if ($action === 'add') {
         ?? validateCoord($latitude, 'Latitude', -90, 90)
         ?? validateCoord($longitude, 'Longitude', -180, 180);
     if ($enumError !== null) {
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => false, 'error' => $enumError]);
+        exit;
+    }
+
+    if (fw4a_dup_value($con, 'site_code', $site_code)) {
+        if (ob_get_level()) { ob_clean(); }
+        echo json_encode(['success' => false, 'error' => 'Site code already exists.']);
+        exit;
+    }
+    if (fw4a_dup_value($con, 'nationwide_id', $nationwide_id)) {
+        if (ob_get_level()) { ob_clean(); }
+        echo json_encode(['success' => false, 'error' => 'Nationwide ID already exists.']);
         exit;
     }
 
@@ -104,10 +173,10 @@ if ($action === 'add') {
     if (mysqli_query($con, $query)) {
         $action_log = 'Added Item ' . $locality;
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => true, 'message' => 'Access point added successfully']);
     } else {
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => false, 'error' => 'Failed to add: ' . mysqli_error($con)]);
     }
     exit;
@@ -155,8 +224,31 @@ if ($action === 'edit') {
         ?? validateCoord($latitude, 'Latitude', -90, 90)
         ?? validateCoord($longitude, 'Longitude', -180, 180);
     if ($enumError !== null) {
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => false, 'error' => $enumError]);
+        exit;
+    }
+
+    // Only block an edit when the submitted value is a NEW one that another
+    // row already holds. Keeping a stored value must keep working even when a
+    // legacy duplicate exists, otherwise editing such a row would break.
+    $stmt = mysqli_prepare($con, "SELECT site_code, nationwide_id FROM tblfwfa WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $cur = $res ? mysqli_fetch_assoc($res) : null;
+    mysqli_stmt_close($stmt);
+    $curCode = $cur ? (string) $cur['site_code'] : '';
+    $curNid  = $cur ? (string) $cur['nationwide_id'] : '';
+
+    if ($site_code !== '' && $site_code !== $curCode && fw4a_dup_value($con, 'site_code', $site_code, $id)) {
+        if (ob_get_level()) { ob_clean(); }
+        echo json_encode(['success' => false, 'error' => 'Site code already exists.']);
+        exit;
+    }
+    if ($nationwide_id !== '' && $nationwide_id !== $curNid && fw4a_dup_value($con, 'nationwide_id', $nationwide_id, $id)) {
+        if (ob_get_level()) { ob_clean(); }
+        echo json_encode(['success' => false, 'error' => 'Nationwide ID already exists.']);
         exit;
     }
 
@@ -195,10 +287,10 @@ if ($action === 'edit') {
     if (mysqli_query($con, $query)) {
         $action_log = 'Updated Item ' . $locality;
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => true, 'message' => 'Access point updated successfully']);
     } else {
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => false, 'error' => 'Failed to update: ' . mysqli_error($con)]);
     }
     exit;
@@ -215,7 +307,7 @@ if ($action === 'delete') {
     }
 
     if (empty($intIds)) {
-        ob_clean();
+        if (ob_get_level()) { ob_clean(); }
         echo json_encode(['success' => false, 'message' => 'No valid IDs provided']);
         exit;
     }
@@ -229,7 +321,7 @@ if ($action === 'delete') {
     $logMsgEsc = mysqli_real_escape_string($con, $logMsg);
     @mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . mysqli_real_escape_string($con, $_SESSION['role']) . "', NOW(), '$logMsgEsc')");
 
-    ob_clean();
+    if (ob_get_level()) { ob_clean(); }
     echo json_encode(['success' => true, 'deleted' => $count, 'message' => "$count item(s) deleted"]);
     exit;
 }

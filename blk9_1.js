@@ -1,0 +1,1 @@
+window.SDN_NOTIF = window.SDN_NOTIF || { base: '../../', pollMs: 45000 };

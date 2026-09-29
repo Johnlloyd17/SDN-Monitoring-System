@@ -638,6 +638,12 @@ include "../footer.php"; ?>
             var totalPages = 1;
             var searchTimeout = null;
             var isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+            if (<?php echo $isAdmin ? 'true' : 'false'; ?>) {
+                <?php if (!isset($_SESSION['fw4a_csrf'])) { $_SESSION['fw4a_csrf'] = bin2hex(random_bytes(32)); } ?>
+                var csrfToken = "<?php echo $_SESSION['fw4a_csrf']; ?>";
+            } else {
+                var csrfToken = "";
+            }
             var selectedIds = {};
             var selectAllActive = false;
 
@@ -1032,6 +1038,7 @@ include "../footer.php"; ?>
                 btn.value = 'Adding...';
                 var formData = new FormData(this);
                 formData.append('action', 'add');
+                formData.append('csrf_token', csrfToken);
                 $.ajax({
                     url: basePath + 'fw4a_crud.php',
                     type: 'POST',
@@ -1111,7 +1118,7 @@ include "../footer.php"; ?>
                 $.ajax({
                     url: basePath + 'fw4a_crud.php',
                     type: 'POST',
-                    data: $(this).serialize() + '&action=edit',
+                    data: $(this).serialize() + '&action=edit&csrf_token=' + encodeURIComponent(csrfToken),
                     dataType: 'json',
                     success: function(res) {
                         if (res.success) {
@@ -1196,6 +1203,7 @@ include "../footer.php"; ?>
                 var fd = new FormData();
                 fd.append('action', 'add_photo');
                 fd.append('hidden_id', inventoryId);
+                fd.append('csrf_token', csrfToken);
                 for (var i = 0; i < fileInput.files.length; i++) {
                     fd.append('photos[]', fileInput.files[i]);
                 }
@@ -1234,6 +1242,7 @@ include "../footer.php"; ?>
 
                 var fd = new FormData();
                 fd.append('action', 'remove_photo');
+                fd.append('csrf_token', csrfToken);
                 ids.forEach(function(id) {
                     fd.append('photo_ids[]', id);
                 });
@@ -1275,6 +1284,7 @@ include "../footer.php"; ?>
                 var ids = Object.keys(selectedIds);
                 var fd = new FormData();
                 fd.append('action', 'delete');
+                fd.append('csrf_token', csrfToken);
                 ids.forEach(function(id) {
                     fd.append('ids[]', id);
                 });

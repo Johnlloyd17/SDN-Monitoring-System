@@ -5,10 +5,10 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
 <html>
 
     <?php
-    
+
     if(!isset($_SESSION['role']))
     {
-        header("Location: ../../login.php"); 
+        header("Location: ../../login.php");
     }
     else
     {
@@ -16,9 +16,10 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
     include('../head_css.php'); ?>
     <body class="skin-black">
         <!-- header logo: style can be found in header.less -->
-        <?php 
-        
+        <?php
+
         include "../connection.php";
+        require_once __DIR__ . '/admin_rows.php';
         ?>
         <?php include('../header.php'); ?>
 
@@ -33,7 +34,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                     <h1>
                         Zone Leader
                     </h1>
-                    
+
                 </section>
 
                 <!-- Main content -->
@@ -43,103 +44,49 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             <div class="box">
                                 <div class="box-header">
                                     <div style="padding:10px;">
-                                        
-                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addZoneModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Zone Leader</button>  
-                                        <?php 
+
+                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addZoneModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Zone Leader</button>
+                                        <?php
                                             if(!isset($_SESSION['staff']))
                                             {
                                         ?>
-                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button> 
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
                                         <?php
                                             }
                                         ?>
-                                
-                                    </div>                                
+
+                                    </div>
                                 </div><!-- /.box-header -->
                                 <div class="box-body table-responsive">
-                                <form method="post">
                                     <table id="table" class="table table-bordered table-striped">
                                         <thead>
-                                            <tr>
-                                                <?php 
-                                                if(!isset($_SESSION['staff']))
-                                                {
-                                                ?>
-                                                <th style="width: 20px !important;"><input type="checkbox" name="chk_delete[]" class="cbxMain" onchange="checkMain(this)"/></th>
-                                                <?php
-                                                    }
-                                                ?>
-                                                <th>Zone</th>
-                                                <th>Userame</th>
-                                                <th style="width: 40px !important;">Option</th>
-                                            </tr>
+                                            <?php echo adm_render_headers(adm_can_delete()); ?>
                                         </thead>
                                         <tbody>
-                                            <?php
-                                            if(!isset($_SESSION['staff'])){
-                                                $squery = mysqli_query($con, "select * from tblzone ");
-                                                while($row = mysqli_fetch_array($squery))
-                                                {
-                                                    echo '
-                                                    <tr>
-                                                        <td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>
-                                                        <td>'.$row['zone'].'</td>
-                                                        <td>'.$row['username'].'</td>
-                                                        <td><button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button></td>
-                                                    </tr>
-                                                    ';
-
-                                                    include "edit_modal.php";
-                                                }
-                                            }
-                                            else{
-                                                $squery = mysqli_query($con, "select * from tblzone ");
-                                                while($row = mysqli_fetch_array($squery))
-                                                {
-                                                    echo '
-                                                    <tr>
-                                                        <td>'.$row['zone'].'</td>
-                                                        <td>'.$row['username'].'</td>
-                                                        <td><button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button></td>
-                                                    </tr>
-                                                    ';
-
-                                                    include "edit_modal.php";
-                                                }
-                                            }
-                                            ?>
+                                            <?php echo adm_render_rows(adm_fetch_rows($con), adm_can_delete()); ?>
                                         </tbody>
                                     </table>
 
+                                    <?php include "edit_modal.php"; ?>
+
                                     <?php include "../deleteModal.php"; ?>
 
-                                    </form>
-                                </div><!-- /.box-body -->
-                            </div><!-- /.box -->
-
-                            <?php include "../edit_notif.php"; ?>
-
-                            <?php include "../added_notif.php"; ?>
-
-                            <?php include "../delete_notif.php"; ?>
-                            <?php include "../duplicate_error.php"; ?>
-
-            <?php include "add_modal.php"; ?>
-
-            <?php include "function.php"; ?>
-
+                                    <?php include "add_modal.php"; ?>
 
                     </div>   <!-- /.row -->
                 </section><!-- /.content -->
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
-        <!-- jQuery 2.0.2 -->
-        <?php } ?>
-        <?php include "../footer.php"; ?>
+        <?php }
+        include "../footer.php"; ?>
+<?php include "admin_list_js.php"; ?>
 <script type="text/javascript">
     $(function() {
+        if ($.fn.DataTable.isDataTable('#table')) {
+            $('#table').DataTable().destroy();
+        }
         $("#table").dataTable({
-           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+           "aoColumnDefs": [ { "bSortable": false, "aTargets": <?php echo adm_can_delete() ? '[0,3]' : '[2]'; ?> } ],"aaSorting": []
         });
     });
 </script>

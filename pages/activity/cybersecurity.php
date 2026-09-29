@@ -136,6 +136,7 @@ $activityView = 'cyber';
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
+<?php include __DIR__ . '/activity_list_js.php'; ?>
 <script type="text/javascript">
 
     $(function() {
@@ -143,8 +144,6 @@ $activityView = 'cyber';
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
         });
     });
-
-<?php include __DIR__ . '/activity_list_js.php'; ?>
 
    // Function to update the date and time
    function updateDateTime() {
@@ -165,10 +164,15 @@ $activityView = 'cyber';
         setInterval(updateDateTime, 1000);
         updateDateTime(); // Initial call to display immediately
             
-        document.getElementById('importBtn').addEventListener('click', function() {
+        var importBtn = document.getElementById('importBtn');
+        if (importBtn) {
+            importBtn.addEventListener('click', function() {
                 document.getElementById('importFile').click();
             });
+        }
 
+        var importFile = document.getElementById('importFile');
+        if (importFile) {
             document.getElementById('importFile').addEventListener('change', function() {
                 var formData = new FormData();
                 formData.append('file', this.files[0]);
@@ -189,8 +193,11 @@ $activityView = 'cyber';
                     showToast('Import failed. Check console for details.', 'error');
                 });
             });
+        }
 // Add event listener for the export button
-document.getElementById('exportBtn').addEventListener('click', function() {
+var exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
     // Get the selected values from the filters
     var selectedIndicator = document.getElementById('indicatorSelect').value; // Assuming there's a indicator select element
     var selectedSector = document.getElementById('projectSelect').value;
@@ -203,9 +210,10 @@ document.getElementById('exportBtn').addEventListener('click', function() {
                     '&municipality=' + encodeURIComponent(selectedMunicipality) +
                     '&barangay=' + encodeURIComponent(selectedBarangay);
 
-    // whiteirect to the constructed URL
+    // Redirect to the constructed URL
     window.location.href = exportUrl;
-});
+    });
+        }
 
 </script>
 

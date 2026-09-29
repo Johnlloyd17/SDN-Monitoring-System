@@ -1,5 +1,15 @@
 <?php
 require_once __DIR__ . '/../auth_check.php'; require_auth();
+require_once __DIR__ . '/bpls_rows.php';
+// Same reasoning as import.php: the export button is manager-only on the page,
+// so a viewer must not be able to pull the file by typing the URL. This has to
+// run before the CSV headers below are sent.
+if (!bpls_can_manage()) {
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo 'Not authorized.';
+    exit;
+}
 ?>
 <?php
 include "../connection.php"; // Include the database connection file

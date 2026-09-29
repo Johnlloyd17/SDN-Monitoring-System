@@ -2,54 +2,52 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <!-- ========================= MODAL ======================= -->
-            <div id="addModal" class="modal fade">
-            <form method="post">
-              <div class="modal-dialog modal-sdm-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Manage Credential</h4>
-                    </div>
-                    <div class="modal-body">
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Name:</label>
-                                    <input name="txt_name" class="form-control input-sm" type="text" placeholder="DICT Bureau / Project"/>
-                                </div>
-                                <div class="form-group">
-                                    <label>Username:</label>
-                                    <input name="txt_uname" class="form-control input-sm" id="username"  type="text" placeholder="Username"/>
-                                    <label id="user_msg" style="color:#CC0000;" ></label>
-                                </div>
-                                <div class="form-group">
-                                    <label>Password:</label>
-                                    <input name="txt_pass" class="form-control input-sm" type="password" placeholder="Password"/>
-                                </div>
+<div id="addModal" class="modal fade">
+    <form method="post" id="credAddForm">
+        <div class="modal-dialog modal-sdm-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><i class="fa fa-plus-circle"></i> Manage Credential</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <input name="txt_name" class="form-control input-sm" type="text" placeholder="DICT Bureau / Project"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Username:</label>
+                                <input name="txt_uname" class="form-control input-sm" id="username" type="text" placeholder="Username"/>
+                                <label id="user_msg" style="color:#CC0000;"></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Password:</label>
+                                <input name="txt_pass" class="form-control input-sm" type="password" placeholder="Password"/>
                             </div>
                         </div>
-                        
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Cancel"/>
-                        <input type="submit" class="btn btn-primary btn-sm" name="btn_add" id="btn_add" value="Add Credential"/>
                     </div>
                 </div>
-              </div>
-              </form>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Cancel"/>
+                    <input type="submit" class="btn btn-primary btn-sm" name="btn_add" id="btn_add" value="Add Credential"/>
+                </div>
             </div>
+        </div>
+    </form>
+</div>
 
 <script type="text/javascript">
     $(document).ready(function() {
- 
+
         var timeOut = null; // this used for hold few seconds to made ajax request
- 
+
         var loading_html = '<img src="../../img/ajax-loader.gif" style="height: 20px; width: 20px;"/>'; // just an loading image or we can put any texts here
- 
+
         //when button is clicked
         $('#username').keyup(function(e){
- 
+
             // when press the following key we need not to make any ajax request, you can customize it with your own way
             switch(e.keyCode)
             {
@@ -83,12 +81,11 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
 function is_available(){
     //get the username
     var username = $('#username').val();
- 
+
     //make the ajax request to check is username available or not
     $.post("check_username.php", { username: username },
     function(result)
     {
-        console.log(result);
         if(result != 0)
         {
             $('#user_msg').html('Not Available');
@@ -100,6 +97,6 @@ function is_available(){
             document.getElementById("btn_add").disabled = false;
         }
     });
- 
+
 }
 </script>

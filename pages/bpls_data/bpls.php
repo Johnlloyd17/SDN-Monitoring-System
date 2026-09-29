@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <!DOCTYPE html>
@@ -94,7 +94,7 @@ if (!isset($_SESSION['role'])) {
                                     <?php include "add_modal.php"; ?>
                                     <?php } ?>
 
-﻿                    </div>   <!-- /.row -->
+                    </div>   <!-- /.row -->
                 </section><!-- /.content -->
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
@@ -140,7 +140,7 @@ if (!isset($_SESSION['role'])) {
     });
 </script>
 
-﻿<style>
+<style>
     .info-box-icon {
             background-color: white; /* Change the background to white */
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2); /* Add an inner shadow */

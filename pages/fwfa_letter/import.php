@@ -1,5 +1,15 @@
 <?php
 require_once __DIR__ . '/../auth_check.php'; require_auth();
+require_once __DIR__ . '/letter_rows.php';
+// The page only draws the import button for a manager, but that left this
+// endpoint open to any signed-in account. Importing writes straight to
+// locationrequests, so the role has to be checked here too.
+if (!letter_can_manage()) {
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => false, 'error' => 'Not authorized.']);
+    exit;
+}
 ?>
 <?php
 include "../connection.php";

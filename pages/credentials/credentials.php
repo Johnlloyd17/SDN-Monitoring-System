@@ -37,73 +37,42 @@ if (!isset($_SESSION['role'])) {
                                     <div class="panel-heading">
                                         Statistics
                                     </div>
-                                   
+
                                     <div style="padding:10px;">
-                                        
-                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Credential</button>  
-                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button> 
-                                    </div>                                
-                               
+                                        <?php require_once __DIR__ . '/credentials_rows.php'; ?>
+                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Credential</button>
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+                                    </div>
+
                                 <div class="box-body table-responsive">
-                                <form method="post">
                                     <table id="table" class="table table-bordered table-striped">
                                         <thead>
-                                            <tr>
-                                                <th style="width: 20px !important;"><input type="checkbox" name="chk_delete[]" class="cbxMain" onchange="checkMain(this)"/></th>
-                                                <th>Name</th>
-                                                <th>Username</th>
-                                                <th style="width: 40px !important;">Option</th>
-                                            </tr>
+                                            <?php echo cred_render_headers(cred_can_manage()); ?>
                                         </thead>
                                         <tbody>
-                                            <?php
-                                            $squery = mysqli_query($con, "select * from tblstaff");
-                                            while($row = mysqli_fetch_array($squery))
-                                            {
-                                                echo '
-                                                <tr>
-                                                    <td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>
-                                                    <td>'.$row['name'].'</td>
-                                                    <td>'.$row['username'].'</td>
-                                                    <td><button class="btn btn-primary btn-sm" data-target="#editModal'.$row['id'].'" data-toggle="modal"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button></td>
-                                                </tr>
-                                                ';
-
-                                                include "edit_modal.php";
-                                            }
-                                            ?>
+                                            <?php echo cred_render_rows(cred_fetch_rows($con), cred_can_manage()); ?>
                                         </tbody>
                                     </table>
 
+                                    <?php include "edit_modal.php"; ?>
+
                                     <?php include "../deleteModal.php"; ?>
 
-                                    </form>
-                                </div><!-- /.box-body -->
-                            </div><!-- /.box -->
-
-                            <?php include "../edit_notif.php"; ?>
-
-                            <?php include "../added_notif.php"; ?>
-
-                            <?php include "../delete_notif.php"; ?>
-
-                            <?php include "../duplicate_error.php"; ?>
-
-            <?php include "add_modal.php"; ?>
-
-            <?php include "function.php"; ?>
-
+                                    <?php include "add_modal.php"; ?>
 
                     </div>   <!-- /.row -->
                 </section><!-- /.content -->
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
-        <!-- jQuery 2.0.2 -->
         <?php }
         include "../scripts.php";
         ?>
+<?php include "credentials_list_js.php"; ?>
 <script type="text/javascript">
     $(function() {
+        if ($.fn.DataTable.isDataTable('#table')) {
+            $('#table').DataTable().destroy();
+        }
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
         });

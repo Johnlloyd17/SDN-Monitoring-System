@@ -14,6 +14,22 @@ if (!function_exists('bpls_escape')) {
     }
 }
 
+if (!function_exists('bpls_id')) {
+    /**
+     * Validates a posted id. Casting with (int) would quietly turn '201 OR 1=1'
+     * into 201, so a malformed id would still act on a real row; a submitted id
+     * has to be a plain positive integer or it is discarded.
+     */
+    function bpls_id($raw)
+    {
+        if (is_array($raw) || is_object($raw) || is_bool($raw)) { return 0; }
+        $s = trim((string) $raw);
+        if ($s === '' || !preg_match('/^[0-9]+$/', $s)) { return 0; }
+        $n = (int) $s;
+        return $n > 0 ? $n : 0;
+    }
+}
+
 if (!function_exists('bpls_module')) {
     function bpls_module()
     {
@@ -144,7 +160,9 @@ if (!function_exists('bpls_render_filters')) {
     /** The filter select, wired for ajax rather than submit. */
     function bpls_render_filters($con, $params)
     {
-        $out  = '<form method="post" id="filterForm">' . "\n";
+        // No method="post": filtering is ajax, and the page reads $_GET, so a GET
+        // form keeps the control working as a plain fallback if the script fails.
+        $out  = '<form id="filterForm">' . "\n";
         $out .= '  <div class="row">' . "\n";
 
         foreach (bpls_filters() as $key => $def) {

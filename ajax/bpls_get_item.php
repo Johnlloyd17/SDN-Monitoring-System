@@ -24,7 +24,7 @@ if (!function_exists('bpls_json_out')) {
 
 $module = bpls_module();
 $action = isset($_GET['action']) ? (string) $_GET['action'] : '';
-$id     = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$id     = bpls_id(isset($_GET['id']) ? $_GET['id'] : 0);
 
 if (!in_array($action, array('item', 'photos'), true) || $id <= 0) {
     bpls_json_out(array('error' => 'Invalid action.'), 400);
