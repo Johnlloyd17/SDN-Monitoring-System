@@ -11,6 +11,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                     <h4 class="modal-title" id="editUatModalTitle"><i class="fa fa-map-marker"></i> UAT Detail</h4>
                 </div>
                 <div class="modal-body">
+                    <div id="editUatAlert"></div>
 
                     <input type="hidden" name="uat_id" id="editUatId" value="">
 
@@ -200,5 +201,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('editUatLatitude').addEventListener('input', updateCoordsHint);
     document.getElementById('editUatLongitude').addEventListener('input', updateCoordsHint);
+
+    $('#editUatForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var btn = document.getElementById('editUatSaveBtn');
+        var alertBox = $('#editUatAlert');
+        alertBox.html('');
+
+        btn.disabled = true;
+        var originalHtml = btn.html();
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: 'function.php',
+            type: 'POST',
+            // jQuery's serialize() drops submit buttons, so the edit_uat flag
+            // that function.php dispatches on has to be appended explicitly.
+            data: $(this).serialize() + '&edit_uat=1',
+            dataType: 'json',
+            success: function (resp) {
+                if (resp && resp.success) {
+                    $('#editUatModal').modal('hide');
+                    showToast(resp.message || 'UAT record updated successfully.', 'success');
+                    if (typeof loadUatData === 'function') loadUatData();
+                } else {
+                    alertBox.html('<div class="alert alert-danger">' +
+                        ((resp && resp.message) ? resp.message : 'The UAT record could not be saved.') + '</div>');
+                }
+            },
+            error: function () {
+                alertBox.html('<div class="alert alert-danger">Network error. Please try again.</div>');
+            },
+            complete: function () {
+                btn.disabled = false;
+                btn.html(originalHtml);
+            }
+        });
+    });
 });
 </script>

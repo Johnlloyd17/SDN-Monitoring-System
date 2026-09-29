@@ -3,7 +3,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <!-- ========================= MODAL ======================= -->
 <div id="addModal" class="modal fade">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="plannedAddForm">
         <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -33,7 +33,15 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                     </div>
                                     <div class="form-group">
                                         <label>Bureau: <span class="req-asterisk">*</span></label>
-                                        <input name="txt_project" class="form-control input-sm" type="text" placeholder="Bureau" required />
+                                        <?php
+                                        // The project is fixed by the page being viewed, so it is
+                                        // shown read-only instead of being typed. This stops a
+                                        // record being created under a different project (or a
+                                        // misspelling) and becoming invisible on this page.
+                                        $__addCfg = planned_view_config(isset($plannedView) ? $plannedView : '');
+                                        ?>
+                                        <input name="txt_project" id="add_project" class="form-control input-sm" type="text"
+                                               value="<?php echo htmlspecialchars($__addCfg ? $__addCfg['project'] : '', ENT_QUOTES); ?>" readonly />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -109,7 +117,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                     </div>
                                     <div class="form-group">
                                         <label>No. of Completers:</label>
-                                        <input name="completers" class="form-control input-sm" type="number" placeholder="No. of Completers" />
+                                        <input name="txt_completers" class="form-control input-sm" type="number" placeholder="No. of Completers" />
                                     </div>
                                     <div class="form-group">
                                         <label>Male Participants:</label>
@@ -134,8 +142,8 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                         <textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks" rows="2"></textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label>Indicator:</label>
-                                        <textarea name="txt_indicator" class="form-control input-sm" placeholder="Indicator" rows="2"></textarea>
+                                        <label>Type:</label>
+                                        <input name="txt_type" class="form-control input-sm" type="text" placeholder="Type" />
                                     </div>
                                 </div>
                             </div>
@@ -144,7 +152,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
-                    <input type="submit" class="btn btn-primary" name="btn_add" value="Add Item" />
+                    <input type="button" class="btn btn-primary" id="btn_add" value="Add Item" />
                 </div>
             </div>
         </div>

@@ -387,7 +387,6 @@ if (!isset($_SESSION['role'])) {
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
-
 <style>
         table {
             table-layout: auto;

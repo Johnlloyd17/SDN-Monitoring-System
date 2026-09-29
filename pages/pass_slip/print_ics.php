@@ -353,5 +353,7 @@ while ($row = mysqli_fetch_assoc($itemQuery)) {
 
     </div>
 
+
+<?php $sdn_asset_prefix = '../../'; include '../session_bootstrap.php'; ?>
 </body>
 </html>

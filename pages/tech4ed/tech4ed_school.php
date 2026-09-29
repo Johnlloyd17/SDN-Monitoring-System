@@ -15,6 +15,7 @@ if (!isset($_SESSION['role'])) {
 <body class="skin-black">
     <?php
     include "../connection.php";
+require_once __DIR__ . '/tech4ed_rows.php';
     include('../header.php');
     ?>
 
@@ -171,86 +172,9 @@ if (!isset($_SESSION['role'])) {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                <?php
-                                                    $counter = 1;  // Initialize counter
-                                                    $municipalityFilter = isset($_POST['municipality']) ? $_POST['municipality'] : '';
-                                                    $barangayFilter = isset($_POST['barangay']) ? $_POST['barangay'] : '';
-                                                    $yearFilter = isset($_POST['year']) ? $_POST['year'] : '';
-                                                    
-                                                    // Dynamic query based on selected filters
-                                                    $tableQuery = "SELECT * FROM tbltech4ed WHERE category = 'School'";
-                                                    
-                                                    if ($municipalityFilter) {
-                                                        $tableQuery .= " AND municipality = '" . mysqli_real_escape_string($con, $municipalityFilter) . "'";
-                                                    }
-                                                    if ($barangayFilter) {
-                                                        $tableQuery .= " AND barangay = '" . mysqli_real_escape_string($con, $barangayFilter) . "'";
-                                                    }
-                                                    if ($yearFilter) {
-                                                        $tableQuery .= " AND YEAR(launch) = '" . mysqli_real_escape_string($con, $yearFilter) . "'";
-                                                    }
-                                                    $tableQuery .= " ORDER BY municipality ASC";
-                                                    $result = mysqli_query($con, $tableQuery);
-                                                    
-                                                    if (!$result) {
-                                                        die('Error: ' . mysqli_error($con));
-                                                    }
-                                                    
-                                                    while ($row = mysqli_fetch_assoc($result)) {
-                                                        echo '
-                                                           <tr>
-                                                                    <td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="' . $row['id'] . '" /></td>
-                                                                   <td>' . $counter++ . '</td>
-                                                                <td>' . $row['region'] . '</td>
-                                                                <td>' . $row['province'] . '</td>
-                                                                <td>' . $row['district'] . '</td>
-                                                                <td>' . $row['municipality'] . '</td>
-                                                                <td>' . $row['barangay'] . '</td>
-                                                                <td>' . $row['street'] . '</td>
-                                                                <td>' . $row['location'] . '</td>
-                                                                <td>' . $row['cname'] . '</td>
-                                                                <td>' . $row['host'] . '</td>
-                                                                <td>' . $row['category'] . '</td>
-                                                                <td>' . $row['longitude'] . '</td>
-                                                                <td>' . $row['latitude'] . '</td>
-                                                                <td>' . $row['cmanager'] . '</td>
-                                                                <td>' . $row['cemail'] . '</td>
-                                                                <td>' . $row['cmobile'] . '</td>
-                                                                <td>' . $row['clandline'] . '</td>
-                                                                <td>' . $row['cgender'] . '</td>
-                                                                <td>' . $row['amanager'] . '</td>
-                                                                <td>' . $row['aemail'] . '</td>
-                                                                <td>' . $row['amobile'] . '</td>
-                                                                <td>' . $row['alandline'] . '</td>
-                                                                <td>' . $row['agender'] . '</td>
-                                                                <td>' . $row['launch'] . '</td>
-                                                                <td>' . $row['registration'] . '</td>
-                                                                <td>' . $row['operation'] . '</td>
-                                                                <td>' . $row['visited'] . '</td>
-                                                                <td>' . $row['desktop'] . '</td>
-                                                                <td>' . $row['laptop'] . '</td>
-                                                                <td>' . $row['printer'] . '</td>
-                                                                <td>' . $row['scanner'] . '</td>
-                                                                <td>' . $row['status'] . '</td>
-                                                                <td>' . $row['network'] . '</td>
-                                                                <td>' . $row['connectivity'] . '</td>
-                                                                <td>' . $row['speed'] . '</td>
-                                                                <td>' . $row['cmtmale'] . '</td>
-                                                                <td>' . $row['cmtfemale'] . '</td>
-                                                                <td>' . $row['straining'] . '</td>
-                                                                <td>' . $row['etraining'] . '</td>
-                                                                <td>' . $row['signing'] . '</td>
-                                                                <td>' . $row['partner'] . '</td>
-                                                                <td>' . $row['expiration'] . '</td>
-                                                                <td>' . $row['donation'] . '</td>
-                                                                <td>' . $row['datedonation'] . '</td>
-                                                                <td>' . $row['tcms'] . '</td>
-                                                                <td>' . $row['key_one'] . '</td>
-                                                                <td>' . $row['identifier'] . '</td>
-                                                        </tr>
-                                                        ';
-                                                    }
-                                                ?>
+<?php
+echo tech4ed_render_rows($con, tech4ed_filters($_POST), tech4ed_can_manage(), 'school');
+?>
                                                 </tbody>
                                             </table>
                                             <?php include "../deleteModal.php"; ?>
@@ -263,6 +187,9 @@ if (!isset($_SESSION['role'])) {
                 </aside><!-- /.right-side -->
             </div><!-- ./wrapper -->
             <?php include "../footer.php"; ?>
+
+<?php $tech4edView = 'school'; ?>
+<?php include __DIR__ . '/tech4ed_list_js.php'; ?>
             <script type="text/javascript">
                 $(function() {
                     $("#table").dataTable({

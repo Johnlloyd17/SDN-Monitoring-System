@@ -3,7 +3,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <!-- ========================= MODAL ======================= -->
 <div id="addModal" class="modal fade">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="bplsAddForm">
         <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
-                    <input type="submit" class="btn btn-primary" name="btn_add" value="Add Item" />
+                    <button type="button" class="btn btn-primary" id="btn_add">Add Item</button>
                 </div>
             </div>
         </div>

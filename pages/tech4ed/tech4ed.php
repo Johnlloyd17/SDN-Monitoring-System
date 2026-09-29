@@ -15,6 +15,7 @@ if (!isset($_SESSION['role'])) {
     <!-- header logo: style can be found in header.less -->
     <?php
     include "../connection.php";
+    require_once __DIR__ . '/tech4ed_rows.php';
     ?>
     <?php include('../header.php'); ?>
 
@@ -532,96 +533,7 @@ if (!isset($_SESSION['role'])) {
                                         </thead>
                                         <tbody>
                                         <?php
-                                                    $counter = 1;  // Initialize counter
-                                                    $municipalityFilter = isset($_POST['municipality']) ? $_POST['municipality'] : '';
-                                                    $barangayFilter = isset($_POST['barangay']) ? $_POST['barangay'] : '';
-                                                    $categoryFilter = isset($_POST['category']) ? $_POST['category'] : '';
-                                                    $yearFilter = isset($_POST['year']) ? $_POST['year'] : '';
-                                                    
-                                                    // Dynamic query based on selected filters
-                                                    $tableQuery = "SELECT * FROM tbltech4ed WHERE municipality != ''";
-                                                    
-                                                    if ($municipalityFilter) {
-                                                        $tableQuery .= " AND municipality = '" . mysqli_real_escape_string($con, $municipalityFilter) . "'";
-                                                    }
-                                                    
-                                                    if ($barangayFilter) {
-                                                        $tableQuery .= " AND barangay = '" . mysqli_real_escape_string($con, $barangayFilter) . "'";
-                                                    }
-                                                    if ($categoryFilter) {
-                                                        $tableQuery .= " AND category = '" . mysqli_real_escape_string($con, $categoryFilter) . "'";
-                                                    }
-                                                    if ($yearFilter) {
-                                                        $year = mysqli_real_escape_string($con, $yearFilter);
-                                                        $tableQuery .= " AND YEAR(launch) = '$year'";
-                                                    }
-                                                    $tableQuery .= " ORDER BY municipality ASC";
-                                                      $result = mysqli_query($con, $tableQuery);
-                                                      if (!$result) {
-                                                          die('Error: ' . mysqli_error($con));
-                                                      }
-                                                    
-                                                      while ($row = mysqli_fetch_assoc($result)) {
-                                                        echo '<tr>';
-                                                if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'fwfasdn') {
-                                                    echo '<td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>';
-                                                    echo ' <td>' . $counter++ . '</td>'; // Assuming 'id' is the primary key
-                                                }
-                                                echo '
-                                                                   <td>' . $row['region'] . '</td>
-                                                                <td>' . $row['province'] . '</td>
-                                                                <td>' . $row['district'] . '</td>
-                                                                <td>' . $row['municipality'] . '</td>
-                                                                <td>' . $row['barangay'] . '</td>
-                                                                <td>' . $row['street'] . '</td>
-                                                                <td>' . $row['location'] . '</td>
-                                                                <td>' . $row['cname'] . '</td>
-                                                                <td>' . $row['host'] . '</td>
-                                                                <td>' . $row['category'] . '</td>
-                                                                <td>' . $row['longitude'] . '</td>
-                                                                <td>' . $row['latitude'] . '</td>
-                                                                <td>' . $row['cmanager'] . '</td>
-                                                                <td>' . $row['cemail'] . '</td>
-                                                                <td>' . $row['cmobile'] . '</td>
-                                                                <td>' . $row['clandline'] . '</td>
-                                                                <td>' . $row['cgender'] . '</td>
-                                                                <td>' . $row['amanager'] . '</td>
-                                                                <td>' . $row['aemail'] . '</td>
-                                                                <td>' . $row['amobile'] . '</td>
-                                                                <td>' . $row['alandline'] . '</td>
-                                                                <td>' . $row['agender'] . '</td>
-                                                                <td>' . $row['launch'] . '</td>
-                                                                <td>' . $row['registration'] . '</td>
-                                                                <td>' . $row['operation'] . '</td>
-                                                                <td>' . $row['visited'] . '</td>
-                                                                <td>' . $row['desktop'] . '</td>
-                                                                <td>' . $row['laptop'] . '</td>
-                                                                <td>' . $row['printer'] . '</td>
-                                                                <td>' . $row['scanner'] . '</td>
-                                                                <td>' . $row['status'] . '</td>
-                                                                <td>' . $row['network'] . '</td>
-                                                                <td>' . $row['connectivity'] . '</td>
-                                                                <td>' . $row['speed'] . '</td>
-                                                                <td>' . $row['cmtmale'] . '</td>
-                                                                <td>' . $row['cmtfemale'] . '</td>
-                                                                <td>' . $row['straining'] . '</td>
-                                                                <td>' . $row['etraining'] . '</td>
-                                                                <td>' . $row['signing'] . '</td>
-                                                                <td>' . $row['partner'] . '</td>
-                                                                <td>' . $row['expiration'] . '</td>
-                                                                <td>' . $row['donation'] . '</td>
-                                                                <td>' . $row['datedonation'] . '</td>
-                                                                <td>' . $row['tcms'] . '</td>
-                                                                <td>' . $row['key_one'] . '</td>
-                                                                <td>' . $row['identifier'] . '</td> ';
-                                                               if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'fwfasdn') {
-                                                echo '<td>
-                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['barangay'], ENT_QUOTES, 'UTF-8').'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
-                                                </td>';
-                                            }
-                                            echo '</tr>';
-                                        }
+                                        echo tech4ed_render_rows($con, tech4ed_filters($_POST), tech4ed_can_manage());
                                         ?>
                                                 </table>
 
@@ -643,9 +555,7 @@ if (!isset($_SESSION['role'])) {
             <?php include "add_modal.php"; ?>
             <?php include "edit_modal.php"; ?>
             <?php include "view_modal.php"; ?>
-
-            <?php include "function.php"; ?>
-
+<?php include dirname(__DIR__) . '/sheet_preview_modal.php'; ?>
 
                     </div>   <!-- /.row -->
                 </section><!-- /.content -->
@@ -654,11 +564,188 @@ if (!isset($_SESSION['role'])) {
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
+<script src="../../js/sdm-preview.js"></script>
 <script type="text/javascript">
+
+    // Master checkbox for the delete column; re-bindable after an in-place refresh.
+    var tech4edSelectAll = document.getElementById("cbxMain");
+
+    function rebindTech4edCheckboxes() {
+        tech4edSelectAll = document.getElementById("cbxMain");
+        var boxes = document.getElementsByClassName("chk_delete");
+        if (tech4edSelectAll) tech4edSelectAll.checked = false;
+        if (tech4edSelectAll) {
+            tech4edSelectAll.onchange = function () {
+                for (var i = 0; i < boxes.length; i++) boxes[i].checked = tech4edSelectAll.checked;
+            };
+        }
+        for (var i = 0; i < boxes.length; i++) {
+            boxes[i].onchange = function () {
+                if (this.checked === false && tech4edSelectAll) tech4edSelectAll.checked = false;
+                var all = document.getElementsByClassName("chk_delete");
+                if (tech4edSelectAll && document.querySelectorAll('.chk_delete:checked').length === all.length) {
+                    tech4edSelectAll.checked = true;
+                }
+            };
+        }
+    }
+
+    function checkMain(el) {
+        var boxes = document.getElementsByClassName("chk_delete");
+        for (var i = 0; i < boxes.length; i++) boxes[i].checked = el.checked;
+    }
+
+    // Re-render the table body in place, preserving the active filters.
+    function refreshTech4edData() {
+        var params = {};
+        var f = document.getElementById('filterForm');
+        if (f) {
+            ['municipality', 'barangay', 'category', 'year'].forEach(function (n) {
+                var el = f.querySelector('[name="' + n + '"]');
+                if (el && el.value !== '') params[n] = el.value;
+            });
+        }
+
+        return $.getJSON('../../ajax/tech4ed_data.php', params, function (resp) {
+            if (!resp || !resp.success) return;
+            var table = $('#table');
+            if ($.fn.DataTable.isDataTable(table)) {
+                table.DataTable().clear().rows.add($.parseHTML(resp.rows, table[0], false)).draw();
+            } else {
+                table.find('tbody').html(resp.rows);
+            }
+            rebindTech4edCheckboxes();
+        }).fail(function () {
+            showToast('Could not refresh the list. Please reload the page.', 'error');
+        });
+    }
+
+    /**
+     * Submit a form over AJAX so the page never reloads.
+     * opts: { action, modal, multipart, success, reset }
+     */
+    function bindAjaxForm(formId, opts) {
+        opts = opts || {};
+        var form = document.getElementById(formId);
+        if (!form || form.dataset.ajaxBound === '1') return;
+        form.dataset.ajaxBound = '1';
+
+        var alertBox = form.querySelector('.modal-alert-slot');
+
+        function showAlert(msg, type) {
+            if (!alertBox) { if (msg) showToast(msg, type); return; }
+            if (!msg) { alertBox.innerHTML = ''; return; }
+            alertBox.innerHTML = '<div class="alert alert-' + (type === 'error' ? 'danger' : type) +
+                '" style="margin:10px 12px 0;"><i class="fa fa-exclamation-circle"></i> ' + msg + '</div>';
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            showAlert('');
+
+            var settings = {
+                url: 'function.php',
+                type: 'POST',
+                dataType: 'json'
+            };
+
+            if (opts.multipart) {
+                // FormData keeps the repeated name="photos[]" inputs intact.
+                var fd = new FormData(form);
+                if (opts.action) fd.append(opts.action, '1');
+                settings.data = fd;
+                settings.processData = false;
+                settings.contentType = false;
+            } else {
+                var data = $(form).serialize();
+                if (opts.action) data += (data ? '&' : '') + encodeURIComponent(opts.action) + '=1';
+                settings.data = data;
+            }
+
+            var submitBtn = form.querySelector('[type="submit"]');
+            // These modals use <input type="submit">, so toggle value vs innerHTML.
+            var isInput = submitBtn && submitBtn.tagName === 'INPUT';
+            var label = submitBtn ? (isInput ? submitBtn.value : submitBtn.innerHTML) : null;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                if (isInput) submitBtn.value = 'Processing...';
+                else submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+            }
+
+            $.ajax(settings).done(function (resp) {
+                if (!resp) { showAlert('Unexpected server response.', 'error'); return; }
+                if (!resp.success) { showAlert(resp.message || 'The request failed.', 'error'); return; }
+
+                showToast(resp.message || 'Saved successfully.', 'success');
+                if (opts.reset && typeof form.reset === 'function') form.reset();
+                if (opts.modal) $(opts.modal).modal('hide');
+                if (opts.success) opts.success(resp);
+            }).fail(function () {
+                showAlert('Network error. Please check your connection and try again.', 'error');
+            }).always(function () {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (isInput) submitBtn.value = label;
+                    else submitBtn.innerHTML = label;
+                }
+            });
+        });
+    }
+
+    // Bulk delete via the shared confirm modal, without reloading.
+    $(function () {
+        var btn = document.getElementById('btn_delete');
+        if (!btn) return;
+        btn.type = 'button';
+        btn.addEventListener('click', function () {
+            var ids = [];
+            var checked = document.querySelectorAll('.chk_delete:checked');
+            for (var i = 0; i < checked.length; i++) ids.push(checked[i].value);
+            if (ids.length === 0) {
+                $('#deleteModal').modal('hide');
+                showToast('Please select at least one record to delete.', 'warning');
+                return;
+            }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deleting...';
+            $.ajax({
+                url: 'function.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { btn_delete: '1', 'chk_delete[]': ids }
+            }).done(function (resp) {
+                showToast((resp && resp.message) || 'Delete finished.', (resp && resp.type) || 'success');
+                if (resp && resp.deleted > 0) {
+                    $('#deleteModal').modal('hide');
+                    refreshTech4edData();
+                }
+            }).fail(function () {
+                showToast('Network error while deleting.', 'error');
+            }).always(function () {
+                btn.disabled = false;
+                btn.value = 'Yes';
+            });
+        });
+    });
 
     $(function() {
         $("#table").dataTable({
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+        });
+        rebindTech4edCheckboxes();
+    });
+
+    $(function () {
+        bindAjaxForm('addForm', {
+            action: 'btn_add',
+            modal: '#addModal',
+            reset: true,
+            success: function () { refreshTech4edData(); }
+        });
+        bindAjaxForm('editForm', {
+            action: 'btn_save',
+            modal: '#editModal',
+            success: function () { refreshTech4edData(); }
         });
     });
 
@@ -696,7 +783,7 @@ if (!isset($_SESSION['role'])) {
                 }).then(response => response.json()).then(data => {
                     if (data.success) {
                         showToast('Data imported successfully!', 'success');
-                        location.reload();
+                        refreshTech4edData();
                     } else {
                         console.error('[Tech4Ed Import Error]', data.error);
                         showToast(data.error || 'Import failed.', 'error');
@@ -721,7 +808,7 @@ document.getElementById('municipalitySelect').addEventListener('change', functio
 
 $(document).on('click', '.btn-edit-item', function() {
     var id = $(this).data('id');
-    $.getJSON('ajax/tech4ed_get_item.php?action=item&id=' + id, function(data) {
+    $.getJSON('../../ajax/tech4ed_get_item.php?action=item&id=' + id, function(data) {
         $('#edit_hidden_id').val(data.id);
         $('#edit_region').val(data.region);
         $('#edit_province').val(data.province);
@@ -776,13 +863,10 @@ $(document).on('click', '.btn-edit-item', function() {
     });
 });
 
-$(document).on('click', '.btn-view-item', function() {
-    var id = $(this).data('id');
-    var name = $(this).data('name');
-    $('#view_item_title').text(name);
-    $('#view_hidden_id').val(id);
+// Load (or reload) the attachment grid for a record.
+function loadTech4edPhotos(id, showModal) {
     var $grid = $('#photoGrid').empty();
-    $.getJSON('ajax/tech4ed_get_item.php?action=photos&id=' + id, function(photos) {
+    return $.getJSON('../../ajax/tech4ed_get_item.php?action=photos&id=' + id, function(photos) {
         if (photos.length === 0) {
             $grid.html('<div class="col-md-12"><p>No files uploaded.</p></div>');
         } else {
@@ -791,11 +875,9 @@ $(document).on('click', '.btn-view-item', function() {
                 var ext = p.type;
                 var nameClean = p.filename.replace(/\d+/g, '');
                 var thumb = '';
-                if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
-                    thumb = '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
-                } else if (ext === 'pdf') {
-                    thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
-                } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
+                if (['jpg','jpeg','png','gif','pdf','xlsx','csv'].indexOf(ext) !== -1) {
+                    thumb = SDMPreview.previewCard(filePath, p.filename, ext, 'tech4ed');
+                } else if (['docx','pptx'].indexOf(ext) !== -1) {
                     thumb = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
                 } else {
                     thumb = '<div class="file-thumbnail">File type not previewable</div>';
@@ -813,22 +895,95 @@ $(document).on('click', '.btn-view-item', function() {
                 );
             });
         }
-        $('#viewModal').modal('show');
+        var master = document.getElementById('cbxMainphoto');
+        if (master) {
+            master.checked = false;
+            master.onchange = function () {
+                var boxes = document.getElementsByClassName('chk_deletephoto');
+                for (var i = 0; i < boxes.length; i++) boxes[i].checked = master.checked;
+            };
+        }
+        if (showModal) $('#viewModal').modal('show');
     }).fail(function(xhr, status, error) {
         console.error('[Tech4Ed Load Photos Error]', status, error);
         showToast('Failed to load files.', 'error');
     });
+}
+
+$(document).on('click', '.btn-view-item', function() {
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    $('#view_item_title').text(name);
+    $('#view_hidden_id').val(id);
+    loadTech4edPhotos(id, true);
 });
 
-var select_all = document.getElementById("cbxMainphoto");
-if (select_all) {
-    select_all.addEventListener("change", function(e){
-        var checkboxes = document.getElementsByClassName("chk_deletephoto");
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = select_all.checked;
+// Upload / delete attachments without reloading the page.
+$(function () {
+    var form = document.getElementById('viewFilesForm');
+    if (!form) return;
+    var alertBox = form.querySelector('.modal-alert-slot');
+
+    function showAlert(msg, type) {
+        if (!msg) { alertBox.innerHTML = ''; return; }
+        alertBox.innerHTML = '<div class="alert alert-' + (type === 'error' ? 'danger' : type) +
+            '" style="margin:10px 12px 0;"><i class="fa fa-exclamation-circle"></i> ' + msg + '</div>';
+    }
+
+    function busy(btn, on) {
+        if (!btn) return;
+        btn.disabled = on;
+        if (!btn.dataset.label) btn.dataset.label = btn.value;
+        btn.value = on ? 'Working...' : btn.dataset.label;
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        showAlert('');
+
+        var id = document.getElementById('view_hidden_id').value;
+        var clicked = document.activeElement;
+        var action = (clicked && (clicked.name === 'btn_addimage' || clicked.name === 'btn_remove'))
+            ? clicked.name
+            : 'btn_addimage';
+
+        var settings = { url: 'function.php', type: 'POST', dataType: 'json' };
+
+        if (action === 'btn_addimage') {
+            var fd = new FormData(form);
+            fd.append('btn_addimage', '1');
+            settings.data = fd;
+            settings.processData = false;
+            settings.contentType = false;
+        } else {
+            var ids = [];
+            var checked = document.querySelectorAll('.chk_deletephoto:checked');
+            for (var i = 0; i < checked.length; i++) ids.push(checked[i].value);
+            if (ids.length === 0) {
+                showAlert('Select at least one file to delete.', 'error');
+                return;
+            }
+            settings.data = { hidden_id: id, btn_remove: '1', 'chk_deletephoto[]': ids };
         }
+
+        busy(clicked, true);
+        $.ajax(settings).done(function (resp) {
+            if (!resp || !resp.success) {
+                showAlert((resp && resp.message) || 'The request failed.', 'error');
+                return;
+            }
+            showToast(resp.message || 'Done.', 'success');
+            if (action === 'btn_addimage') {
+                document.getElementById('viewFilesForm').reset();
+            }
+            loadTech4edPhotos(id, false);
+        }).fail(function () {
+            showAlert('Network error. Please try again.', 'error');
+        }).always(function () {
+            busy(clicked, false);
+        });
     });
-}
+});
 
 </script>
 

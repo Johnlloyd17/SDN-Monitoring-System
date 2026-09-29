@@ -31,6 +31,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                     <h4 class="modal-title"><i class="fa fa-file-signature"></i> Create UAT Record</h4>
                 </div>
                 <div class="modal-body">
+                    <div id="addUatAlert"></div>
 
                     <div class="modal-section-header"><i class="fa fa-map-marker"></i> Location Info</div>
 
@@ -116,7 +117,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" name="create_uat" class="btn btn-primary"><i class="fa fa-save"></i> Save UAT</button>
+                    <button type="submit" name="create_uat" class="btn btn-primary" id="addUatSaveBtn"><i class="fa fa-save"></i> Save UAT</button>
                 </div>
             </form>
         </div>
@@ -277,6 +278,45 @@ document.addEventListener('DOMContentLoaded', function() {
         addBtnId: 'addUatRowBtn',
         wrapId: 'uatInvSearchWrap',
         countLabelId: 'uatItemCount'
+    });
+
+    $('#addUatForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var btn = document.getElementById('addUatSaveBtn');
+        var alertBox = $('#addUatAlert');
+        alertBox.html('');
+
+        btn.disabled = true;
+        var originalHtml = btn.html();
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: 'function.php',
+            type: 'POST',
+            // jQuery's serialize() drops submit buttons, so the create_uat flag
+            // that function.php dispatches on has to be appended explicitly.
+            data: $(this).serialize() + '&create_uat=1',
+            dataType: 'json',
+            success: function (resp) {
+                if (resp && resp.success) {
+                    $('#addUatModal').modal('hide');
+                    document.getElementById('addUatForm').reset();
+                    showToast(resp.message || 'UAT record created successfully.', 'success');
+                    if (typeof loadUatData === 'function') loadUatData();
+                } else {
+                    alertBox.html('<div class="alert alert-danger">' +
+                        ((resp && resp.message) ? resp.message : 'The UAT record could not be saved.') + '</div>');
+                }
+            },
+            error: function () {
+                alertBox.html('<div class="alert alert-danger">Network error. Please try again.</div>');
+            },
+            complete: function () {
+                btn.disabled = false;
+                btn.html(originalHtml);
+            }
+        });
     });
 });
 </script>

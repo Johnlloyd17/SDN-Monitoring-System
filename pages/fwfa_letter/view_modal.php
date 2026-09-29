@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <div id="viewModal" class="modal fade" role="dialog">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="letterViewForm">
         <div class="modal-dialog modal-sdm-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -16,10 +16,10 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <div class="col-md-6">
-                        <input name="photos[]" class="form-control input-sm" type="file" multiple/>
+                        <input name="photos[]" id="letterPhotoInput" class="form-control input-sm" type="file" multiple/>
                     </div>
-                    <input type="submit" class="btn btn-primary btn-sm" name="btn_addimage" value="Add"/>
-                    <input type="submit" class="btn btn-danger btn-sm" name="btn_remove" value="Remove Selected"/>
+                    <input type="button" class="btn btn-primary btn-sm" id="btn_addimage" value="Add"/>
+                    <input type="button" class="btn btn-danger btn-sm" id="btn_remove_photo" value="Remove Selected"/>
                     <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Close"/>
                 </div>
             </div>

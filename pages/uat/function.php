@@ -2,7 +2,11 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth_api();
 ?>
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+/* Guarded above, so the session is normally already up. Kept as an explicit
+   call to the shared bootstrap rather than a raw session_start(): a bare
+   session_start() here would silently fall back to php.ini's 24-minute
+   gc_maxlifetime if the guard above were ever removed or reordered. */
+sdn_session_boot();
 include "../connection.php";
 
 $isStaff = isset($_SESSION['staff']);
@@ -140,6 +144,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'inventory_item_search') {
     exit;
 }
 if (isset($_POST['create_uat'])) {
+    header('Content-Type: application/json');
+
     $municipality = mysqli_real_escape_string($con, trim($_POST['municipality'] ?? ''));
     $strategy = mysqli_real_escape_string($con, trim($_POST['strategy'] ?? ''));
     $transport_location = mysqli_real_escape_string($con, trim($_POST['transport_location'] ?? ''));
@@ -147,7 +153,7 @@ if (isset($_POST['create_uat'])) {
     $longitude = isset($_POST['longitude']) && trim($_POST['longitude']) !== '' ? "'" . mysqli_real_escape_string($con, trim($_POST['longitude'])) . "'" : "NULL";
 
     if (empty($municipality) || empty($strategy) || empty($transport_location)) {
-        echo "<script>alert('Municipality, Strategy, and Transport Location are required.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Municipality, Strategy, and Transport Location are required.']);
         exit;
     }
 
@@ -160,7 +166,9 @@ if (isset($_POST['create_uat'])) {
     $inventory_ids = $_POST['inventory_id'] ?? [];
 
     $itemRows = array();
+    $rowNumber = 0;
     foreach ($item_names as $index => $itemName) {
+        $rowNumber = $index + 1;
         $rn = trim($itemName ?? '');
         $rqty = trim($qtys[$index] ?? '');
         $runit = trim($units[$index] ?? '');
@@ -169,7 +177,7 @@ if (isset($_POST['create_uat'])) {
         $invId = isset($inventory_ids[$index]) ? intval($inventory_ids[$index]) : 0;
         if ($rn === '' && $rqty === '' && $runit === '' && $rdesc === '' && $rser === '' && $invId <= 0) continue;
         if ($rn === '') {
-            echo "<script>alert('Please enter an Item Name for equipment row " . ($index + 1) . ".'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Please enter an Item Name for equipment row ' . $rowNumber . '.']);
             exit;
         }
         if ($rqty === '') $rqty = 1;
@@ -177,12 +185,12 @@ if (isset($_POST['create_uat'])) {
         if ($invId > 0) {
             $checkInv = mysqli_query($con, "SELECT 1 FROM inventory WHERE id = $invId LIMIT 1");
             if (!$checkInv || mysqli_num_rows($checkInv) == 0) {
-                echo "<script>alert('The Inventory item linked in row " . ($index + 1) . " no longer exists. Remove that link and try again.'); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'The Inventory item linked in row ' . $rowNumber . ' no longer exists. Remove that link and try again.']);
                 exit;
             }
         }
 
-        $itemRows[] = array('qty' => intval($rqty), 'unit' => $runit, 'item_name' => $rn, 'description' => $rdesc, 'serial_numbers' => $rser, 'inventory_id' => $invId);
+        $itemRows[] = array('row' => $rowNumber, 'qty' => intval($rqty), 'unit' => $runit, 'item_name' => $rn, 'description' => $rdesc, 'serial_numbers' => $rser, 'inventory_id' => $invId);
     }
 
     $insertHeader = "INSERT INTO uat (municipality, strategy, transport_location, latitude, longitude, created_by)
@@ -190,7 +198,7 @@ if (isset($_POST['create_uat'])) {
                      '" . ($_SESSION['username'] ?? 'admin') . "')";
 
     if (!mysqli_query($con, $insertHeader)) {
-        echo "<script>alert('Error saving UAT: " . mysqli_error($con) . "'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Error saving UAT: ' . mysqli_error($con)]);
         exit;
     }
 
@@ -198,6 +206,7 @@ if (isset($_POST['create_uat'])) {
     $insertedCount = 0;
 
     foreach ($itemRows as $row) {
+        $rowNumber = $row['row'];
         $qty = $row['qty'];
         $unit = mysqli_real_escape_string($con, $row['unit']);
         $item_name = mysqli_real_escape_string($con, $row['item_name']);
@@ -219,15 +228,15 @@ if (isset($_POST['create_uat'])) {
             $itemErr = mysqli_errno($con);
         }
         if ($itemErr === 1062) {
-            echo "<script>alert('A linked item in row " . ($index + 1) . " is already assigned to another UAT row. Select a different item.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'A linked item in row ' . $rowNumber . ' is already assigned to another UAT row. Select a different item.']);
             exit;
         }
         if ($itemErr === 1452) {
-            echo "<script>alert('A linked item in row " . ($index + 1) . " no longer exists. Remove that link and try again.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'A linked item in row ' . $rowNumber . ' no longer exists. Remove that link and try again.']);
             exit;
         }
         if ($itemErr !== null) {
-            echo "<script>alert('Error saving equipment for row: " . mysqli_error($con) . "'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Error saving equipment for row: ' . mysqli_error($con)]);
             exit;
         }
     }
@@ -235,8 +244,7 @@ if (isset($_POST['create_uat'])) {
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
         VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Created UAT for: $transport_location (Municipality: $municipality)')");
 
-    $_SESSION['new_uat'] = $uat_id;
-    header("Location: uat.php");
+    echo json_encode(['success' => true, 'uat_id' => intval($uat_id), 'items' => $insertedCount, 'message' => 'UAT record created successfully.']);
     exit;
 }
 
@@ -244,9 +252,11 @@ if (isset($_POST['create_uat'])) {
 // ACTION: Edit UAT header + equipment items (replace items)
 // ============================================================
 if (isset($_POST['edit_uat'])) {
+    header('Content-Type: application/json');
+
     $id = intval($_POST['uat_id'] ?? 0);
     if ($id <= 0) {
-        echo "<script>alert('Invalid UAT record.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Invalid UAT record.']);
         exit;
     }
 
@@ -257,7 +267,7 @@ if (isset($_POST['edit_uat'])) {
     $longitude = isset($_POST['longitude']) && trim($_POST['longitude']) !== '' ? "'" . mysqli_real_escape_string($con, trim($_POST['longitude'])) . "'" : "NULL";
 
     if (empty($municipality) || empty($strategy) || empty($transport_location)) {
-        echo "<script>alert('Municipality, Strategy, and Transport Location are required.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Municipality, Strategy, and Transport Location are required.']);
         exit;
     }
 
@@ -265,7 +275,7 @@ if (isset($_POST['edit_uat'])) {
                      transport_location = '$transport_location', latitude = $latitude, longitude = $longitude
                      WHERE id = $id";
     if (!mysqli_query($con, $updateHeader)) {
-        echo "<script>alert('Error updating UAT: " . mysqli_error($con) . "'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Error updating UAT: ' . mysqli_error($con)]);
         exit;
     }
 
@@ -287,7 +297,9 @@ if (isset($_POST['edit_uat'])) {
 
     $itemRows = array();
     $seenLinks = array();
+    $rowNumber = 0;
     foreach ($item_names as $index => $itemName) {
+        $rowNumber = $index + 1;
         $rn = trim($itemName ?? '');
         $rqty = trim($qtys[$index] ?? '');
         $runit = trim($units[$index] ?? '');
@@ -297,28 +309,28 @@ if (isset($_POST['edit_uat'])) {
         $invId = isset($inventory_ids[$index]) ? intval($inventory_ids[$index]) : 0;
         if ($rn === '' && $rqty === '' && $runit === '' && $rdesc === '' && $rser === '' && $linkId <= 0 && $invId <= 0) continue;
         if ($rn === '') {
-            echo "<script>alert('Please enter an Item Name for equipment row " . ($index + 1) . ".'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Please enter an Item Name for equipment row ' . $rowNumber . '.']);
             exit;
         }
         if ($rqty === '') $rqty = 1;
 
         if ($linkId > 0 && $invId > 0) {
-            echo "<script>alert('Row " . ($index + 1) . " cannot be linked to both a Pass Slip item and an Inventory item. Select only one source.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Row ' . $rowNumber . ' cannot be linked to both a Pass Slip item and an Inventory item. Select only one source.']);
             exit;
         }
 
         if ($linkId > 0) {
             if (!in_array($linkId, $oldPsLinks)) {
-                echo "<script>alert('Row " . ($index + 1) . " links a Pass Slip item that is not part of this record. New UAT rows can only link Inventory items.'); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Row ' . $rowNumber . ' links a Pass Slip item that is not part of this record. New UAT rows can only link Inventory items.']);
                 exit;
             }
             if (isset($seenLinks[$linkId])) {
-                echo "<script>alert('The Pass Slip item in row " . ($index + 1) . " appears in more than one row. Each item can only appear once.'); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'The Pass Slip item in row ' . $rowNumber . ' appears in more than one row. Each item can only appear once.']);
                 exit;
             }
             $alreadyQ = mysqli_query($con, "SELECT 1 FROM uat_items WHERE pass_slip_item_id = $linkId AND uat_id != $id LIMIT 1");
             if ($alreadyQ && mysqli_num_rows($alreadyQ) > 0) {
-                echo "<script>alert('The Pass Slip item in row " . ($index + 1) . " is already confirmed installed in another UAT record. Select a different item.'); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'The Pass Slip item in row ' . $rowNumber . ' is already confirmed installed in another UAT record. Select a different item.']);
                 exit;
             }
             $seenLinks[$linkId] = $index + 1;
@@ -327,12 +339,12 @@ if (isset($_POST['edit_uat'])) {
         if ($invId > 0) {
             $checkInv = mysqli_query($con, "SELECT 1 FROM inventory WHERE id = $invId LIMIT 1");
             if (!$checkInv || mysqli_num_rows($checkInv) == 0) {
-                echo "<script>alert('The Inventory item linked in row " . ($index + 1) . " no longer exists. Remove that link and try again.'); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'The Inventory item linked in row ' . $rowNumber . ' no longer exists. Remove that link and try again.']);
                 exit;
             }
         }
 
-        $itemRows[] = array('qty' => intval($rqty), 'unit' => $runit, 'item_name' => $rn, 'description' => $rdesc, 'serial_numbers' => $rser, 'pass_slip_item_id' => $linkId, 'inventory_id' => $invId);
+        $itemRows[] = array('row' => $rowNumber, 'qty' => intval($rqty), 'unit' => $runit, 'item_name' => $rn, 'description' => $rdesc, 'serial_numbers' => $rser, 'pass_slip_item_id' => $linkId, 'inventory_id' => $invId);
     }
 
     // Replace equipment rows: delete all then re-insert (keeps FK parent valid)
@@ -340,6 +352,7 @@ if (isset($_POST['edit_uat'])) {
 
     $insertedCount = 0;
     foreach ($itemRows as $row) {
+        $rowNumber = $row['row'];
         $qty = $row['qty'];
         $unit = mysqli_real_escape_string($con, $row['unit']);
         $item_name = mysqli_real_escape_string($con, $row['item_name']);
@@ -361,15 +374,15 @@ if (isset($_POST['edit_uat'])) {
             $itemErr = mysqli_errno($con);
         }
         if ($itemErr === 1062) {
-            echo "<script>alert('The Pass Slip item in row " . ($index + 1) . " is already confirmed installed in another UAT record. Select a different item.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'The Pass Slip item in row ' . $rowNumber . ' is already confirmed installed in another UAT record. Select a different item.']);
             exit;
         }
         if ($itemErr === 1452) {
-            echo "<script>alert('A linked item in row " . ($index + 1) . " no longer exists. Remove that link and try again.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'A linked item in row ' . $rowNumber . ' no longer exists. Remove that link and try again.']);
             exit;
         }
         if ($itemErr !== null) {
-            echo "<script>alert('Error saving equipment for row: " . mysqli_error($con) . "'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Error saving equipment for row: ' . mysqli_error($con)]);
             exit;
         }
     }
@@ -390,8 +403,7 @@ if (isset($_POST['edit_uat'])) {
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
         VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Edited UAT for: $transport_location (ID: $id)')");
 
-    $_SESSION['edited'] = 1;
-    header("Location: uat.php");
+    echo json_encode(['success' => true, 'uat_id' => $id, 'items' => $insertedCount, 'message' => 'UAT record updated successfully.']);
     exit;
 }
 

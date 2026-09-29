@@ -187,7 +187,7 @@ if (!isset($_SESSION['role'])) {
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
-        <script type="text/javascript">
+<script type="text/javascript">
             $(function () {
                 $("#table").dataTable({
                     "aoColumnDefs": [{ "bSortable": false, "aTargets": [13] }], "aaSorting": []

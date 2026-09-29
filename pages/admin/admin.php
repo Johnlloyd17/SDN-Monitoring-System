@@ -134,8 +134,8 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
         <!-- jQuery 2.0.2 -->
-        <?php }
-        include "../footer.php"; ?>
+        <?php } ?>
+        <?php include "../footer.php"; ?>
 <script type="text/javascript">
     $(function() {
         $("#table").dataTable({

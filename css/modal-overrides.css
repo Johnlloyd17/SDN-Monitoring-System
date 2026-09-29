@@ -250,6 +250,152 @@
   background: linear-gradient(135deg, #1b3a6b 0%, #3c8dbc 100%);
 }
 
+/* --- SPREADSHEET PREVIEW (#sdmPreviewModal) --- */
+#sdmPreviewSheetWrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+
+/* Sheet tab strip (only shown when the workbook has >1 sheet) */
+#sdmSheetTabs {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #f4f6f8;
+  border-bottom: 1px solid #dde3ea;
+}
+#sdmSheetTabs:empty { display: none; }
+
+#sdmSheetTabs .sdm-sheet-tab {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  background: #fff;
+  border: 1px solid #cfd8e3;
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#sdmSheetTabs .sdm-sheet-tab:hover {
+  border-color: #3c8dbc;
+  color: #3c8dbc;
+}
+#sdmSheetTabs .sdm-sheet-tab.active {
+  background: #3c8dbc;
+  border-color: #367fa9;
+  color: #fff;
+}
+
+/* Scrollable grid area */
+#sdmSheetScroll {
+  flex: 1 1 auto;
+  overflow: auto;
+  background: #fff;
+}
+
+#sdmSheetTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12.5px;
+  table-layout: auto;
+}
+#sdmSheetTable th,
+#sdmSheetTable td {
+  border-right: 1px solid #e4e8ee;
+  border-bottom: 1px solid #e4e8ee;
+  padding: 5px 9px;
+  vertical-align: top;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 320px;
+}
+
+/* Sticky row-number gutter + header row */
+#sdmSheetTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #1b3a6b;
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+#sdmSheetTable th.sdm-rownum,
+#sdmSheetTable td.sdm-rownum {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f0f3f7;
+  color: #888;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  border-right: 1px solid #cfd8e3;
+  min-width: 44px;
+}
+#sdmSheetTable thead th.sdm-rownum {
+  background: #1b3a6b;
+  color: #fff;
+  z-index: 4;
+}
+#sdmSheetTable tbody tr:nth-child(even) td:not(.sdm-rownum) {
+  background: #fbfcfd;
+}
+
+/* "showing first N rows" notice */
+.sdm-sheet-note {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  color: #8a6d3b;
+  background: #fcf8e3;
+  border-top: 1px solid #faebcc;
+}
+.sdm-sheet-note:empty { display: none; }
+
+/* Error / message shown inside the sheet panel */
+.sdm-sheet-msg {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+.sdm-sheet-msg .fa { font-size: 34px; display: block; margin-bottom: 12px; }
+.sdm-sheet-msg.is-error { color: #e74c3c; }
+
+/* Excel thumbnail on the file card */
+.file-thumbnail-sheet { cursor: pointer; }
+.file-thumbnail-sheet:hover { transform: scale(1.05); }
+
+/* Printing a spreadsheet preview: drop the modal chrome, keep the grid. */
+@media print {
+  #sdmPreviewModal .modal-header,
+  #sdmPreviewModal .modal-footer { display: none !important; }
+  #sdmPreviewModal .modal-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  #sdmSheetScroll { overflow: visible !important; height: auto !important; }
+  #sdmSheetTable th.sdm-rownum,
+  #sdmSheetTable td.sdm-rownum { position: static !important; }
+  #sdmSheetTable thead th { position: static !important; }
+}
+
 /* --- SCROLLBAR --- */
 /* Global custom scrollbar: thin, rounded, light gray thumb. */
 *::-webkit-scrollbar {

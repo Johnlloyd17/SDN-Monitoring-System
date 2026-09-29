@@ -257,8 +257,7 @@ if (!isset($_SESSION['role'])) {
 }
 include "../footer.php";
     ?>
-
-    <script type="text/javascript">
+<script type="text/javascript">
         // Function to update the date and time
         function updateDateTime() {
             const now = new Date();

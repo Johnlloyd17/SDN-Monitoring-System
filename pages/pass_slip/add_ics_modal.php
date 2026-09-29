@@ -6,6 +6,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
     <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
             <form method="POST" action="function.php" id="addIcsForm">
+            <div class="modal-alert-slot"></div>
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title"><i class="fa fa-clipboard"></i> Create Inventory Custodian Slip</h4>
@@ -144,6 +145,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    function resetIcsForm() {
+        var form = document.getElementById('addIcsForm');
+        form.reset();
+        var tbody = document.getElementById('icsItemsBody');
+        var rows = tbody.querySelectorAll('.ics-item-row');
+        for (var i = 1; i < rows.length; i++) {
+            rows[i].remove();
+        }
+        var first = tbody.querySelector('.ics-item-row');
+        if (first) {
+            first.querySelectorAll('input').forEach(function(inp) { inp.value = ''; });
+            first.querySelectorAll('textarea').forEach(function(ta) { ta.value = ''; });
+        }
+        calculateIcsTotal();
+    }
+    window.resetIcsForm = resetIcsForm;
 
     document.getElementById('icsNo').addEventListener('change', function() {
         syncInvNos();

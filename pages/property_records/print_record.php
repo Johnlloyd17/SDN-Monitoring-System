@@ -165,5 +165,7 @@ if (!$row) {
 <div class="no-print" style="text-align:center; margin-top:12px;">
     <button onclick="window.print();" style="padding:6px 20px; font-size:13px; cursor:pointer;">Print Sticker</button>
 </div>
+
+<?php $sdn_asset_prefix = '../../'; include '../session_bootstrap.php'; ?>
 </body>
 </html>

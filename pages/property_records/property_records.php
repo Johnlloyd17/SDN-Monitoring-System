@@ -255,7 +255,7 @@ if (!isset($_SESSION['role'])) {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Cancel" />
+                          
                             <input type="submit" class="btn btn-primary btn-sm" value="Add Item" id="addSubmitBtn" />
                         </div>
                     </div>
@@ -346,28 +346,8 @@ if (!isset($_SESSION['role'])) {
             </form>
         </div>
 
-        <!-- ========================= PREVIEW FILE MODAL ======================= -->
-        <div id="previewFileModal" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-sdm-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header" style="background: #1b3a6b; color: #fff;">
-                        <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
-                        <h4 class="modal-title"><i class="fa fa-file-image-o"></i> <span id="previewFileName">Preview</span></h4>
-                    </div>
-                    <div class="modal-body" style="padding: 0; height: 700px; background: #e9e9e9; display: flex; align-items: center; justify-content: center;">
-                        <div id="previewSpinner" style="text-align:center;">
-                            <i class="fa fa-spinner fa-spin" style="font-size:36px; color:#888;"></i>
-                            <p style="margin-top:10px; color:#888;">Loading preview...</p>
-                        </div>
-                        <iframe id="previewPdfFrame" src="" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
-                        <img id="previewImgTag" src="" style="max-width: 100%; max-height: 100%; display: none;">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="printPreviewFile()"><i class="fa fa-print"></i> Print</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- ========================= SHARED FILE PREVIEW MODAL ======================= -->
+        <?php include dirname(__DIR__) . '/sheet_preview_modal.php'; ?>
 
         <!-- ========================= DELETE CONFIRMATION MODAL ======================= -->
         <div id="deleteModal" class="modal fade">
@@ -580,7 +560,7 @@ if (!isset($_SESSION['role'])) {
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+                   
                         <?php if ($_SESSION['role'] !== 'staff') { ?>
                         <button type="button" class="btn btn-primary btn-sm" id="groupSaveSharedBtn"><i class="fa fa-save"></i> Save Changes</button>
                         <?php } ?>
@@ -593,6 +573,7 @@ if (!isset($_SESSION['role'])) {
         <div id="ajaxToast" class="alert" style="position:fixed; top:1em; right:1em; z-index:9999; display:none; min-width:250px;"></div>
 
         <?php include dirname(__DIR__) . '/scripts.php'; ?>
+        <script src="../../js/sdm-preview.js"></script>
 
         <style>
             .info-box-icon {
@@ -1064,7 +1045,9 @@ if (!isset($_SESSION['role'])) {
                             preview = '<img src="' + photo.filepath + '" alt="" class="file-thumbnail" style="cursor:pointer;" onclick="previewFile(\'' + photo.filepath + '\', \'' + photo.filename.replace(/'/g, "\\'") + '\', \'' + ext + '\')"/>';
                         } else if (ext === 'pdf') {
                             preview = '<div class="file-thumbnail-pdf" style="cursor:pointer;" onclick="previewFile(\'' + photo.filepath + '\', \'' + photo.filename.replace(/'/g, "\\'") + '\', \'pdf\')"><i class="fa fa-file-pdf-o" style="font-size:50px; color:#e74c3c;"></i></div>';
-                        } else if (['docx','xlsx','pptx'].indexOf(ext) >= 0) {
+                        } else if (['xlsx','csv'].indexOf(ext) >= 0) {
+                            preview = SDMPreview.previewCard(photo.filepath, photo.filename, ext, 'property_records');
+                        } else if (['docx','pptx'].indexOf(ext) >= 0) {
                             preview = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
                         } else {
                             preview = '<div class="file-thumbnail">File type not previewable</div>';
@@ -1084,61 +1067,10 @@ if (!isset($_SESSION['role'])) {
             }
 
             function previewFile(fileUrl, fileName, ext) {
-                var pdfFrame = document.getElementById('previewPdfFrame');
-                var imgTag = document.getElementById('previewImgTag');
-                var spinner = document.getElementById('previewSpinner');
-                document.getElementById('previewFileName').textContent = fileName;
-
-                pdfFrame.style.display = 'none';
-                pdfFrame.src = '';
-                imgTag.style.display = 'none';
-                imgTag.src = '';
-                spinner.style.display = 'block';
-                spinner.innerHTML = '<i class="fa fa-spinner fa-spin" style="font-size:36px; color:#888;"></i><p style="margin-top:10px; color:#888;">Loading preview...</p>';
-
-                if (ext === 'pdf') {
-                    pdfFrame.onload = function() {
-                        spinner.style.display = 'none';
-                        pdfFrame.style.display = 'block';
-                        pdfFrame.onload = null;
-                    };
-                    pdfFrame.src = fileUrl;
-                } else {
-                    var preload = new Image();
-                    preload.onload = function() {
-                        imgTag.src = fileUrl;
-                        spinner.style.display = 'none';
-                        imgTag.style.display = 'block';
-                    };
-                    preload.onerror = function() {
-                        spinner.innerHTML = '<i class="fa fa-exclamation-triangle" style="font-size:36px; color:#e74c3c;"></i><p style="margin-top:10px; color:#e74c3c;">Failed to load file.</p>';
-                    };
-                    preload.src = fileUrl;
-                }
-
-                $('#previewFileModal').modal('show');
+                SDMPreview.open(fileUrl, fileName, ext, 'property_records');
             }
 
-            function printPreviewFile() {
-                var pdfFrame = document.getElementById('previewPdfFrame');
-                var imgTag = document.getElementById('previewImgTag');
-
-                if (pdfFrame.style.display !== 'none' && pdfFrame.contentWindow) {
-                    pdfFrame.contentWindow.focus();
-                    pdfFrame.contentWindow.print();
-                } else if (imgTag.style.display !== 'none' && imgTag.src) {
-                    var printWindow = window.open('', '_blank');
-                    printWindow.document.write('<html><head><title>Print</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;} img{max-width:100%;max-height:100vh;}</style></head><body>');
-                    printWindow.document.write('<img src="' + imgTag.src + '" onload="window.print();window.close();">');
-                    printWindow.document.write('</body></html>');
-                    printWindow.document.close();
-                }
-            }
-
-            $('#previewFileModal').on('hidden.bs.modal', function() {
-                document.getElementById('previewPdfFrame').src = '';
-                document.getElementById('previewImgTag').src = '';
-            });
+            window.previewFile = previewFile;
 
             $('#viewSelectAll').on('change', function() {
                 var c = this.checked;

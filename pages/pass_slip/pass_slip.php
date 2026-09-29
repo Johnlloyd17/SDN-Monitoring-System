@@ -14,6 +14,7 @@ if (!isset($_SESSION['role'])) {
 
     <body class="skin-black">
         <?php include "../connection.php"; ?>
+        <?php require_once __DIR__ . '/pass_slip_rows.php'; ?>
         <?php include('../header.php'); ?>
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
@@ -200,113 +201,7 @@ if (!isset($_SESSION['role'])) {
                                                                     </thead>
                                                                     <tbody>
                                                                         <?php
-                                                                        $counter = 1;
-                                                                        $tableCheck2 = @mysqli_query($con, "SELECT 1 FROM pass_slip LIMIT 0");
-                                                                        if ($tableCheck2) {
-                                                                            $tableQuery = "SELECT 
-                        ps.pass_slip_no,
-                        MIN(ps.id) AS first_id,
-                        MIN(ps.pullout_date) AS pullout_date,
-                        MIN(ps.requested_by_out) AS requested_by_out,
-                        MIN(ps.inspected_by_out) AS inspected_by_out,
-                        MIN(ps.approved_by_out) AS approved_by_out,
-                        MIN(ps.status) AS status,
-                        MIN(ps.purpose) AS purpose,
-                        MIN(ps.condition_out) AS condition_out,
-                        MIN(ps.return_date) AS return_date,
-                        MIN(ps.requested_by_return) AS requested_by_return,
-                        MIN(ps.inspected_by_return) AS inspected_by_return,
-                        MIN(ps.approved_by_return) AS approved_by_return,
-                        MIN(ps.condition_return) AS condition_return,
-                        MIN(ps.remarks) AS remarks,
-                        COUNT(*) AS item_count,
-                        GROUP_CONCAT(ps.item_description SEPARATOR ', ') AS items_summary
-                    FROM pass_slip ps WHERE 1=1";
-
-                                                                            if (isset($_POST['status']) && $_POST['status'] != '') {
-                                                                                $status = mysqli_real_escape_string($con, $_POST['status']);
-                                                                                $tableQuery .= " AND ps.status = '$status'";
-                                                                            }
-                                                                            if (isset($_POST['date_from']) && $_POST['date_from'] != '') {
-                                                                                $dateFrom = mysqli_real_escape_string($con, $_POST['date_from']);
-                                                                                $tableQuery .= " AND ps.pullout_date >= '$dateFrom'";
-                                                                            }
-                                                                            if (isset($_POST['date_to']) && $_POST['date_to'] != '') {
-                                                                                $dateTo = mysqli_real_escape_string($con, $_POST['date_to']);
-                                                                                $tableQuery .= " AND ps.pullout_date <= '$dateTo'";
-                                                                            }
-                                                                            if (isset($_POST['search_borrower']) && $_POST['search_borrower'] != '') {
-                                                                                $search = mysqli_real_escape_string($con, $_POST['search_borrower']);
-                                                                                $tableQuery .= " AND (ps.requested_by_out LIKE '%$search%' OR ps.approved_by_out LIKE '%$search%' OR ps.pass_slip_no LIKE '%$search%')";
-                                                                            }
-
-                                                                            $tableQuery .= " GROUP BY ps.pass_slip_no ORDER BY MIN(ps.pullout_date) DESC";
-                                                                            $result = mysqli_query($con, $tableQuery);
-
-                                                                            if (!$result) {
-                                                                                die('Error: ' . mysqli_error($con));
-                                                                            }
-
-                                                                            while ($row = mysqli_fetch_assoc($result)) {
-                                                                                $statusClass = '';
-                                                                                $statusLabel = '';
-                                                                                switch ($row['status']) {
-                                                                                    case 'borrowed':
-                                                                                        $statusClass = 'label label-warning';
-                                                                                        $statusLabel = 'Borrowed';
-                                                                                        break;
-                                                                                    case 'deployed':
-                                                                                        $statusClass = 'label label-primary';
-                                                                                        $statusLabel = 'Deployed';
-                                                                                        break;
-                                                                                    case 'returned':
-                                                                                        $statusClass = 'label label-success';
-                                                                                        $statusLabel = 'Returned';
-                                                                                        break;
-                                                                                    case 'overdue':
-                                                                                        $statusClass = 'label label-danger';
-                                                                                        $statusLabel = 'Overdue';
-                                                                                        break;
-                                                                                }
-
-                                                                                $slipNo = htmlspecialchars($row['pass_slip_no']);
-                                                                                $itemsSummary = htmlspecialchars($row['items_summary']);
-                                                                                $itemCount = $row['item_count'];
-
-                                                                                echo '
-                        <tr>
-                            <td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="' . $slipNo . '" /></td>
-                            <td>' . $counter++ . '</td>
-                            <td><strong>' . $slipNo . '</strong></td>
-                            <td title="' . $itemsSummary . '">' . (strlen($itemsSummary) > 50 ? substr($itemsSummary, 0, 50) . '...' : $itemsSummary) . '</td>
-                            <td>' . $itemCount . '</td>
-                            <td>' . $row['pullout_date'] . '</td>
-                            <td>' . htmlspecialchars($row['requested_by_out']) . '</td>
-                            <td><span class="' . $statusClass . '">' . $statusLabel . '</span></td>
-                            <td>
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">';
-
-                                                                                if (!isset($_SESSION['staff'])) {
-                                                                                    echo '<button type="button" class="btn btn-primary btn-xs" onclick="openEditSlip(\'' . $slipNo . '\')" title="Edit Purpose / Remarks"><i class="fa fa-pencil"></i></button>';
-                                                                                }
-
-if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
-                    echo '<button type="button" class="btn btn-success btn-xs" onclick="openReturnModal(\'' . $slipNo . '\')" title="Process Return"><i class="fa fa-undo"></i></button>';
-                }
-                                                                                if (!isset($_SESSION['staff'])) {
-                                                                                    echo '<button type="button" class="btn btn-default btn-xs" onclick="openChangeStatus(\'' . $slipNo . '\')" title="Change Status"><i class="fa fa-exchange"></i></button>';
-                                                                                }
-                                                                                echo '
-                                    <button type="button" class="btn btn-default btn-xs" onclick="openPrintSlip(\'' . $slipNo . '\')" title="Print Pass Slip"><i class="fa fa-print"></i></button>
-                                    <button type="button" class="btn btn-info btn-xs" onclick="openAcknowledgement(\'' . $slipNo . '\')" title="Print Acknowledgement"><i class="fa fa-file-text"></i></button>
-                                    <button type="button" class="btn btn-warning btn-xs" onclick="openUploadModal(\'' . $slipNo . '\')" title="Upload Scanned Copy"><i class="fa fa-paperclip"></i></button>
-                                </div>
-                            </td>
-                        </tr>';
-                                                                            }
-                                                                        } else {
-                                                                            echo '<tr><td colspan="9" class="text-center" style="padding:20px;"><i class="fa fa-info-circle"></i> Pass Slip table not found. Please run the database migration first.</td></tr>';
-                                                                        }
+                                                                        echo ps_render_slip_rows($con, ps_slip_filters($_POST), isset($_SESSION['staff']));
                                                                         ?>
                                                                     </tbody>
                                                                 </table>
@@ -447,59 +342,10 @@ if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
                                                                         <th style="width: 100px !important;">Actions</th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody>
-                                                                    <?php
-                                                                    $icsCounter = 1;
-                                                                    $icsTableCheck = @mysqli_query($con, "SELECT 1 FROM ics LIMIT 0");
-                                                                    if ($icsTableCheck) {
-                                                                        $icsQuery = "SELECT i.*, COUNT(it.id) AS item_count
-                                     FROM ics i
-                                     LEFT JOIN ics_items it ON it.ics_id = i.id
-                                     WHERE 1=1";
-
-                                                                        if (isset($_POST['ics_date_from']) && $_POST['ics_date_from'] != '') {
-                                                                            $icsDateFrom = mysqli_real_escape_string($con, $_POST['ics_date_from']);
-                                                                            $icsQuery .= " AND i.date_issued >= '$icsDateFrom'";
-                                                                        }
-                                                                        if (isset($_POST['ics_date_to']) && $_POST['ics_date_to'] != '') {
-                                                                            $icsDateTo = mysqli_real_escape_string($con, $_POST['ics_date_to']);
-                                                                            $icsQuery .= " AND i.date_issued <= '$icsDateTo'";
-                                                                        }
-                                                                        if (isset($_POST['ics_search']) && $_POST['ics_search'] != '') {
-                                                                            $icsSearch = mysqli_real_escape_string($con, $_POST['ics_search']);
-                                                                            $icsQuery .= " AND i.ics_no LIKE '%$icsSearch%'";
-                                                                        }
-
-                                                                        $icsQuery .= " GROUP BY i.id ORDER BY i.date_issued DESC, i.id DESC";
-                                                                        $icsResult = mysqli_query($con, $icsQuery);
-                                                                        if ($icsResult) {
-                                                                            while ($row = mysqli_fetch_assoc($icsResult)) {
-                                                                                $icsId = intval($row['id']);
-                                                                                $icsNo = htmlspecialchars($row['ics_no']);
-                                                                                $dateIssued = $row['date_issued'] ? date('F d, Y', strtotime($row['date_issued'])) : '';
-                                                                                $dateReceived = !empty($row['date_received']) ? date('F d, Y', strtotime($row['date_received'])) : '';
-                                                                    echo '
-                                                                    <tr>
-                                                                            <td><input type="checkbox" class="chk_delete_ics" name="ics_chk_delete[]" value="' . $icsId . '" onchange="updateIcsRecordsDeleteBtn()" /></td>
-                                                                            <td>' . $icsCounter++ . '</td>
-                                        <td><strong>' . $icsNo . '</strong></td>
-                                        <td>' . intval($row['item_count']) . '</td>
-                                        <td>' . $dateIssued . '</td>
-                                        <td>&#8369; ' . number_format(floatval($row['total']), 2) . '</td>
-                                        <td>' . ($dateReceived ? $dateReceived : '<span class="text-muted">Not yet filled</span>') . '</td>
-                                        <td>
-                                            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
-                                                <button type="button" class="btn btn-warning btn-xs" onclick="openUploadIcs(' . $icsNo . ')" title="Upload Scanned Copy"><i class="fa fa-paperclip"></i></button>
-                                                <button type="button" class="btn btn-default btn-xs" onclick="openPrintIcs(' . $icsId . ')" title="Print ICS"><i class="fa fa-print"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>';
-                                                                            }
-                                                                        }
-                                                                    } else {
-                                                                        echo '<tr><td colspan="7" class="text-center" style="padding:20px;"><i class="fa fa-info-circle"></i> ICS table not found. Please run the database migration first.</td></tr>';
-                                                                    }
-                                                                    ?>
+                                                                 <tbody>
+                                                                        <?php
+                                                                        echo ps_render_ics_rows($con, ps_ics_filters($_POST));
+                                                                        ?>
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -535,24 +381,12 @@ if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
                                     <?php include "edit_slip_modal.php"; ?>
                                     <?php include "function.php"; ?>
 
-                                    <?php if (isset($_SESSION['new_ics'])) {
-                                        $icsId = intval($_SESSION['new_ics']);
-                                        unset($_SESSION['new_ics']);
-                                    ?>
-                                        <script type="text/javascript">
-                                            $(document).ready(function() {
-                                                if (confirm('Inventory Custodian Slip created successfully. Print it now?')) {
-                                                    openPrintIcs('<?php echo $icsId; ?>');
-                                                }
-                                            });
-                                        </script>
-                                    <?php } ?>
-
                                     <!-- Return Pass Slip Modal -->
                                     <div class="modal fade" id="returnPassSlipModal" tabindex="-1" role="dialog">
                                         <div class="modal-dialog modal-sdm-xl" role="document">
                                             <div class="modal-content">
-                                                <form method="POST" action="function.php">
+                                                <form method="POST" action="function.php" id="processReturnForm">
+                                                    <div class="modal-alert-slot"></div>
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                                                         <h4 class="modal-title"><i class="fa fa-undo"></i> Process Return - <span id="returnSlipNo"></span></h4>
@@ -809,27 +643,7 @@ if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
                                     </div>
 
                                     <!-- Preview Attachment Modal -->
-                                    <div class="modal fade" id="previewAttachmentModal" tabindex="-1" role="dialog">
-                                        <div class="modal-dialog modal-sdm-xl" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, #001f3f 0%, #1b3a6b 100%); color: #fff;">
-                                                    <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
-                                                    <h4 class="modal-title"><i class="fa fa-file-image-o"></i> <span id="previewFileName">Preview</span></h4>
-                                                </div>
-                                                <div class="modal-body" id="previewModalBody" style="padding: 0; height: 700px; background: #e9e9e9; display: flex; align-items: center; justify-content: center;">
-                                                    <div id="previewSpinner" style="text-align:center;">
-                                                        <i class="fa fa-spinner fa-spin" style="font-size:36px; color:#888;"></i>
-                                                        <p style="margin-top:10px; color:#888;">Loading preview...</p>
-                                                    </div>
-                                                    <iframe id="previewPdfFrame" src="" style="width: 100%; height: 100%; border: none; display: none;" onload="document.getElementById('previewSpinner').style.display='none';"></iframe>
-                                                    <img id="previewImgTag" src="" style="max-width: 100%; max-height: 100%; display: none;" onload="document.getElementById('previewSpinner').style.display='none';">
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-primary" onclick="printPreview()"><i class="fa fa-print"></i> Print</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <?php include dirname(__DIR__) . '/sheet_preview_modal.php'; ?>
 
                                 </div>
                 </section>
@@ -837,40 +651,159 @@ if ($row['status'] == 'borrowed' && !isset($_SESSION['staff'])) {
         </div>
     <?php }
 include dirname(__DIR__) . '/scripts.php'; ?>
+<script src="../../js/sdm-preview.js"></script>
 
     <script type="text/javascript">
         var select_all = document.getElementById("cbxMain");
         var checkboxes = document.getElementsByClassName("chk_delete");
 
-        select_all.addEventListener("change", function(e) {
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = select_all.checked;
-            }
-        });
+        function rebindSlipCheckboxes() {
+            checkboxes = document.getElementsByClassName("chk_delete");
+            if (select_all) select_all.checked = false;
 
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].addEventListener('change', function(e) {
-                if (this.checked == false) {
-                    select_all.checked = false;
-                }
-                if (document.querySelectorAll('.chk_delete:checked').length == checkboxes.length) {
-                    select_all.checked = true;
-                }
-            });
+            if (select_all) {
+                select_all.onchange = function(e) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        checkboxes[i].checked = select_all.checked;
+                    }
+                };
+            }
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].onchange = function(e) {
+                    if (this.checked == false && select_all) {
+                        select_all.checked = false;
+                    }
+                    if (select_all && document.querySelectorAll('.chk_delete:checked').length == checkboxes.length) {
+                        select_all.checked = true;
+                    }
+                };
+            }
         }
+
+        rebindSlipCheckboxes();
 
         // Store all pass slip data for JS access
         var passSlipData = {};
 
         <?php
-        if ($tableCheck2 && $result) {
-            mysqli_data_seek($result, 0);
-            while ($r = mysqli_fetch_assoc($result)) {
-                $key = addslashes($r['pass_slip_no']);
-                echo "passSlipData['{$key}'] = " . json_encode($r) . ";\n";
-            }
-        }
+        $psSlipDataJson = json_encode((object) ps_build_slip_data($con, ps_slip_filters($_POST)));
         ?>
+        passSlipData = <?php echo $psSlipDataJson !== false ? $psSlipDataJson : '{}'; ?>;
+
+        /**
+         * Submit a form over AJAX so the page never reloads.
+         * opts: { action, success, modal, reset, hideOnSuccess }
+         */
+        function bindAjaxForm(formId, opts) {
+            opts = opts || {};
+            var form = document.getElementById(formId);
+            if (!form || form.dataset.ajaxBound === '1') return;
+            form.dataset.ajaxBound = '1';
+
+            var alertBox = form.querySelector('.modal-alert-slot');
+
+            function showAlert(msg, type) {
+                if (!alertBox) { showToast(msg, type); return; }
+                if (!msg) { alertBox.innerHTML = ''; return; }
+                alertBox.innerHTML = '<div class="alert alert-' + (type === 'error' ? 'danger' : type) +
+                    '" style="margin:10px 12px 0;"><i class="fa fa-exclamation-circle"></i> ' + msg + '</div>';
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                showAlert('');
+
+                // serialize() keeps repeated name="field[]" inputs intact.
+                var data = $(form).serialize();
+                if (opts.action) {
+                    data += (data ? '&' : '') + encodeURIComponent(opts.action) + '=1';
+                }
+
+                var submitBtn = form.querySelector('button[type="submit"]');
+                var label = submitBtn ? submitBtn.innerHTML : null;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+                }
+
+                $.ajax({
+                    url: form.getAttribute('action') || 'function.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data
+                }).done(function (resp) {
+                    if (!resp) { showAlert('Unexpected server response.', 'error'); return; }
+                    if (!resp.success) { showAlert(resp.message || 'The request failed.', 'error'); return; }
+
+                    showToast(resp.message || 'Saved successfully.', 'success');
+
+                    if (opts.reset && typeof form.reset === 'function') form.reset();
+                    if (opts.modal) $(opts.modal).modal('hide');
+                    if (opts.success) opts.success(resp);
+                    if (opts.hideOnSuccess !== false && opts.modal) refreshPassSlipData();
+                }).fail(function () {
+                    showAlert('Network error. Please check your connection and try again.', 'error');
+                }).always(function () {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = label;
+                    }
+                });
+            });
+        }
+
+        bindAjaxForm('processReturnForm', {
+            action: 'process_return',
+            modal: '#returnPassSlipModal',
+            success: function () {
+                var body = document.getElementById('returnItemsBody');
+                if (body) body.innerHTML = '';
+            }
+        });
+
+        // Re-render both list tables in place, preserving the active filters.
+        function refreshPassSlipData() {
+            var params = {};
+            var slipFilter = document.getElementById('filterForm');
+            if (slipFilter) {
+                ['status', 'date_from', 'date_to', 'search_borrower'].forEach(function (n) {
+                    var el = slipFilter.querySelector('[name="' + n + '"]');
+                    if (el && el.value !== '') params[n] = el.value;
+                });
+            }
+            var icsFilter = document.getElementById('icsFilterForm');
+            if (icsFilter) {
+                ['ics_date_from', 'ics_date_to', 'ics_search'].forEach(function (n) {
+                    var el = icsFilter.querySelector('[name="' + n + '"]');
+                    if (el && el.value !== '') params[n] = el.value;
+                });
+            }
+
+            return $.getJSON('../../ajax/pass_slip_data.php', params, function (resp) {
+                if (!resp || !resp.success) return;
+
+                var slipTable = $('#passSlipTable');
+                if ($.fn.DataTable.isDataTable(slipTable)) {
+                    slipTable.DataTable().clear().rows.add($.parseHTML(resp.rows, slipTable[0], false)).draw();
+                } else {
+                    slipTable.find('tbody').html(resp.rows);
+                }
+
+                var icsTable = $('#icsTable');
+                if ($.fn.DataTable.isDataTable(icsTable)) {
+                    icsTable.DataTable().clear().rows.add($.parseHTML(resp.ics_rows, icsTable[0], false)).draw();
+                } else {
+                    icsTable.find('tbody').html(resp.ics_rows);
+                }
+
+                passSlipData = resp.data || {};
+                rebindSlipCheckboxes();
+                updateIcsRecordsDeleteBtn();
+            }).fail(function () {
+                showToast('Could not refresh the list. Please reload the page.', 'error');
+            });
+        }
 
         function openEditSlip(slipNo) {
             var d = passSlipData[slipNo];
@@ -1000,7 +933,7 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                 if (resp && resp.success) {
                     $('#changeStatusModal').modal('hide');
                     showToast(resp.message, 'success');
-                    setTimeout(function() { location.reload(); }, 600);
+                    refreshPassSlipData();
                 } else {
                     showToast((resp && resp.message) || 'Failed to update status.', 'error');
                 }
@@ -1015,26 +948,37 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             retAlert.style.display = (sel.value === 'returned') ? 'block' : 'none';
         });
 
+        function psDeleteRequest(payload, onDone) {
+            var btn = document.getElementById('deleteConfirmBtn') || document.querySelector('#deleteModal .btn-danger');
+            if (btn) {
+                btn.disabled = true;
+                if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deleting...';
+            }
+
+            $.ajax({
+                url: 'function.php',
+                type: 'POST',
+                dataType: 'json',
+                data: payload
+            }).done(function (resp) {
+                showToast((resp && resp.message) || 'Delete finished.', (resp && resp.type) || 'success');
+                if (typeof onDone === 'function') onDone(resp);
+            }).fail(function () {
+                showToast('Network error while deleting. Please try again.', 'error');
+            }).always(function () {
+                if (btn) {
+                    btn.disabled = false;
+                    if (btn.dataset.originalLabel) btn.innerHTML = btn.dataset.originalLabel;
+                }
+            });
+        }
+
         function confirmDeleteSlip(slipNo) {
             if (confirm('Are you sure you want to delete Pass Slip ' + slipNo + '? This will remove all items in this slip.')) {
-                var form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '';
-
-                var input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'delete_pass_slip_no';
-                input.value = slipNo;
-                form.appendChild(input);
-
-                var inputBtn = document.createElement('input');
-                inputBtn.type = 'hidden';
-                inputBtn.name = 'btn_delete';
-                inputBtn.value = '1';
-                form.appendChild(inputBtn);
-
-                document.body.appendChild(form);
-                form.submit();
+                psDeleteRequest({ btn_delete: '1', delete_pass_slip_no: slipNo }, function (resp) {
+                    if (resp && resp.deleted > 0) refreshPassSlipData();
+                });
             }
         }
 
@@ -1046,6 +990,31 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             }
             $('#deleteModal').modal('show');
         }
+
+        // Intercept the shared delete-modal confirm button so bulk deletes stay in-page.
+        (function () {
+            var btn = document.getElementById('btn_delete');
+            if (!btn) return;
+            btn.type = 'button';
+            btn.addEventListener('click', function () {
+                var checked = document.querySelectorAll('.chk_delete:checked');
+                if (checked.length === 0) {
+                    $('#deleteModal').modal('hide');
+                    showToast('Please select at least one Pass Slip to delete.', 'warning');
+                    return;
+                }
+                var slipNos = [];
+                for (var i = 0; i < checked.length; i++) {
+                    slipNos.push(checked[i].value);
+                }
+                psDeleteRequest({ btn_delete: '1', 'chk_delete[]': slipNos }, function (resp) {
+                    if (resp && resp.deleted > 0) {
+                        $('#deleteModal').modal('hide');
+                        refreshPassSlipData();
+                    }
+                });
+            });
+        })();
 
         function openPrintSlip(slipNo) {
             var frame = document.getElementById('printSlipFrame');
@@ -1144,7 +1113,7 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                     html += '<div class="attachment-card-filename">' + f.filename + '</div>';
                     html += '<div class="attachment-card-meta">' + (f.uploaded_by || '-') + ' &middot; ' + f.uploaded_at + '</div>';
                     html += '</div>';
-                    html += '<button type="button" class="btn btn-info btn-xs" onclick="event.stopPropagation(); previewAttachment(\'' + fileUrl + '\', \'' + f.filename.replace(/'/g, "\\'") + '\')" title="View File"><i class="fa fa-eye"></i></button>';
+                    html += '<button type="button" class="btn btn-info btn-xs" onclick="event.stopPropagation(); previewAttachment(\'' + fileUrl + '\', \'' + f.filename.replace(/'/g, "\\'") + '\', \'pass_slip\')" title="View File"><i class="fa fa-eye"></i></button>';
                     html += '</div>';
                 }
                 html += '</div>';
@@ -1258,7 +1227,7 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                     html += '<div class="attachment-card-filename">' + f.filename + '</div>';
                     html += '<div class="attachment-card-meta">' + (f.uploaded_by || '-') + ' &middot; ' + f.uploaded_at + '</div>';
                     html += '</div>';
-                    html += '<button type="button" class="btn btn-info btn-xs" onclick="event.stopPropagation(); previewAttachment(\'' + fileUrl + '\', \'' + f.filename.replace(/'/g, "\\'") + '\')" title="View File"><i class="fa fa-eye"></i></button>';
+                    html += '<button type="button" class="btn btn-info btn-xs" onclick="event.stopPropagation(); previewAttachment(\'' + fileUrl + '\', \'' + f.filename.replace(/'/g, "\\'") + '\', \'ics\')" title="View File"><i class="fa fa-eye"></i></button>';
                     html += '</div>';
                 }
                 html += '</div>';
@@ -1321,7 +1290,7 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             }, function(resp) {
                 if (resp.success) {
                     showToast(resp.deleted + ' ICS record(s) deleted successfully.', 'success');
-                    setTimeout(function() { location.reload(); }, 600);
+                    refreshPassSlipData();
                 } else {
                     showToast(resp.message || 'Failed to delete ICS records.', 'error');
                 }
@@ -1405,56 +1374,9 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             });
         });
 
-        function previewAttachment(fileUrl, fileName) {
-            var ext = fileName.split('.').pop().toLowerCase();
-            var pdfFrame = document.getElementById('previewPdfFrame');
-            var imgTag = document.getElementById('previewImgTag');
-            var spinner = document.getElementById('previewSpinner');
-            document.getElementById('previewFileName').textContent = fileName;
-
-            pdfFrame.style.display = 'none';
-            pdfFrame.src = '';
-            imgTag.style.display = 'none';
-            imgTag.src = '';
-            spinner.style.display = 'block';
-
-            if (ext === 'pdf') {
-                pdfFrame.onload = function() {
-                    spinner.style.display = 'none';
-                    pdfFrame.style.display = 'block';
-                    pdfFrame.onload = null;
-                };
-                pdfFrame.src = fileUrl;
-            } else {
-                var preload = new Image();
-                preload.onload = function() {
-                    imgTag.src = fileUrl;
-                    spinner.style.display = 'none';
-                    imgTag.style.display = 'block';
-                };
-                preload.onerror = function() {
-                    spinner.innerHTML = '<i class="fa fa-exclamation-triangle" style="font-size:36px; color:#e74c3c;"></i><p style="margin-top:10px; color:#e74c3c;">Failed to load file.</p>';
-                };
-                preload.src = fileUrl;
-            }
-
-            $('#previewAttachmentModal').modal('show');
-        }
-
-        function printPreview() {
-            var pdfFrame = document.getElementById('previewPdfFrame');
-            var imgTag = document.getElementById('previewImgTag');
-
-            if (pdfFrame.style.display !== 'none' && pdfFrame.contentWindow) {
-                pdfFrame.contentWindow.focus();
-                pdfFrame.contentWindow.print();
-            } else if (imgTag.style.display !== 'none' && imgTag.src) {
-                var printWindow = window.open('', '_blank');
-                printWindow.document.write('<html><head><title>Print</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;} img{max-width:100%;max-height:100vh;}</style></head><body>');
-                printWindow.document.write('<img src="' + imgTag.src + '" onload="window.print();window.close();">');
-                printWindow.document.write('</body></html>');
-                printWindow.document.close();
-            }
+        function previewAttachment(fileUrl, fileName, src) {
+            var ext = String(fileName || '').split('.').pop().toLowerCase();
+            SDMPreview.open(fileUrl, fileName, ext, src || 'pass_slip');
         }
 
         $(document).ready(function() {
@@ -1496,12 +1418,6 @@ include dirname(__DIR__) . '/scripts.php'; ?>
                         console.error('[Upload Error]', status, error, xhr.responseText);
                         showToast('An error occurred during upload. Check console for details.', 'error');
                     }
-                });
-
-                $('#previewAttachmentModal').on('hidden.bs.modal', function() {
-                    document.getElementById('previewPdfFrame').src = '';
-                    document.getElementById('previewImgTag').src = '';
-                    document.getElementById('previewSpinner').style.display = 'block';
                 });
             });
         });

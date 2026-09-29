@@ -202,6 +202,7 @@ if (!function_exists('resolve_pass_slip_employee_id')) {
 // ACTION: Create New Pass Slip (supports multiple items)
 // ============================================================
 if (isset($_POST['create_pass_slip'])) {
+    header('Content-Type: application/json');
     $purpose = mysqli_real_escape_string($con, $_POST['purpose']);
     $requested_by_out = mysqli_real_escape_string($con, $_POST['requested_by_out']);
     $inspected_by_out = mysqli_real_escape_string($con, $_POST['inspected_by_out']);
@@ -224,13 +225,13 @@ if (isset($_POST['create_pass_slip'])) {
     $slipStatus = in_array($slipStatusInput, array('borrowed', 'deployed'), true) ? $slipStatusInput : 'deployed';
 
     if (empty($descriptions) || count($descriptions) == 0) {
-        echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please add at least one item.']);
         exit;
     }
 
     foreach ($descriptions as $index => $desc) {
         if (empty(trim($desc))) {
-            echo "<script>alert('Please enter a description for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please enter a description for row ' . ($index + 1) . '.']);
             exit;
         }
     }
@@ -239,7 +240,7 @@ if (isset($_POST['create_pass_slip'])) {
         $pass_slip_no = mysqli_real_escape_string($con, trim($_POST['pass_slip_no']));
         $dupeCheck = mysqli_query($con, "SELECT 1 FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' LIMIT 1");
         if ($dupeCheck && mysqli_num_rows($dupeCheck) > 0) {
-            echo "<script>alert('Pass Slip No. already exists. Choose another or leave it empty to auto-generate.'); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Pass Slip No. already exists. Choose another or leave it empty to auto-generate.']);
             exit;
         }
     } else {
@@ -284,7 +285,7 @@ if (isset($_POST['create_pass_slip'])) {
 
         if ($qty < 0) {
             $psRollback();
-            echo "<script>alert(" . json_encode('Invalid quantity for row ' . ($index + 1) . '.') . "); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Invalid quantity for row ' . ($index + 1) . '.']);
             exit;
         }
 
@@ -298,25 +299,25 @@ if (isset($_POST['create_pass_slip'])) {
 
             if (!$item) {
                 $psRollback();
-                echo "<script>alert(" . json_encode('Item not found for row ' . ($index + 1) . '.') . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Item not found for row ' . ($index + 1) . '.']);
                 exit;
             }
 
             if (!empty($item['assigned_to'])) {
                 $psRollback();
-                echo "<script>alert(" . json_encode('Cannot create pass slip for item: ' . $item_desc . '. The item is already assigned/deployed to "' . $item['assigned_to'] . '" — only unassigned items can be borrowed.') . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Cannot create pass slip for item: ' . $item_desc . '. The item is already assigned/deployed to "' . $item['assigned_to'] . '" — only unassigned items can be borrowed.']);
                 exit;
             }
 
             if (!empty($item['serial']) && !empty($serial_no) && trim($serial_no) !== $item['serial']) {
                 $psRollback();
-                echo "<script>alert(" . json_encode('Serial number "' . $serial_no . '" does not match the selected item ' . $item_desc . ' (' . $item['serial'] . '). The quantity shown is deducted from the serial exactly as picked — remove the item and select the correct serial from the search.') . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Serial number "' . $serial_no . '" does not match the selected item ' . $item_desc . ' (' . $item['serial'] . '). The quantity shown is deducted from the serial exactly as picked — remove the item and select the correct serial from the search.']);
                 exit;
             }
 
             if ($item['quantity'] < $qty) {
                 $psRollback();
-                echo "<script>alert(" . json_encode('Insufficient quantity for: ' . $item_desc . '. Available: ' . ($item['quantity'] ?? 0)) . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Insufficient quantity for: ' . $item_desc . '. Available: ' . ($item['quantity'] ?? 0)]);
                 exit;
             }
 
@@ -348,7 +349,7 @@ if (isset($_POST['create_pass_slip'])) {
             $itemSummaries[] = "$item_desc ($qty $unit)";
         } else {
             $psRollback();
-            echo "<script>alert(" . json_encode('Error creating pass slip for: ' . $item_desc . ' - ' . mysqli_error($con)) . "); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Error creating pass slip for: ' . $item_desc . ' - ' . mysqli_error($con)]);
             exit;
         }
     }
@@ -358,11 +359,15 @@ if (isset($_POST['create_pass_slip'])) {
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
             VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Created Pass Slip: $pass_slip_no - $summary')");
 
-        $_SESSION['ps_generated'] = 1;
-        header("Location: pass_slip.php");
+        echo json_encode([
+            'success' => true,
+            'pass_slip_no' => $pass_slip_no,
+            'items' => $insertedCount,
+            'message' => 'Pass Slip ' . $pass_slip_no . ' created successfully.',
+        ]);
         exit;
     } else {
-        echo "<script>alert('Error: No items were added.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Error: No items were added.']);
     }
     exit;
 }
@@ -371,6 +376,7 @@ if (isset($_POST['create_pass_slip'])) {
 // ACTION: Edit Pass Slip (full form: header + items reconciliation)
 // ============================================================
 if (isset($_POST['edit_pass_slip'])) {
+    header('Content-Type: application/json');
     $pass_slip_no = mysqli_real_escape_string($con, trim($_POST['pass_slip_no'] ?? ''));
     $purpose = mysqli_real_escape_string($con, trim($_POST['purpose'] ?? ''));
     $requested_by_out = mysqli_real_escape_string($con, trim($_POST['requested_by_out'] ?? ''));
@@ -392,23 +398,23 @@ if (isset($_POST['edit_pass_slip'])) {
     $return_dates = $_POST['return_date'] ?? [];
 
     if (empty($pass_slip_no)) {
-        echo "<script>alert('Invalid Pass Slip Number.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Invalid Pass Slip Number.']);
         exit;
     }
     if (empty($descriptions) || count($descriptions) == 0) {
-        echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please add at least one item.']);
         exit;
     }
     foreach ($descriptions as $index => $desc) {
         if (empty(trim($desc))) {
-            echo "<script>alert('Please enter a description for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please enter a description for row ' . ($index + 1) . '.']);
             exit;
         }
     }
 
     $check = mysqli_query($con, "SELECT 1 FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' LIMIT 1");
     if (!$check || mysqli_num_rows($check) == 0) {
-        echo "<script>alert('Pass Slip not found.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Pass Slip not found.']);
         exit;
     }
 
@@ -435,7 +441,7 @@ if (isset($_POST['edit_pass_slip'])) {
         $item_return_date = !empty($return_dates[$index]) ? "'" . mysqli_real_escape_string($con, $return_dates[$index]) . "'" : "NULL";
 
         if ($qty < 0) {
-            echo "<script>alert('Invalid quantity for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Invalid quantity for row ' . ($index + 1) . '.']);
             exit;
         }
 
@@ -447,15 +453,15 @@ if (isset($_POST['edit_pass_slip'])) {
             $checkItem = mysqli_query($con, "SELECT quantity, assigned_to, serial FROM inventory WHERE id = '$inv_id'");
             $itemRow = mysqli_fetch_assoc($checkItem);
             if (!$itemRow) {
-                echo "<script>alert('Item not found for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Item not found for row ' . ($index + 1) . '.']);
                 exit;
             }
             if (!empty($itemRow['assigned_to'])) {
-                echo "<script>alert(" . json_encode('Cannot edit pass slip for item: ' . $item_desc . '. The item is already assigned/deployed to "' . $itemRow['assigned_to'] . '" — only unassigned items can be borrowed.') . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Cannot edit pass slip for item: ' . $item_desc . '. The item is already assigned/deployed to "' . $itemRow['assigned_to'] . '" — only unassigned items can be borrowed.']);
                 exit;
             }
             if (!empty($itemRow['serial']) && !empty($serial_no) && trim($serial_no) !== $itemRow['serial']) {
-                echo "<script>alert(" . json_encode('Serial number "' . $serial_no . '" does not match the selected item ' . $item_desc . ' (' . $itemRow['serial'] . '). The quantity shown is deducted from the serial exactly as picked — remove the item and select the correct serial from the search.') . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Serial number "' . $serial_no . '" does not match the selected item ' . $item_desc . ' (' . $itemRow['serial'] . '). The quantity shown is deducted from the serial exactly as picked — remove the item and select the correct serial from the search.']);
                 exit;
             }
             if (!empty($itemRow['serial'])) {
@@ -467,7 +473,7 @@ if (isset($_POST['edit_pass_slip'])) {
                 $needed = $qty - intval($old['qty']);
             }
             if ($needed > 0 && $available < $needed) {
-                echo "<script>alert(" . json_encode('Insufficient quantity for: ' . $item_desc . '. Available: ' . ($itemRow['quantity'] ?? 0)) . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Insufficient quantity for: ' . $item_desc . '. Available: ' . ($itemRow['quantity'] ?? 0)]);
                 exit;
             }
         }
@@ -497,7 +503,7 @@ if (isset($_POST['edit_pass_slip'])) {
                     }
                 }
             } else {
-                echo "<script>alert(" . json_encode('Error updating item row ' . ($index + 1) . ': ' . mysqli_error($con)) . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Error updating item row ' . ($index + 1) . ': ' . mysqli_error($con)]);
                 exit;
             }
         } else {
@@ -515,7 +521,7 @@ if (isset($_POST['edit_pass_slip'])) {
                 }
                 $newRows++;
             } else {
-                echo "<script>alert(" . json_encode('Error adding item row ' . ($index + 1) . ': ' . mysqli_error($con)) . "); window.history.back();</script>";
+                echo json_encode(['success' => false, 'message' => 'Error adding item row ' . ($index + 1) . ': ' . mysqli_error($con)]);
                 exit;
             }
         }
@@ -543,8 +549,11 @@ if (isset($_POST['edit_pass_slip'])) {
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
         VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Edited Pass Slip: $pass_slip_no (full)')");
 
-    $_SESSION['edited'] = 1;
-    header("Location: pass_slip.php");
+    echo json_encode([
+        'success' => true,
+        'pass_slip_no' => $pass_slip_no,
+        'message' => 'Pass Slip ' . $pass_slip_no . ' updated successfully.',
+    ]);
     exit;
 }
 
@@ -552,6 +561,7 @@ if (isset($_POST['edit_pass_slip'])) {
 // ACTION: Create Inventory Custodian Slip (ICS) with multiple items
 // ============================================================
 if (isset($_POST['create_ics'])) {
+    header('Content-Type: application/json');
     $date_issued = mysqli_real_escape_string($con, $_POST['date_issued']);
     $received_by = mysqli_real_escape_string($con, $_POST['received_by'] ?? '');
     $received_by_position = mysqli_real_escape_string($con, $_POST['received_by_position'] ?? '');
@@ -568,12 +578,12 @@ if (isset($_POST['create_ics'])) {
     $useful_lives = $_POST['estimated_useful_life'] ?? [];
 
     if (empty($date_issued)) {
-        echo "<script>alert('Date Issued is required.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Date Issued is required.']);
         exit;
     }
 
     if (empty($qtys) || count($qtys) == 0) {
-        echo "<script>alert('Please add at least one item.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please add at least one item.']);
         exit;
     }
 
@@ -598,11 +608,11 @@ if (isset($_POST['create_ics'])) {
     foreach ($qtys as $index => $qty) {
         $qty = intval($qty);
         if ($qty <= 0) {
-            echo "<script>alert('Invalid quantity for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Invalid quantity for row ' . ($index + 1) . '.']);
             exit;
         }
         if (empty($descriptions[$index])) {
-            echo "<script>alert('Please enter a description for row " . ($index + 1) . ".'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Please enter a description for row ' . ($index + 1) . '.']);
             exit;
         }
         $cost = floatval($costs[$index] ?? 0);
@@ -613,7 +623,7 @@ if (isset($_POST['create_ics'])) {
     // Duplicate check
     $dupCheck = mysqli_query($con, "SELECT id FROM ics WHERE ics_no = '$ics_no'");
     if ($dupCheck && mysqli_num_rows($dupCheck) > 0) {
-        echo "<script>alert('ICS No. $ics_no already exists. Please use a different number.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'ICS No. $ics_no already exists. Please use a different number.']);
         exit;
     }
 
@@ -624,7 +634,7 @@ if (isset($_POST['create_ics'])) {
                       '" . ($_SESSION['username'] ?? 'admin') . "')";
 
     if (!mysqli_query($con, $insertHeader)) {
-        echo "<script>alert('Error saving ICS: " . mysqli_error($con) . "'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Error saving ICS: ' . mysqli_error($con)]);
         exit;
     }
 
@@ -650,7 +660,7 @@ if (isset($_POST['create_ics'])) {
             $insertedCount++;
             $itemSummaries[] = "$description ($qty $unit)";
         } else {
-            echo "<script>alert(" . json_encode('Error saving ICS item for row ' . ($index + 1) . ': ' . mysqli_error($con)) . "); window.history.back();</script>";
+            echo json_encode(['success' => false, 'message' => 'Error saving ICS item for row ' . ($index + 1) . ': ' . mysqli_error($con)]);
             exit;
         }
     }
@@ -660,12 +670,15 @@ if (isset($_POST['create_ics'])) {
         mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action)
             VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Created Inventory Custodian Slip: $ics_no - Total: $total')");
 
-        $_SESSION['added'] = 1;
-        $_SESSION['new_ics'] = $ics_id;
-        header("Location: pass_slip.php");
+        echo json_encode([
+            'success' => true,
+            'ics_no' => $ics_no,
+            'items' => $insertedCount,
+            'message' => 'ICS ' . $ics_no . ' created successfully.',
+        ]);
         exit;
     } else {
-        echo "<script>alert('Error: No items were added.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'Error: No items were added.']);
         exit;
     }
 }
@@ -1577,6 +1590,7 @@ function ps_delete_slip($con, $pass_slip_no, &$deleted, &$blocked, &$errs) {
 }
 
 if (isset($_POST['btn_delete'])) {
+    header('Content-Type: application/json');
     $deleted = array();
     $blocked = array();
     $errs = array();
@@ -1627,8 +1641,12 @@ if (isset($_POST['btn_delete'])) {
             VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Blocked Pass Slip delete (UAT link): " . mysqli_real_escape_string($con, implode(', ', array_keys($blocked))) . "')");
     }
 
-    $_SESSION['ps_msg_delete'] = array('type' => $type, 'text' => $message);
-    header("Location: pass_slip.php");
+    echo json_encode([
+        'success' => count($deleted) > 0,
+        'deleted' => count($deleted),
+        'type' => $type,
+        'message' => $message,
+    ]);
     exit;
 }
 
@@ -1636,6 +1654,7 @@ if (isset($_POST['btn_delete'])) {
 // ACTION: Process Return (all items by pass_slip_no)
 // ============================================================
 if (isset($_POST['process_return'])) {
+    header('Content-Type: application/json');
     $pass_slip_no = mysqli_real_escape_string($con, $_POST['pass_slip_no']);
     $return_date = mysqli_real_escape_string($con, $_POST['return_date']);
     $condition_return = mysqli_real_escape_string($con, $_POST['condition_return']);
@@ -1651,7 +1670,7 @@ if (isset($_POST['process_return'])) {
     // Get all items in this pass slip
     $psItems = mysqli_query($con, "SELECT * FROM pass_slip WHERE pass_slip_no = '$pass_slip_no' AND status = 'borrowed'");
     if (!$psItems || mysqli_num_rows($psItems) == 0) {
-        echo "<script>alert('No borrowed items found for this pass slip.'); window.history.back();</script>";
+        echo json_encode(['success' => false, 'message' => 'No borrowed items found for this pass slip.']);
         exit;
     }
 
@@ -1682,7 +1701,11 @@ if (isset($_POST['process_return'])) {
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) 
         VALUES ('" . ($_SESSION['role'] ?? 'admin') . "', NOW(), 'Processed Return: $pass_slip_no - $itemCount item(s) returned')");
 
-    echo "<script>alert('$itemCount item(s) returned successfully!'); window.location.href = 'pass_slip.php';</script>";
+    echo json_encode([
+        'success' => true,
+        'returned' => $itemCount,
+        'message' => $itemCount . ' item(s) returned successfully!',
+    ]);
     exit;
 }
 

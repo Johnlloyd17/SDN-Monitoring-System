@@ -278,5 +278,6 @@ if ($newest) {
         });
     });
     </script>
+<?php include('../scripts.php'); ?>
 </body>
 </html>

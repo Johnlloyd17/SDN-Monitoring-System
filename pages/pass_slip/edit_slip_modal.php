@@ -6,6 +6,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
     <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
             <form method="POST" action="function.php" id="editPassSlipForm">
+            <div class="modal-alert-slot"></div>
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title"><i class="fa fa-pencil"></i> Edit Pass Slip - <span id="editSlipNo"></span></h4>

@@ -52,6 +52,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
     <div class="modal-dialog modal-sdm-xl" role="document">
         <div class="modal-content">
             <form method="POST" action="function.php" id="addPassSlipForm">
+            <div class="modal-alert-slot"></div>
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title"><i class="fa fa-file-text-o"></i> Generate Office Equipment Pass Slip</h4>
@@ -371,6 +372,11 @@ window.initItemEditor = function(cfg) {
     return {
         setActiveRow: function(row) {
             if (row && itemsBody.contains(row)) activeRow = row;
+        },
+        reset: function() {
+            itemsBody.innerHTML = '<tr class="item-row">' + window.itemRowHtml() + '</tr>';
+            activeRow = itemsBody.querySelector('.item-row');
+            updateCount();
         }
     };
 };
@@ -512,31 +518,44 @@ document.addEventListener('DOMContentLoaded', function() {
     initEmployeeNameAutocomplete('returnInspectedBy', 'returnInspectedByEmpId');
     initEmployeeNameAutocomplete('returnApprovedBy', 'returnApprovedByEmpId');
 
-    function guardSubmit(formId, btnName) {
-        var form = document.getElementById(formId);
-        if (!form) return;
-        form.addEventListener('submit', function(e) {
-            var btn = form.querySelector('button[name="' + btnName + '"]');
-            if (!btn) return;
-            if (form.dataset.submitting === '1') {
-                e.preventDefault();
-                return;
-            }
-            var hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = btnName;
-            hidden.value = btn.value || btn.textContent.trim();
-            form.appendChild(hidden);
-            form.dataset.submitting = '1';
-            if (!btn.dataset.originalLabel) {
-                btn.dataset.originalLabel = btn.innerHTML;
-            }
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
-        });
-    }
-    guardSubmit('addPassSlipForm', 'create_pass_slip');
-    guardSubmit('editPassSlipForm', 'edit_pass_slip');
+    bindAjaxForm('addPassSlipForm', {
+        action: 'create_pass_slip',
+        modal: '#addPassSlipModal',
+        success: function () {
+            var form = document.getElementById('addPassSlipForm');
+            form.reset();
+            if (window.createItemEditor) window.createItemEditor.reset();
+        }
+    });
+    bindAjaxForm('editPassSlipForm', {
+        action: 'edit_pass_slip',
+        modal: '#editPassSlipModal'
+    });
+    bindAjaxForm('addIcsForm', {
+        action: 'create_ics',
+        modal: '#addIcsModal',
+        hideOnSuccess: false,
+        success: function (resp) {
+            var icsNo = resp.ics_no || '';
+            if (typeof resetIcsForm === 'function') resetIcsForm();
+            $('#addIcsModal').modal('hide');
+            refreshPassSlipData().always(function () {
+                if (!icsNo) return;
+                var boxes = document.querySelectorAll('#icsTable .chk_delete_ics');
+                for (var i = 0; i < boxes.length; i++) {
+                    var tr = boxes[i].closest('tr');
+                    if (!tr) continue;
+                    var cell = tr.children[2];
+                    if (cell && cell.textContent.trim() === icsNo) {
+                        if (confirm('Inventory Custodian Slip ' + icsNo + ' created. Print it now?')) {
+                            openPrintIcs(boxes[i].value);
+                        }
+                        return;
+                    }
+                }
+            });
+        }
+    });
 
     window.addEventListener('pageshow', function(e) {
         if (e.persisted) {

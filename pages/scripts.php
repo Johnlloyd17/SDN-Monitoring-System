@@ -1,3 +1,17 @@
+<?php
+/**
+ * Shared script bundle for every page. Also the single injection point for
+ * the project-wide session inactivity timer: pages/scripts.php is included by
+ * footer.php and directly by the ~106 full pages, so the client-side half of
+ * the 1-hour timeout is loaded in exactly one place.
+ *
+ * SCRIPT_NAME reflects the page actually being requested, not this partial, so
+ * auth_login_relative() resolves the right ../ depth for pages/<module>/*.php.
+ */
+require_once __DIR__ . '/auth_check.php';
+include __DIR__ . '/session_bootstrap.php';
+?>
+
 <!-- Bootstrap -->
 <script src="../../js/alert.js" type="text/javascript"></script>
 <script src="../../js/bootstrap.min.js" type="text/javascript"></script>

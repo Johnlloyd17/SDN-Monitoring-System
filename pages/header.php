@@ -353,7 +353,7 @@ echo '<header class="header">
 </div>
 
 <div id="editProfileModal" class="modal fade">
-    <form method="post">
+    <form method="post" id="editProfileForm">
         <div class="modal-dialog modal-sdm-sm">
             <div class="modal-content">
                 <div class="modal-header">
@@ -361,6 +361,7 @@ echo '<header class="header">
                     <h4 class="modal-title"><i class="fa fa-user"></i> Change Account</h4>
                 </div>
                 <div class="modal-body">
+                    <div id="editProfileAlert"></div>
                     <div class="row">
                         <div class="col-md-12">
                             <?php
@@ -405,22 +406,44 @@ echo '<header class="header">
     </form>
 </div>
 
-<?php
-if(isset($_POST['btn_saveeditProfile'])){
-    $username = $_POST['txt_username'];
-    $password = $_POST['txt_password'];
+<script>
+$(function () {
+    $('#editProfileForm').on('submit', function (e) {
+        e.preventDefault();
 
-    if($_SESSION['role'] == "Administrator"){
-        $updadmin = mysqli_query($con,"UPDATE tbluser set username = '$username', password = '$password' where id = '".$_SESSION['userid']."' ");
-        if($updadmin == true){
-            header ("location: ".$_SERVER['REQUEST_URI']);
-        }
-    }
-    elseif($_SESSION['staff'] == "Staff"){
-        $updstaff = mysqli_query($con,"UPDATE tblstaff set username = '$username', password = '$password' where id = '".$_SESSION['userid']."' ");
-        if($updstaff == true){
-            header ("location: ".$_SERVER['REQUEST_URI']);
-        }
-    }
-}
-?>
+        var btn = document.getElementById('btn_saveeditProfile');
+        var alertBox = $('#editProfileAlert');
+        alertBox.html('');
+
+        btn.disabled = true;
+        btn.value = 'Saving...';
+
+        $.ajax({
+            url: '<?php echo $_notifBase; ?>ajax/account_crud.php',
+            type: 'POST',
+            data: $(this).serialize() + '&action=update_account',
+            dataType: 'json',
+            success: function (res) {
+                if (res && res.success) {
+                    $('#editProfileModal').modal('hide');
+                    document.getElementById('editProfileForm').reset();
+                    if (typeof showToast === 'function') {
+                        showToast('Your account has been updated.', 'success');
+                    }
+                } else {
+                    alertBox.html('<div class="alert alert-danger">' +
+                        (res && res.error ? res.error : 'The account could not be saved. Please try again.') +
+                        '</div>');
+                }
+            },
+            error: function () {
+                alertBox.html('<div class="alert alert-danger">Network error. Please try again.</div>');
+            },
+            complete: function () {
+                btn.disabled = false;
+                btn.value = 'Save';
+            }
+        });
+    });
+});
+</script>

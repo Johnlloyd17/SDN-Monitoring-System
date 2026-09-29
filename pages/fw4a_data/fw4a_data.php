@@ -593,7 +593,23 @@ if (!isset($_SESSION['role'])) {
                 </div>
             </div>
         </div>
-
+        <!-- ========================= SITE DETAIL MODAL ======================= -->
+        <div id="siteDetailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title"><i class="fa fa-wifi"></i> Access Point Details</h4>
+                    </div>
+                    <div class="modal-body" id="siteDetailModalBody" style="max-height: 75vh; overflow-y: auto; background:#f4f6f9;">
+                        <div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div> <!-- /.row -->
         </section><!-- /.content -->
         </aside><!-- /.right-side -->
@@ -614,7 +630,7 @@ if (!isset($_SESSION['role'])) {
         <!-- jQuery 2.0.2 -->
     <?php }
 include "../footer.php"; ?>
-    <script type="text/javascript">
+<script type="text/javascript">
         (function() {
             var basePath = '../../ajax/';
             var currentPage = 1;
@@ -755,7 +771,7 @@ include "../footer.php"; ?>
                         cell(row.locality) +
                         cell(row.barangay) +
                         cell(row.district) +
-                        cell(row.transport_location) +
+                        transportCell(row.transport_location, id) +
                         cell(row.transport_type) +
                         cell(row.site_locations) +
                         cell(row.transfer_new_locations) +
@@ -810,7 +826,15 @@ include "../footer.php"; ?>
                 }
                 return '<td class="text-center"><span class="bool-badge bool-no" title="No"><i class="fa fa-times"></i> No</span></td>';
             }
-
+            function transportCell(v, id) {
+                if (v === null || v === undefined || v === '') {
+                    return '<td class="text-center" style="color:#aaa;">&mdash;</td>';
+                }
+                return '<td><a href="javascript:void(0);" class="transportLink" data-id="' + id + '" title="Click to view full details" >' +
+                    '<i class="fa fa-wifi transport-icon"></i>' +
+                    '<span class="transport-text">' + escHtml(v) + '</span>' +
+                    '</a></td>';
+            }
             function linkCell(v) {
                 if (v === null || v === undefined || v === '') {
                     return '<td class="text-center" style="color:#aaa;">&mdash;</td>';
@@ -1861,7 +1885,7 @@ include "../footer.php"; ?>
                 return '<div class="detail-card"><h5>' + title + '</h5><div class="detail-grid">' + fieldsHtml + '</div></div>';
             }
 
-            function renderDetailPanel(item) {
+            function buildDetailHtml(item) {
                 var statusHtml = escVal(item.status);
                 if (item.status) {
                     var st = String(item.status).toLowerCase();
@@ -1930,7 +1954,11 @@ include "../footer.php"; ?>
                     field('Contact Details', escVal(item.contact_details))
                 ].join(''));
 
-                document.getElementById('detailBody').innerHTML = html;
+                    return html;
+            }
+
+            function renderDetailPanel(item) {
+                document.getElementById('detailBody').innerHTML = buildDetailHtml(item);
             }
 
             function openDetailPanel(id) {
@@ -1961,7 +1989,18 @@ include "../footer.php"; ?>
                     closeDetailPanel();
                 }
             });
-
+            $(document).on('click', '.transportLink', function() {
+                var id = $(this).attr('data-id');
+                document.getElementById('siteDetailModalBody').innerHTML =
+                    '<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</div>';
+                $('#siteDetailModal').modal('show');
+                $.getJSON(basePath + 'fw4a_get_item.php?action=item&id=' + id, function(item) {
+                    document.getElementById('siteDetailModalBody').innerHTML = buildDetailHtml(item);
+                }).fail(function() {
+                    document.getElementById('siteDetailModalBody').innerHTML =
+                        '<div class="alert alert-danger">Failed to load item details.</div>';
+                });
+            });
             // ========== INIT ==========
             loadFilters();
             loadData(1);
@@ -2644,6 +2683,61 @@ include "../footer.php"; ?>
         .file-link:hover {
             text-decoration: underline;
         }
+        .detailLink,
+        .transportLink {
+            color: #3c8dbc;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .detailLink:hover,
+        .transportLink:hover {
+            text-decoration: underline;
+        }
+        .transportLink {
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+           
+        }
+        .transportLink {
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none !important;
+            color: #333333;
+        }
+
+        .transportLink:hover,
+        .transportLink:focus,
+        .transportLink:active,
+        .transportLink:visited {
+            text-decoration: none !important;
+        }
+
+        .transportLink .transport-icon {
+            flex-shrink: 0;
+            margin: 0;
+            color: #2c6fbb;
+        }
+
+        .transportLink .transport-text {
+            text-align: left;
+            color: inherit;
+            text-decoration: none !important;
+        }
+
+        .transportLink:hover .transport-text {
+            text-decoration: none !important;
+            color: #ff6600 !important;
+        }
+
+        .transportLink:hover .transport-icon {
+            color: #ff6600 !important;
+        }
+            
     </style>
     </body>
 

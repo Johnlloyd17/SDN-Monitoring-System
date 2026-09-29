@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <?php
-session_start();
+require_once __DIR__ . '/pages/session_config.php';
+sdn_session_boot();
 include "pages/connection.php";
 
 $message = '';
@@ -22,6 +23,7 @@ if(isset($_POST['btn_login'])) {
         $_SESSION['role'] = "Administrator";
         $_SESSION['userid'] = $row['id'];
         $_SESSION['username'] = $row['username'];
+        sdn_session_touch();
         $message = "Login successful! Redirecting...";
         $message_type = "success";
     } elseif ($numrow_staff > 0) {
@@ -30,12 +32,19 @@ if(isset($_POST['btn_login'])) {
         $_SESSION['staff'] = "staff";
         $_SESSION['userid'] = $row['id'];
         $_SESSION['username'] = $row['username'];
+        sdn_session_touch();
         $message = "Login successful! Redirecting...";
         $message_type = "success";
     } else {
         $message = "Invalid username or password.";
         $message_type = "error";
     }
+} elseif (isset($_GET['expired']) && $_GET['expired'] === '1') {
+    // Sent by auth_check.php / js/session-timeout.js when the 1-hour
+    // inactivity timeout fires. Checked after the POST block so a fresh login
+    // attempt (success or failure) always reports its own result instead.
+    $message = "Your session expired due to inactivity. Please log in again.";
+    $message_type = "info";
 }
 ?>
 <head>

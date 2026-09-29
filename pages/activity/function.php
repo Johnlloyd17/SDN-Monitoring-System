@@ -1,198 +1,300 @@
 <?php
-require_once __DIR__ . '/../auth_check.php'; require_auth();
+require_once __DIR__ . '/../auth_check.php'; require_auth_api();
 ?>
-<?php if (!isset($con)) include "../connection.php";
-if (isset($_POST['btn_add'])) {
-    $start = mysqli_real_escape_string($con, $_POST['txt_start']);
-    $end = mysqli_real_escape_string($con, $_POST['txt_end']);
-    $project = mysqli_real_escape_string($con, $_POST['txt_project']);
-    $subproject = mysqli_real_escape_string($con, $_POST['txt_subproject']);
-    $indicator = mysqli_real_escape_string($con, $_POST['txt_indicator']);
-    $activity = mysqli_real_escape_string($con, $_POST['txt_activity']);
-    $training = mysqli_real_escape_string($con, $_POST['txt_training']);
-    $municipality = mysqli_real_escape_string($con, $_POST['txt_municipality']);
-    $barangay = mysqli_real_escape_string($con, $_POST['txt_barangay']);
-    $district = mysqli_real_escape_string($con, $_POST['txt_district']);
-    $agency = mysqli_real_escape_string($con, $_POST['txt_agency']);
-    $mode = mysqli_real_escape_string($con, $_POST['txt_mode']);
-    $sector = mysqli_real_escape_string($con, $_POST['txt_sector']);
-    $person = mysqli_real_escape_string($con, $_POST['txt_person']);
-    $resource = mysqli_real_escape_string($con, $_POST['txt_resource']);
-    $participants = mysqli_real_escape_string($con, $_POST['txt_participants']);
-    $completers = mysqli_real_escape_string($con, $_POST['txt_completers']);
-    $male = mysqli_real_escape_string($con, $_POST['txt_male']);
-    $female = mysqli_real_escape_string($con, $_POST['txt_female']);
-    $approved = mysqli_real_escape_string($con, $_POST['txt_approved']);
-    $mov = mysqli_real_escape_string($con, $_POST['txt_mov']);
-    $remarks = mysqli_real_escape_string($con, $_POST['txt_remarks']);
+<?php
+if (!isset($con)) include __DIR__ . '/../connection.php';
 
+// Always called as its own request (POST), never included by a page. Guard
+// anyway so a stray include can never send a JSON content type for an HTML
+// page, and never append JSON to the document.
+$isDirectRequest = isset($_SERVER['SCRIPT_FILENAME'])
+    && basename($_SERVER['SCRIPT_FILENAME']) === 'function.php';
+
+if ($isDirectRequest) {
+    header('Content-Type: application/json');
+}
+
+// Inert when included by a page: no headers, no output, no JSON appended
+// to the HTML document.
+if (!$isDirectRequest) {
+    return;
+}
+
+/**
+ * Column list for tblactivity plus the matching POST field name for each.
+ * Shared by the add and edit branches so the two stay in sync.
+ */
+function activity_field_map($prefix)
+{
+    return array(
+        'start'        => 'txt_' . $prefix . 'start',
+        'end'          => 'txt_' . $prefix . 'end',
+        'project'      => 'txt_' . $prefix . 'project',
+        'subproject'   => 'txt_' . $prefix . 'subproject',
+        'indicator'    => 'txt_' . $prefix . 'indicator',
+        'activity'     => 'txt_' . $prefix . 'activity',
+        'training'     => 'txt_' . $prefix . 'training',
+        'municipality' => 'txt_' . $prefix . 'municipality',
+        'barangay'     => 'txt_' . $prefix . 'barangay',
+        'district'     => 'txt_' . $prefix . 'district',
+        'agency'       => 'txt_' . $prefix . 'agency',
+        'mode'         => 'txt_' . $prefix . 'mode',
+        'sector'       => 'txt_' . $prefix . 'sector',
+        'person'       => 'txt_' . $prefix . 'person',
+        'resource'     => 'txt_' . $prefix . 'resource',
+        'participants' => 'txt_' . $prefix . 'participants',
+        'completers'   => 'txt_' . $prefix . 'completers',
+        'male'         => 'txt_' . $prefix . 'male',
+        'female'       => 'txt_' . $prefix . 'female',
+        'approved'     => 'txt_' . $prefix . 'approved',
+        'mov'          => 'txt_' . $prefix . 'mov',
+        'remarks'      => 'txt_' . $prefix . 'remarks',
+    );
+}
+
+function activity_fail($message, $code = 400)
+{
+    http_response_code($code);
+    echo json_encode(array('success' => false, 'message' => $message));
+    exit;
+}
+
+function activity_log($con, $action)
+{
     if (isset($_SESSION['role'])) {
-        $action = 'Added Item:' . $activity;  // Logging activity
-        $iquery = mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '" . $action . "')");
+        $role = mysqli_real_escape_string($con, $_SESSION['role']);
+        $safe = mysqli_real_escape_string($con, $action);
+        mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('$role', NOW(), '$safe')");
+    }
+}
+
+/**
+ * Persist uploaded attachments for a record.
+ * Returns array('uploaded' => int, 'errors' => array).
+ */
+function activity_store_files($con, $id, $field)
+{
+    $uploaded = 0;
+    $errors = array();
+
+    if (!isset($_FILES[$field]) || !is_array($_FILES[$field]['tmp_name'])) {
+        return array('uploaded' => 0, 'errors' => $errors);
     }
 
-    $query = "INSERT INTO tblactivity (
-        start, end, project, subproject, indicator, activity, training, municipality, barangay, district, agency, mode, sector, person, resource, participants, completers, male, female, approved, mov, remarks
-    ) VALUES (
-        '$start', '$end', '$project', '$subproject', '$indicator', '$activity', '$training', '$municipality', '$barangay', '$district', '$agency', '$mode', '$sector', '$person', '$resource', '$participants', '$completers', '$male', '$female', '$approved', '$mov', '$remarks'
-    )";
+    $target = __DIR__ . '/photo/';
+    if (!file_exists($target)) {
+        mkdir($target, 0777, true);
+    }
 
-    $query_result = mysqli_query($con, $query) or die('Error: ' . mysqli_error($con));
+    foreach ($_FILES[$field]['tmp_name'] as $key => $tmp_name) {
+        if (!is_uploaded_file($tmp_name)) {
+            $errors[] = 'Invalid upload.';
+            continue;
+        }
 
-    $id = mysqli_insert_id($con);
-    if (isset($_FILES['files'])) {
-        foreach ($_FILES['files']['tmp_name'] as $key => $tmp_name) {
-            $target = "photo/";
+        $milliseconds = round(microtime(true) * 1000);
+        $safeName = preg_replace('/[^a-zA-Z0-9\-_\.]/', '_', $_FILES[$field]['name'][$key]);
+        $name = $milliseconds . $safeName;
 
-            // Ensure the photo directory exists, create if it doesn't
-            if (!file_exists($target)) {
-                mkdir($target, 0777, true); // Create the directory with write permissions
-            }
-
-            // Sanitize file name (optional, but recommended)
-            $milliseconds = round(microtime(true) * 1000);
-            $name = $milliseconds . preg_replace("/[^a-zA-Z0-9\-_\.]/", "_", $_FILES['files']['name'][$key]);
-            $target = $target . $name;
-
-            if (move_uploaded_file($tmp_name, $target)) {
-                mysqli_query($con, "INSERT INTO tblactivityphoto (activityid, filename) 
-                    VALUES ('$id', '" . $name . "')") or die('Error: ' . mysqli_error($con));
+        if (move_uploaded_file($tmp_name, $target . $name)) {
+            $safeStored = mysqli_real_escape_string($con, $name);
+            if (mysqli_query($con, "INSERT INTO tblactivityphoto (activityid, filename) VALUES ('" . intval($id) . "', '$safeStored')")) {
+                $uploaded++;
             } else {
-                echo "Error uploading file: " . $_FILES['files']['name'][$key];
+                $errors[] = 'Could not record file ' . $safeName . '.';
             }
+        } else {
+            $errors[] = 'Error uploading file: ' . $_FILES[$field]['name'][$key];
         }
     }
 
-    if ($query_result) {
-        $_SESSION['added'] = 1;
-        header("location: " . $_SERVER['REQUEST_URI']);
+    return array('uploaded' => $uploaded, 'errors' => $errors);
+}
+
+if (isset($_POST['btn_add'])) {
+    $fields = activity_field_map('');
+    $columns = array_keys($fields);
+    $values = array();
+    foreach ($columns as $col) {
+        $values[] = isset($_POST[$fields[$col]]) ? $_POST[$fields[$col]] : '';
     }
+
+    $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+    $sql = "INSERT INTO tblactivity (" . implode(', ', $columns) . ") VALUES ($placeholders)";
+
+    $stmt = mysqli_prepare($con, $sql);
+    if ($stmt === false) {
+        activity_fail('Database error: ' . mysqli_error($con), 500);
+    }
+    $types = str_repeat('s', count($values));
+    mysqli_stmt_bind_param($stmt, $types, ...$values);
+    if (!mysqli_stmt_execute($stmt)) {
+        $err = mysqli_stmt_error($stmt);
+        mysqli_stmt_close($stmt);
+        activity_fail('Database error: ' . $err, 500);
+    }
+    $id = mysqli_insert_id($con);
+    mysqli_stmt_close($stmt);
+
+    activity_log($con, 'Added Item:' . (isset($_POST['txt_activity']) ? $_POST['txt_activity'] : ''));
+
+    // Attachments are optional; the Add form currently has no file input.
+    $files = activity_store_files($con, $id, 'files');
+
+    echo json_encode(array(
+        'success' => true,
+        'id' => intval($id),
+        'uploaded' => $files['uploaded'],
+        'message' => 'Record added successfully.',
+    ));
+    exit;
 }
 
 if (isset($_POST['btn_save'])) {
-    $id = $_POST['hidden_id'];
-    $start = mysqli_real_escape_string($con, $_POST['txt_edit_start']);
-    $end = mysqli_real_escape_string($con, $_POST['txt_edit_end']);
-    $project = mysqli_real_escape_string($con, $_POST['txt_edit_project']);
-    $subproject = mysqli_real_escape_string($con, $_POST['txt_edit_subproject']);
-    $indicator = mysqli_real_escape_string($con, $_POST['txt_edit_indicator']);
-    $activity = mysqli_real_escape_string($con, $_POST['txt_edit_activity']);
-    $training = mysqli_real_escape_string($con, $_POST['txt_edit_training']);
-    $municipality = mysqli_real_escape_string($con, $_POST['txt_edit_municipality']);
-    $barangay = mysqli_real_escape_string($con, $_POST['txt_edit_barangay']);
-    $district = mysqli_real_escape_string($con, $_POST['txt_edit_district']);
-    $agency = mysqli_real_escape_string($con, $_POST['txt_edit_agency']);
-    $mode = mysqli_real_escape_string($con, $_POST['txt_edit_mode']);
-    $sector = mysqli_real_escape_string($con, $_POST['txt_edit_sector']);
-    $person = mysqli_real_escape_string($con, $_POST['txt_edit_person']);
-    $resource = mysqli_real_escape_string($con, $_POST['txt_edit_resource']);
-    $participants = mysqli_real_escape_string($con, $_POST['txt_edit_participants']);
-    $completers = mysqli_real_escape_string($con, $_POST['txt_edit_completers']);
-    $male = mysqli_real_escape_string($con, $_POST['txt_edit_male']);
-    $female = mysqli_real_escape_string($con, $_POST['txt_edit_female']);
-    $approved = mysqli_real_escape_string($con, $_POST['txt_edit_approved']);
-    $mov = mysqli_real_escape_string($con, $_POST['txt_edit_mov']);
-    $remarks = mysqli_real_escape_string($con, $_POST['txt_edit_remarks']);
-
-    $update_query = mysqli_query($con, "UPDATE tblactivity SET 
-         start = '$start', 
-        end = '$end', 
-        project = '$project', 
-        subproject = '$subproject', 
-        indicator = '$indicator', 
-        activity = '$activity', 
-        training = '$training', 
-        municipality = '$municipality', 
-        barangay = '$barangay', 
-        district = '$district', 
-        agency = '$agency', 
-        mode = '$mode', 
-        sector = '$sector', 
-        person = '$person', 
-        resource = '$resource', 
-        participants = '$participants', 
-        completers = '$completers', 
-        male = '$male', 
-        female = '$female', 
-        approved = '$approved', 
-        mov = '$mov', 
-        remarks = '$remarks' 
-        WHERE id = '$id'") or die('Error: ' . mysqli_error($con));
-
-    if (isset($_SESSION['role'])) {
-        $action = 'Updated Item ' . $activity;  // Logging activity
-        $iquery = mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '" . $action . "')");
+    $id = isset($_POST['hidden_id']) ? intval($_POST['hidden_id']) : 0;
+    if ($id <= 0) {
+        activity_fail('Invalid record id.');
     }
 
-    if ($update_query) {
-        $_SESSION['edited'] = 1;
-        header("Location: " . $_SERVER['REQUEST_URI']);
+    $fields = activity_field_map('edit_');
+    $columns = array_keys($fields);
+    $values = array();
+    foreach ($columns as $col) {
+        $values[] = isset($_POST[$fields[$col]]) ? $_POST[$fields[$col]] : '';
     }
+
+    $set = implode(', ', array_map(function ($c) { return "$c = ?"; }, $columns));
+    $sql = "UPDATE tblactivity SET $set WHERE id = ?";
+
+    $stmt = mysqli_prepare($con, $sql);
+    if ($stmt === false) {
+        activity_fail('Database error: ' . mysqli_error($con), 500);
+    }
+    $types = str_repeat('s', count($values)) . 'i';
+    $values[] = $id;
+    mysqli_stmt_bind_param($stmt, $types, ...$values);
+    if (!mysqli_stmt_execute($stmt)) {
+        $err = mysqli_stmt_error($stmt);
+        mysqli_stmt_close($stmt);
+        activity_fail('Database error: ' . $err, 500);
+    }
+    mysqli_stmt_close($stmt);
+
+    activity_log($con, 'Updated Item ' . (isset($_POST['txt_edit_activity']) ? $_POST['txt_edit_activity'] : ''));
+
+    echo json_encode(array(
+        'success' => true,
+        'id' => $id,
+        'message' => 'Edit successfully saved.',
+    ));
+    exit;
 }
 
 if (isset($_POST['btn_delete'])) {
+    // Capture the activity names first so the log matches the old wording.
+    $ids = array();
     if (isset($_POST['chk_delete'])) {
-        foreach ($_POST['chk_delete'] as $value) {
-            // First, retrieve the activity name before deletion
-            $activityQuery = mysqli_query($con, "SELECT activity FROM tblactivity WHERE id = '$value'");
-            $activityRow = mysqli_fetch_assoc($activityQuery);
-            $activityName = $activityRow['activity'];
+        $ids = is_array($_POST['chk_delete']) ? $_POST['chk_delete'] : array($_POST['chk_delete']);
+    }
 
-            $delete_query = mysqli_query($con, "DELETE FROM tblactivity WHERE id = '$value'") or die('Error: ' . mysqli_error($con));
-            
-            // Logging the deletion of each item
-            if (isset($_SESSION['role'])) {
-                $action = 'Deleted Item: ' . $activityName;  // Log the deleted activity name
-                $iquery = mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '" . $action . "')");
-            }
-            
-            if ($delete_query) {
-                $_SESSION['delete'] = 1;
-                header("Location: " . $_SERVER['REQUEST_URI']);
-            }
+    $ids = array_values(array_filter(array_map('intval', $ids), function ($v) { return $v > 0; }));
+
+    if (count($ids) === 0) {
+        activity_fail('No record was selected to delete.');
+    }
+
+    $in = implode(',', $ids);
+    $names = array();
+    $sel = mysqli_query($con, "SELECT id, activity FROM tblactivity WHERE id IN ($in)");
+    if ($sel) {
+        while ($row = mysqli_fetch_assoc($sel)) {
+            $names[$row['id']] = $row['activity'];
         }
     }
+
+    $ok = mysqli_query($con, "DELETE FROM tblactivity WHERE id IN ($in)");
+    if (!$ok) {
+        activity_fail('Database error: ' . mysqli_error($con), 500);
+    }
+    $deleted = mysqli_affected_rows($con);
+
+    // NOTE: attachment rows are deliberately NOT cascaded. tblactivityphoto
+    // is shared with the Tech4Ed module and keyed on a bare record id, so
+    // "WHERE activityid IN (...)" would also delete the other module's
+    // attachments for any colliding id. Matches the pre-existing behaviour.
+
+    if ($deleted > 0) {
+        activity_log($con, 'Deleted Item(s) ' . implode(', ', array_keys($names)));
+    }
+
+    echo json_encode(array(
+        'success' => $deleted > 0,
+        'deleted' => $deleted,
+        'type' => $deleted > 0 ? 'success' : 'error',
+        'message' => $deleted > 0
+            ? $deleted . ' record(s) deleted successfully.'
+            : 'No matching record was found to delete.',
+    ));
+    exit;
 }
 
 if (isset($_POST['btn_addimage'])) {
-    $id = $_POST['hidden_id'];
-
-    if (isset($_FILES['photos'])) {
-        foreach ($_FILES['photos']['tmp_name'] as $key => $tmp_name) {
-            $target = "photo/";
-
-            // Ensure the photo directory exists, create if it doesn't
-            if (!file_exists($target)) {
-                mkdir($target, 0777, true);
-            }
-
-            // Sanitize file name
-            $milliseconds = round(microtime(true) * 1000);
-            $name = $milliseconds . preg_replace("/[^a-zA-Z0-9\-_\.]/", "_", $_FILES['photos']['name'][$key]);
-            $target = $target . $name;
-
-            if (move_uploaded_file($tmp_name, $target)) {
-                $query = mysqli_query($con, "INSERT INTO tblactivityphoto (activityid, filename) 
-                    VALUES ('$id', '" . $name . "')") or die('Error: ' . mysqli_error($con));
-                if ($query == true) {
-                    $_SESSION['added'] = 1;
-                    header("location: " . $_SERVER['REQUEST_URI']);
-                }
-            }
-        }
+    $id = isset($_POST['hidden_id']) ? intval($_POST['hidden_id']) : 0;
+    if ($id <= 0) {
+        activity_fail('Invalid record id.');
     }
+
+    $files = activity_store_files($con, $id, 'photos');
+    if ($files['uploaded'] === 0) {
+        activity_fail(count($files['errors']) ? implode(' ', $files['errors']) : 'No files were uploaded.');
+    }
+
+    echo json_encode(array(
+        'success' => true,
+        'uploaded' => $files['uploaded'],
+        'errors' => $files['errors'],
+        'message' => $files['uploaded'] . ' file(s) uploaded successfully.',
+    ));
+    exit;
 }
 
 if (isset($_POST['btn_remove'])) {
+    $ids = array();
     if (isset($_POST['chk_deletephoto'])) {
-        foreach ($_POST['chk_deletephoto'] as $value) {
-            $delete_query = mysqli_query($con, "DELETE from tblactivityphoto where id = '$value'") or die('Error: ' . mysqli_error($con));
-                    
-            if ($delete_query == true) {
-                $_SESSION['delete'] = 1;
-                header("location: " . $_SERVER['REQUEST_URI']);
-            }
+        $ids = is_array($_POST['chk_deletephoto']) ? $_POST['chk_deletephoto'] : array($_POST['chk_deletephoto']);
+    }
+
+    $ids = array_values(array_filter(array_map('intval', $ids), function ($v) { return $v > 0; }));
+
+    if (count($ids) === 0) {
+        activity_fail('No file was selected to delete.');
+    }
+
+    // Remove the physical files alongside their rows.
+    $in = implode(',', $ids);
+    $res = mysqli_query($con, "SELECT id, filename FROM tblactivityphoto WHERE id IN ($in)");
+    while ($row = mysqli_fetch_assoc($res)) {
+        $path = __DIR__ . '/photo/' . basename($row['filename']);
+        if (is_file($path)) {
+            @unlink($path);
         }
     }
+
+    $ok = mysqli_query($con, "DELETE FROM tblactivityphoto WHERE id IN ($in)");
+    if (!$ok) {
+        activity_fail('Database error: ' . mysqli_error($con), 500);
+    }
+    $deleted = mysqli_affected_rows($con);
+
+    echo json_encode(array(
+        'success' => $deleted > 0,
+        'deleted' => $deleted,
+        'type' => $deleted > 0 ? 'success' : 'error',
+        'message' => $deleted > 0
+            ? $deleted . ' file(s) deleted successfully.'
+            : 'No matching file was found to delete.',
+    ));
+    exit;
 }
-?>
+
+echo json_encode(array('success' => false, 'message' => 'Unknown action.'));

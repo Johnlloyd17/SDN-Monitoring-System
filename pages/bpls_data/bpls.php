@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <!DOCTYPE html>
@@ -45,349 +45,102 @@ if (!isset($_SESSION['role'])) {
                                     Systems Integration and Status Across LGUs
                                     </div>
                                     <div class="panel-body">
-                                        <form method="post" id="filterForm">
-                                            <div class="row">
-                                                <div class="col-md-3 col-sm-6 col-xs-12">
-                                                    <div class="form-group">
-                                                        <label for="systemSelect">Select System</label>
-                                                        <select id="systemSelect" name="system" class="form-control" onchange="this.form.submit()">
-                                                            <option value="">All System</option>
-                                                            <?php
-                                                            // Fetching distinct requesting agencies
-                                                            $agenciesQuery = mysqli_query($con, "SELECT DISTINCT system FROM tblbpls WHERE system != ''");
-                                                            while ($system = mysqli_fetch_assoc($agenciesQuery)) {
-                                                                echo '<option value="' . $system['system'] . '"' . (isset($_POST['system']) && $_POST['system'] == $system['system'] ? ' selected' : '') . '>' . $system['system'] . '</option>';
-                                                            }
-                                                            ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </form>
+
+                                        <?php
+                                        // The filter select and the table both come from the
+                                        // shared definition, so the page and the ajax endpoint
+                                        // cannot drift apart.
+                                        require_once __DIR__ . '/bpls_rows.php';
+                                        echo bpls_render_filters($con, bpls_filter_params($_GET));
+                                        ?>
                                         </div>
-                                        <div style="padding:10px; display: flex; justify-content: space-between;">
-                                            <div>
-                                            <?php if ($_SESSION['role'] === 'Administrator') { ?>
-                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
-                                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                                        
-                                                    <?php } elseif ($_SESSION['username'] === 'elgusdn') { ?>
-                                                        <!-- Limited access for specific user -->
-                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
-                                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                                    <?php } ?>
-                                            </div>
-                                            <div>
-                                            <?php if ($_SESSION['role'] === 'Administrator') { ?>
-                                                <!-- Import Button -->
+                                    </div>
+                                </div>
+
+                                <?php $bplsManage = bpls_can_manage(); ?>
+                                <div style="padding:10px; display: flex; justify-content: space-between;">
+                                    <div>
+                                    <?php if ($bplsManage) { ?>
+                                                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Item</button>
+                                                <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                    <?php } ?>
+                                    </div>
+                                    <div>
+                                    <?php if ($bplsManage) { ?>
                                                 <button id="importBtn" class="btn btn-success btn-sm"><i class="fa fa-download" aria-hidden="true"></i> Import</button>
                                                 <input type="file" id="importFile" style="display:none;" accept=".csv, .xlsx" />
                                                 <button id="exportBtn" class="btn btn-primary btn-sm"><i class="fa fa-upload" aria-hidden="true"></i> Export</button>
-                                                
-                                                <?php } elseif ($_SESSION['username'] === 'elgusdn') { ?>
-                                                    <button id="importBtn" class="btn btn-success btn-sm"><i class="fa fa-download" aria-hidden="true"></i> Import</button>
-                                                <input type="file" id="importFile" style="display:none;" accept=".csv, .xlsx" />
-                                                <!-- Export Button -->
-                                                <button id="exportBtn" class="btn btn-primary btn-sm"><i class="fa fa-upload" aria-hidden="true"></i> Export</button>
-                                                <?php } ?>
-                                            </div>
-                                        </div>
-                                
+                                    <?php } ?>
+                                    </div>
+                                </div>
+
                                 <div class="box-body table-responsive">
-                                <form method="post">
                                     <table id="table" class="table table-bordered table-striped">
                                         <thead>
-                                        <tr>
-                                            <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
-                                            ?>
-                                                <th style="width: 20px !important;"><input type="checkbox" name="chk_delete[]" class="cbxMain" onchange="checkMain(this)"/></th>
-                                                <th>No.</th>
-                                            <?php 
-                                            }
-                                            ?>
-                                                <th>Province</th>
-                                                <th>Congressional District</th>
-                                                <th>City/Municipality</th>
-                                                <th>LGU Name</th>
-                                                <th>Class</th>
-                                                <th>System Provider</th>
-                                                <th>Remarks / Action Items</th>
-                                                <th>(BP) Y/N</th>
-                                                <th>(BP) Status</th>
-                                                <th>Integration of (BC) Y/N</th>
-                                                <th>Integration of (BC) Status</th>
-                                                <th>(BPCO) Y/N</th>
-                                                <th>(BPCO) Status</th>
-                                                <th>(WP) Y/N</th>
-                                                <th>(WP) Status</th>
-                                                <th>Integration of (FSIC)</th>
-                                                <th>(BPLS) Y/N</th>
-                                                <th>(BPLS) Status</th>
-                                                <th>(eCEDULA) Y/N</th>
-                                                <th>(eCEDULA) Status</th>
-                                                <th>(eLCR) Y/N</th>
-                                                <th>(eLCR) Status</th>
-                                                <th>eNEWS Y/N</th>
-                                                <th>eNEWS Status</th>
-                                                <th>Remarks</th>
-                                                <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
-                                            ?>
-                                                <th style="width: 40px !important;">Option</th>
-                                            <?php 
-                                            }
-                                            ?>
-                                        </tr>
+                                        <?php echo bpls_render_headers($bplsManage); ?>
                                         </thead>
                                         <tbody>
-                                        <?php
-                                                $counter = 1;  // Initialize counter
-                                                $systemFilter = isset($_POST['system']) ? $_POST['system'] : '';
-                                                $tableQuery = "SELECT * FROM tblbpls WHERE system != ''";
-                                                if ($systemFilter) {
-                                                    $tableQuery .= " AND system = '" . mysqli_real_escape_string($con, $systemFilter) . "'";
-                                                }
-                                                $tableQuery .= " ORDER BY lgu ASC";
-                                                $result = mysqli_query($con, $tableQuery);
-                                                if (!$result) {
-                                                    die('Error: ' . mysqli_error($con));
-                                                }
-                                                while ($row = mysqli_fetch_assoc($result)) {
-                                                    echo '<tr>';
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
-                                                echo '<td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>';
-                                                echo ' <td>' . $counter++ . '</td>'; // Assuming 'id' is the primary key
-                                            }
-                                            echo '
-                                                                    <td>' . $row['province'] . '</td>
-                                                                    <td>' . $row['district'] . '</td>
-                                                                    <td>' . $row['municipality'] . '</td>
-                                                                    <td>' . $row['lgu'] . '</td>
-                                                                    <td>' . $row['class'] . '</td>
-                                                                    <td>' . $row['system'] . '</td>
-                                                                    <td>' . $row['action'] . '</td>
-                                                                    <td>' . $row['businessyn'] . '</td>
-                                                                    <td>' . $row['businessstatus'] . '</td>
-                                                                    <td>' . $row['barangayyn'] . '</td>
-                                                                    <td>' . $row['barangaystatus'] . '</td>
-                                                                    <td>' . $row['buildingyn'] . '</td>
-                                                                    <td>' . $row['buildingstatus'] . '</td>
-                                                                    <td>' . $row['workingyn'] . '</td>
-                                                                    <td>' . $row['workingstatus'] . '</td>
-                                                                    <td>' . $row['bfpyn'] . '</td>
-                                                                    <td>' . $row['bplyn'] . '</td>
-                                                                    <td>' . $row['bplstatus'] . '</td>
-                                                                    <td>' . $row['ecedulayn'] . '</td>
-                                                                    <td>' . $row['ecedulastatus'] . '</td>
-                                                                    <td>' . $row['elcryn'] . '</td>
-                                                                    <td>' . $row['elcrstatus'] . '</td>
-                                                                    <td>' . $row['enewsyn'] . '</td>
-                                                                    <td>' . $row['enewsstatus'] . '</td>
-                                                                    <td>' . $row['remark'] . '</td>';
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'elgusdn') {
-                                                echo '<td>
-                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['lgu'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['lgu'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
-                                                </td>';
-                                            }
-                                            echo '</tr>';
-                                        }
-                                        ?>
-                                                </table>
+                                        <?php echo bpls_render_rows(bpls_fetch_rows($con, bpls_filter_params($_GET)), $bplsManage); ?>
+                                        </tbody>
+                                    </table>
 
-                                <?php include "edit_modal.php"; ?>
-                                <?php include "view_modal.php"; ?>
+                                    <?php include "edit_modal.php"; ?>
+                                    <?php include "view_modal.php"; ?>
+                                    <?php include dirname(__DIR__) . '/sheet_preview_modal.php'; ?>
 
                                     <?php include "../deleteModal.php"; ?>
 
-                                    </form>
-                                </div><!-- /.box-body -->
-                            </div><!-- /.box -->
+                                    <?php if ($bplsManage) { ?>
+                                    <?php include "add_modal.php"; ?>
+                                    <?php } ?>
 
-                            <?php include "../edit_notif.php"; ?>
-
-                            <?php include "../added_notif.php"; ?>
-
-                            <?php include "../delete_notif.php"; ?>
-
-                            <?php include "../duplicate_error.php"; ?>
-
-            <?php include "add_modal.php"; ?>
-
-            <?php include "function.php"; ?>
-
-
-                    </div>   <!-- /.row -->
+﻿                    </div>   <!-- /.row -->
                 </section><!-- /.content -->
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
-<script type="text/javascript">
+<script src="../../js/sdm-preview.js"></script>
 
-    $(function() {
-        $("#table").DataTable({
+<?php include "bpls_list_js.php"; ?>
+<script type="text/javascript">
+    $(function () {
+        if ($.fn.DataTable.isDataTable('#table')) {
+            $('#table').DataTable().destroy();
+        }
+        $('#table').dataTable({
             "aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 3] }],
             "aaSorting": [],
             "pageLength": 10,
             "lengthMenu": [10, 25, 50, 100]
         });
 
-        var editFields = [
-            'province','district','municipality','lgu','class','system','action',
-            'businessyn','businessstatus','barangayyn','barangaystatus',
-            'buildingyn','buildingstatus','workingyn','workingstatus',
-            'bfpyn','bplyn','bplstatus','ecedulayn','ecedulastatus',
-            'elcryn','elcrstatus','enewsyn','enewsstatus','remark'
-        ];
-
-        $(document).on('click', '.btn-edit-item', function() {
-            var id = $(this).data('id');
-            $.ajax({
-                url: '../../ajax/bpls_get_item.php',
-                method: 'GET',
-                data: { action: 'item', id: id },
-                dataType: 'json',
-                success: function(data) {
-                    $('#edit_hidden_id').val(data.id);
-                    for (var i = 0; i < editFields.length; i++) {
-                        var f = editFields[i];
-                        $('#edit_' + f).val(data[f] || '');
-                    }
-                    $('#editModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error('[BPLS Load Item Error]', status, error);
-                    showToast('Failed to load record data.', 'error');
-                }
+        // Export is a download, so it stays a real navigation rather than ajax.
+        // The button only exists for managers, so the listener has to be guarded
+        // or a viewer's page throws here and never reaches updateDateTime below.
+        var exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function () {
+                var el = document.getElementById('bplsSystemSelect');
+                window.location.href = 'export.php?system=' + encodeURIComponent(el ? el.value : '');
             });
-        });
-
-        $(document).on('click', '.btn-view-item', function() {
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            $('#view_item_title').text(name);
-            $('#view_hidden_id').val(id);
-            $('#photoGrid').empty();
-
-            $.ajax({
-                url: '../../ajax/bpls_get_item.php',
-                method: 'GET',
-                data: { action: 'photos', id: id },
-                dataType: 'json',
-                success: function(photos) {
-                    if (photos.length === 0) {
-                        $('#photoGrid').html('<div class="col-md-12"><p>No files found.</p></div>');
-                    } else {
-                        var html = '';
-                        for (var i = 0; i < photos.length; i++) {
-                            var p = photos[i];
-                            var ext = p.type;
-                            html += '<div class="col-md-4">';
-                            html += '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />';
-                            html += '<div class="file-item">';
-                            if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
-                                html += '<img src="' + p.filepath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
-                            } else if (ext === 'pdf') {
-                                html += '<div class="file-thumbnail-pdf"><embed src="' + p.filepath + '" type="application/pdf" width="100%" height="100%" /></div>';
-                            } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
-                                html += '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
-                            } else {
-                                html += '<div class="file-thumbnail">File type not previewable</div>';
-                            }
-                            var nameClean = p.filename.replace(/\d+/g, '');
-                            html += '<div class="file-info"><span class="filename">' + nameClean + '</span>';
-                            html += '<a href="' + p.filepath + '" download class="download-btn"><i class="fas fa-download"></i></a></div>';
-                            html += '</div></div>';
-                        }
-                        $('#photoGrid').html(html);
-                    }
-                    rebindPhotoCheckboxes();
-                    $('#viewModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error('[BPLS Load Photos Error]', status, error);
-                    showToast('Failed to load files.', 'error');
-                }
-            });
-        });
-
-        function rebindPhotoCheckboxes() {
-            var selectAll = document.getElementById("cbxMainphoto");
-            var boxes = document.getElementsByClassName("chk_deletephoto");
-            selectAll.checked = false;
-            selectAll.onchange = function(e) {
-                for (var i = 0; i < boxes.length; i++) {
-                    boxes[i].checked = selectAll.checked;
-                }
-            };
-            for (var i = 0; i < boxes.length; i++) {
-                boxes[i].onchange = function(e) {
-                    if (!this.checked) selectAll.checked = false;
-                    if (document.querySelectorAll('.chk_deletephoto:checked').length === boxes.length) selectAll.checked = true;
-                };
-            }
         }
-    });
 
-     // Function to update the date and time
-   function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit', 
-                hour12: true 
+        function updateDateTime() {
+            var now = new Date();
+            var options = {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
             };
             document.getElementById('dateTime').innerText = now.toLocaleString('en-US', options);
         }
-
-        // Update the date and time every second
         setInterval(updateDateTime, 1000);
-        updateDateTime(); // Initial call to display immediately
-
-            document.getElementById('importBtn').addEventListener('click', function() {
-                document.getElementById('importFile').click();
-            });
-
-            document.getElementById('importFile').addEventListener('change', function() {
-                var formData = new FormData();
-                formData.append('file', this.files[0]);
-
-                fetch('import.php', {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json()).then(data => {
-                    if (data.success) {
-                        showToast('Data imported successfully!', 'success');
-                        location.reload();
-                    } else {
-                        console.error('[BPLS Import Error]', data.error);
-                        showToast(data.error || 'Import failed.', 'error');
-                    }
-                }).catch(function(error) {
-                    console.error('[BPLS Import Error]', error);
-                    showToast('Import failed. Check console for details.', 'error');
-                });
-            });
-
-            document.getElementById('exportBtn').addEventListener('click', function() {
-        // Get the selected system value from the filter
-        var selectedSystem = document.getElementById('systemSelect').value;
-        // Redirect to the export.php script with the selected system as a GET parameter
-        window.location.href = 'export.php?system=' + encodeURIComponent(selectedSystem);
+        updateDateTime();
     });
-
-            
-
 </script>
 
-<style>
+﻿<style>
     .info-box-icon {
             background-color: white; /* Change the background to white */
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2); /* Add an inner shadow */

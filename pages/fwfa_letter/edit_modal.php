@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <div id="editModal" class="modal fade">
-    <form method="post" id="editForm">
+    <form method="post" id="letterEditForm">
         <div class="modal-dialog modal-sdm-md">
             <div class="modal-content">
                 <div class="modal-header">
@@ -60,7 +60,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default btn-sm" data-dismiss="modal" value="Cancel"/>
-                    <input type="submit" class="btn btn-primary btn-sm" name="btn_save" value="Save"/>
+                    <input type="button" class="btn btn-primary btn-sm" id="btn_save" value="Save"/>
                 </div>
             </div>
         </div>

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <div id="editModal" class="modal fade">
-    <form method="post">
+    <form method="post" id="bplsEditForm">
         <div class="modal-dialog modal-sdm-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                 </div>
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel"/>
-                    <input type="submit" class="btn btn-primary" name="btn_save" value="Save"/>
+                    <button type="button" class="btn btn-primary" id="btn_save">Save</button>
                 </div>
             </div>
         </div>

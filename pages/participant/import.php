@@ -1,89 +1,99 @@
 <?php
-require_once __DIR__ . '/../auth_check.php'; require_auth();
+require_once __DIR__ . '/../auth_check.php';
+require_auth_api();
 ?>
 <?php
-include "../connection.php";
 
-// Function to check if the file extension is valid
-function isValidFileExtension($filename) {
-    $validExtensions = ['csv', 'xls', 'xlsx'];
-    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    return in_array($extension, $validExtensions);
+header('Content-Type: application/json');
+
+include __DIR__ . '/../connection.php';
+require_once __DIR__ . '/participant_rows.php';
+
+function import_fail($message) {
+    echo json_encode(array('success' => false, 'error' => $message));
+    exit;
 }
 
-// Check if a file was uploaded
-if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-    $filename = $_FILES['file']['name'];
+if (!isset($_FILES['file']) || !isset($_FILES['file']['error']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    import_fail('No file uploaded or upload error.');
+}
 
-    // Validate file extension
-    if (isValidFileExtension($filename)) {
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        $fileTmpName = $_FILES['file']['tmp_name'];
+$filename = $_FILES['file']['name'];
+$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+if (!in_array($extension, array('csv', 'xls', 'xlsx'), true)) {
+    import_fail('Invalid file format. Only CSV, XLS, and XLSX files are allowed.');
+}
+if ($extension !== 'csv') {
+    // Handling for XLS and XLSX would require a library such as PhpSpreadsheet.
+    import_fail('XLS and XLSX file handling is not implemented.');
+}
 
-        if ($extension === 'csv') {
-            $handle = fopen($fileTmpName, "r");
-            if ($handle !== false) {
-                // Skip header row
-                $header = fgetcsv($handle);
-                $success = true;
-                $error = '';
+// The page is scoped to one project, so imported rows belong to that project
+// regardless of what the file's Project column happens to contain. Taking the
+// file's value would drop rows off the page they were imported on.
+$view = isset($_POST['view']) ? (string) $_POST['view'] : 'cyber';
+$cfg  = participant_view_config($view);
+$project = $cfg['project'];
 
-                while (($data = fgetcsv($handle)) !== false) {
-                    // Check if the data array matches the expected number of columns
-                    if (count($data) >= 14) { // Ensure there are at least 19 columns
-                        $start = mysqli_real_escape_string($con, $data[0]);
-                        $end = mysqli_real_escape_string($con, $data[1]);
-                        $activity = mysqli_real_escape_string($con, $data[2]);
-                        $indicator = mysqli_real_escape_string($con, $data[3]);
-                        $fullname = mysqli_real_escape_string($con, $data[4]);
-                        $sex = mysqli_real_escape_string($con, $data[5]);
-                        $contact = mysqli_real_escape_string($con, $data[6]);
-                        $email = mysqli_real_escape_string($con, $data[7]);
-                        $mode = mysqli_real_escape_string($con, $data[8]);
-                        $agency = mysqli_real_escape_string($con, $data[9]);
-                        $sector = mysqli_real_escape_string($con, $data[10]);
-                        $project = mysqli_real_escape_string($con, $data[11]);
-                        $person = mysqli_real_escape_string($con, $data[12]);
-                        $remarks = mysqli_real_escape_string($con, $data[13]);
+$handle = fopen($_FILES['file']['tmp_name'], 'r');
+if ($handle === false) {
+    import_fail('Error opening the CSV file.');
+}
 
-                        // Prepare the SQL query to insert the data
-                        $query = "INSERT INTO tblparticipant (
-                            start, end, activity, indicator, fullname, sex, contact, email, mode, 
-                            agency, sector, project, person, remarks
-                        ) VALUES (
-                            '$start', '$end', '$activity','$indicator', '$fullname', '$sex', '$contact', '$email', '$mode', 
-                            '$agency', '$sector', '$project', '$person', '$remarks'
-                        )";
-                        
-                        if (!mysqli_query($con, $query)) {
-                            $success = false;
-                            $error = mysqli_error($con);
-                            break;
-                        }
-                    } else {
-                        $success = false;
-                        $error = 'CSV file does not have the correct number of columns.';
-                        break;
-                    }
-                }
-                fclose($handle);
+fgetcsv($handle); // skip header row
 
-                if ($success) {
-                    echo json_encode(['success' => true]);
-                } else {
-                    echo json_encode(['success' => false, 'error' => $error]);
-                }
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Error opening the CSV file.']);
-            }
-        } else {
-            // Handling for XLS and XLSX files would require libraries such as PhpSpreadsheet.
-            echo json_encode(['success' => false, 'error' => 'XLS and XLSX file handling is not implemented.']);
-        }
-    } else {
-        echo json_encode(['success' => false, 'error' => 'Invalid file format. Only CSV, XLS, and XLSX files are allowed.']);
+// start, end, activity, indicator, fullname, sex, contact, email, mode,
+// agency, sector, project, person, remarks
+$stmt = mysqli_prepare($con, "INSERT INTO tblparticipant
+    (`start`, `end`, `activity`, `indicator`, `fullname`, `sex`, `contact`, `email`,
+     `mode`, `agency`, `sector`, `project`, `person`, `remarks`)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+if (!$stmt) {
+    fclose($handle);
+    import_fail('Could not prepare the insert.');
+}
+
+$imported = 0;
+$skipped  = 0;
+
+while (($data = fgetcsv($handle)) !== false) {
+    if (count($data) < 14) {
+        // Short rows are a malformed file, not a record to skip silently.
+        fclose($handle);
+        mysqli_stmt_close($stmt);
+        import_fail('CSV file does not have the correct number of columns.');
     }
-} else {
-    echo json_encode(['success' => false, 'error' => 'No file uploaded or upload error.']);
+
+    $row = array(
+        trim($data[0]), trim($data[1]), trim($data[2]), trim($data[3]),
+        trim($data[4]), trim($data[5]), trim($data[6]), trim($data[7]),
+        trim($data[8]), trim($data[9]), trim($data[10]),
+        $project,                      // forced to this page's project
+        trim($data[12]), trim($data[13]),
+    );
+
+    if ($row[0] === '' || $row[1] === '' || $row[4] === '') {
+        $skipped++;
+        continue;
+    }
+
+    mysqli_stmt_bind_param($stmt, 'ssssssssssssss', ...$row);
+    if (!mysqli_stmt_execute($stmt)) {
+        $err = mysqli_stmt_error($stmt);
+        fclose($handle);
+        mysqli_stmt_close($stmt);
+        import_fail($err);
+    }
+    $imported++;
 }
-?>
+
+fclose($handle);
+mysqli_stmt_close($stmt);
+
+$message = $imported . ' record(s) imported.';
+if ($skipped > 0) {
+    $message .= ' ' . $skipped . ' row(s) skipped for a missing date or fullname.';
+}
+
+echo json_encode(array('success' => true, 'imported' => $imported, 'skipped' => $skipped, 'error' => $message));

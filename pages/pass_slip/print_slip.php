@@ -576,5 +576,7 @@ $uatLocations = load_uat_transport_locations($con);
 
 </div>
 
+
+<?php $sdn_asset_prefix = '../../'; include '../session_bootstrap.php'; ?>
 </body>
 </html>

@@ -124,9 +124,9 @@ if (!isset($_SESSION['role'])) {
             </aside><!-- /.right-side -->
         </div><!-- ./wrapper -->
         <!-- jQuery 2.0.2 -->
-        <?php }
-        include "../footer.php"; ?>
- <script type="text/javascript">
+        <?php } ?>
+        <?php include "../footer.php"; ?>
+<script type="text/javascript">
     var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
 var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
 

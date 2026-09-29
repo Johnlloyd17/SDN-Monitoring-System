@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../auth_check.php'; require_auth();
 ?>
 <div id="viewModal" class="modal fade" role="dialog">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="viewFilesForm">
+    <div class="modal-alert-slot"></div>
         <div class="modal-dialog modal-sdm-xl">
             <div class="modal-content">
                 <div class="modal-header">

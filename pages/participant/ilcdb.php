@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../auth_check.php'; require_auth();
+$participantView = 'ilcdb';
+require_once __DIR__ . '/participant_rows.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -45,98 +47,14 @@ if (!isset($_SESSION['role'])) {
                                     </div>
                                 
                                     <div class="panel-body">
-    <form method="post" id="filterForm">
-        <div class="row">
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="form-group">
-                    <label for="projectSelect">Select Sector</label>
-                    <select id="projectSelect" name="project" class="form-control" onchange="this.form.submit()">
-                        <option value="">All Sectors</option>
-                        <?php
-                        // Fetching distinct projects related to ILCDB
-                        $projectsQuery = mysqli_query($con, "SELECT DISTINCT sector FROM tblparticipant WHERE project = 'ILCDB'");
-                        while ($project = mysqli_fetch_assoc($projectsQuery)) {
-                            // Check if the sector is not empty
-                            if (!empty($project['sector'])) {
-                                echo '<option value="' . htmlspecialchars($project['sector']) . '"' . (isset($_POST['project']) && $_POST['project'] == $project['sector'] ? ' selected' : '') . '>' . htmlspecialchars($project['sector']) . '</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Total Participants -->
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box">
-                    <span class="info-box-icon bg-red">
-                        <img src="icons/participants_1.png" alt="Total Activities" style="width: 54px; height: 54px;">
-                    </span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Total Participants</span>
-                        <span class="info-box-number" id="totalParticipants">
-                            <?php
-                            $projectFilter = isset($_POST['project']) ? $_POST['project'] : '';
-                            $filterQuery = "SELECT COUNT(*) AS total_participants FROM tblparticipant WHERE project = 'ILCDB'";
-                            if ($projectFilter) {
-                                $filterQuery .= " AND sector = '" . mysqli_real_escape_string($con, $projectFilter) . "'";
-                            }
-                            $q = mysqli_query($con, $filterQuery);
-                            $result = mysqli_fetch_assoc($q);
-                            echo $result['total_participants'];
-                            ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Male -->
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box">
-                    <span class="info-box-icon bg-blue">
-                        <img src="icons/male_1.png" alt="Total Activities" style="width: 50px; height: 50px;">
-                    </span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Male</span>
-                        <span class="info-box-number">
-                            <?php
-                            $filterQuery = "SELECT COUNT(*) AS total_male FROM tblparticipant WHERE sex = 'Male' AND project = 'ILCDB'";
-                            if ($projectFilter) {
-                                $filterQuery .= " AND sector = '" . mysqli_real_escape_string($con, $projectFilter) . "'";
-                            }
-                            $q = mysqli_query($con, $filterQuery);
-                            $result = mysqli_fetch_assoc($q);
-                            echo $result['total_male'];
-                            ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Female -->
-            <div class="col-md-3 col-sm-6 col-xs-12">
-                <div class="info-box">
-                    <span class="info-box-icon bg-red">
-                        <img src="icons/female_1.png" alt="Total Activities" style="width: 60px; height: 60px;">
-                    </span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Female</span>
-                        <span class="info-box-number">
-                            <?php
-                            $filterQuery = "SELECT COUNT(*) AS total_female FROM tblparticipant WHERE sex = 'Female' AND project = 'ILCDB'";
-                            if ($projectFilter) {
-                                $filterQuery .= " AND sector = '" . mysqli_real_escape_string($con, $projectFilter) . "'";
-                            }
-                            $q = mysqli_query($con, $filterQuery);
-                            $result = mysqli_fetch_assoc($q);
-                            echo $result['total_female'];
-                            ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+                                            <form method="post" id="filterForm">
+                                            <div class="row" id="participantCards">
+<?php echo participant_render_cards($con, $participantView, participant_filters($participantView, $_POST)); ?>
+                                            </div>
+                                            <div class="row">
+<?php echo participant_render_filters($con, $participantView, participant_filters($participantView, $_POST)); ?>
+                                            </div> <!-- End of filter row -->
+                                        </form>
 </div></div></div>
                                     <div class="col-md-12 col-sm-12 col-xs-12">
                     <div class="panel panel-default">
@@ -172,86 +90,17 @@ if (!isset($_SESSION['role'])) {
                                         </div>
                                 
                                 <div class="box-body table-responsive">
-                                <form method="post">
+                                                                    <form method="post" id="participantDeleteForm">
                                     <table id="table" class="table table-bordered table-striped">
                                         <thead>
-                                        <tr>
-                                            <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'ilcdbsdn') {
-                                            ?>
-                                                <th style="width: 20px !important;"><input type="checkbox" name="chk_delete[]" class="cbxMain" onchange="checkMain(this)"/></th>
-                                                <th>No.</th>
-                                            <?php 
-                                            }
-                                            ?>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>Activity Name</th>
-                                                    <th>Indicators</th>
-                                                    <th>Fullname</th>
-                                                    <th>Sex</th>
-                                                    <th>Contact</th>
-                                                    <th>Email Address</th>
-                                                    <th>Mode of Implementation</th>
-                                                    <th>Agency</th>
-                                                    <th>Target Sector</th>
-                                                    <th>Project</th>
-                                                    <th>Responsible Person</th>
-                                                    <th>Remarks</th>
-                                                    <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'ilcdbsdn') {
-                                            ?>
-                                                <th style="width: 40px !important;">Option</th>
-                                            <?php 
-                                            }
-                                            ?>
+                                            <tr>
+<?php echo participant_render_headers($participantView); ?>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <?php
-                                                        $counter = 1;  // Initialize counter
-                                                        $tableQuery = "SELECT * FROM tblparticipant where project = 'ILCDB'";
-                                                        if (isset($_POST['project']) && $_POST['project']) {
-                                                            $tableQuery .= " AND sector = '" . mysqli_real_escape_string($con, $_POST['project']) . "'";
-                                                        }
-                                                        $tableQuery .= " ORDER BY start DESC";
-                                                        $result = mysqli_query($con, $tableQuery);
-                                                        if (!$result) {
-                                                            die('Error: ' . mysqli_error($con));
-                                                        }
-                                                        while ($row = mysqli_fetch_assoc($result)) {
-                                                            echo '<tr>';
-                                                    if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'ilcdbsdn') {
-                                                        echo '<td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>';
-                                                        echo ' <td>' . $counter++ . '</td>'; // Assuming 'id' is the primary key
-                                                    }
-                                                    echo '
-                                                        <td>' . $row['start'] . '</td>
-                                                                    <td>' . $row['end'] . '</td>
-                                                                    <td>' . $row['activity'] . '</td>
-                                                                    <td>' . $row['indicator'] . '</td>
-                                                                    <td>' . $row['fullname'] . '</td>
-                                                                    <td>' . $row['sex'] . '</td>
-                                                                    <td>' . $row['contact'] . '</td>
-                                                                    <td>' . $row['email'] . '</td>
-                                                                    <td>' . $row['mode'] . '</td>
-                                                                    <td>' . $row['agency'] . '</td>
-                                                                    <td>' . $row['sector'] . '</td>
-                                                                    <td>' . $row['project'] . '</td>
-                                                                    <td>' . $row['person'] . '</td>
-                                                                     <td>' . $row['remarks'] . '</td>';
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'ilcdbsdn') {
-                                                echo '<td>
-                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['fullname'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['fullname'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
-                                                </td>';
-                                            }
-                                            echo '</tr>';
-                                        }
-                                        ?>
-                                                </table>
-
-
+<?php echo participant_render_rows($con, $participantView, participant_filters($participantView, $_POST), participant_can_manage($participantView)); ?>
+                                        </tbody>
+                                    </table>
 
                                     <?php include "../deleteModal.php"; ?>
 
@@ -271,8 +120,9 @@ if (!isset($_SESSION['role'])) {
 
             <?php include "edit_modal.php"; ?>
             <?php include "view_modal.php"; ?>
+<?php include dirname(__DIR__) . '/sheet_preview_modal.php'; ?>
 
-            <?php include "function.php"; ?>
+            
 
 
                     </div>   <!-- /.row -->
@@ -282,176 +132,8 @@ if (!isset($_SESSION['role'])) {
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
-<script type="text/javascript">
-
-var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
-var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
-
-//select all checkboxes
-select_all.addEventListener("change", function(e){
-    for (i = 0; i < checkboxes.length; i++) { 
-        checkboxes[i].checked = select_all.checked;
-    }
-});
-
-
-for (var i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('change', function(e){ //".checkbox" change 
-        //uncheck "select all", if one of the listed checkbox item is unchecked
-        if(this.checked == false){
-            select_all.checked = false;
-        }
-        //check "select all" if all checkbox items are checked
-        if(document.querySelectorAll('.checkbox:checked').length == checkboxes.length){
-            select_all.checked = true;
-        }
-    });
-}
-    $(function() {
-        $("#table").dataTable({
-           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
-        });
-
-        $(document).on('click', '.btn-edit-item', function(e) {
-            e.preventDefault();
-            var id = $(this).data('id');
-            $.ajax({
-                url: '../../ajax/participant_get_item.php?action=item&id=' + id,
-                method: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    $('#edit_hidden_id').val(data.id);
-                    $('#edit_start').val(data.start);
-                    $('#edit_end').val(data.end);
-                    $('#edit_activity').val(data.activity);
-                    $('#edit_indicator').val(data.indicator);
-                    $('#edit_fullname').val(data.fullname);
-                    $('#edit_sex').val(data.sex);
-                    $('#edit_contact').val(data.contact);
-                    $('#edit_email').val(data.email);
-                    $('#edit_mode').val(data.mode);
-                    $('#edit_agency').val(data.agency);
-                    $('#edit_sector').val(data.sector);
-                    $('#edit_project').val(data.project);
-                    $('#edit_person').val(data.person);
-                    $('#edit_remarks').val(data.remarks);
-                    $('#editModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error('[Participant Load Item Error]', status, error);
-                    showToast('Failed to load participant data.', 'error');
-                }
-            });
-        });
-
-        $(document).on('click', '.btn-view-item', function(e) {
-            e.preventDefault();
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            $('#view_item_title').text(name);
-            $('#view_hidden_id').val(id);
-            $.ajax({
-                url: '../../ajax/participant_get_item.php?action=photos&id=' + id,
-                method: 'GET',
-                dataType: 'json',
-                success: function(photos) {
-                    var html = '';
-                    if (photos.length === 0) {
-                        html = '<div class="col-md-12 text-center"><p>No photos found.</p></div>';
-                    } else {
-                        for (var i = 0; i < photos.length; i++) {
-                            var p = photos[i];
-                            var filePath = 'photo/' + p.filename;
-                            var ext = p.filename.split('.').pop().toLowerCase();
-                            var thumb = '';
-                            if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
-                                thumb = '<img src="' + filePath + '" alt="' + p.filename + '" class="file-thumbnail"/>';
-                            } else if (ext === 'pdf') {
-                                thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
-                            } else if (['docx','xlsx','pptx'].indexOf(ext) !== -1) {
-                                thumb = '<div class="file-thumbnail-office"><i class="fas fa-file-word"></i></div>';
-                            } else {
-                                thumb = '<div class="file-thumbnail">File type not previewable</div>';
-                            }
-                            var nameWithoutNums = p.filename.replace(/\d+/g, '');
-                            html += '<div class="col-md-4">' +
-                                '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + p.id + '" />' +
-                                '<div class="file-item">' + thumb +
-                                '<div class="file-info"><span class="filename">' + nameWithoutNums + '</span>' +
-                                '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
-                                '</div></div></div>';
-                        }
-                    }
-                    $('#photoGrid').html(html);
-                    $('#viewModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error('[Participant Load Photos Error]', status, error);
-                    showToast('Failed to load files.', 'error');
-                }
-            });
-        });
-    });
-
- // Function to update the date and time
- function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit', 
-                hour12: true 
-            };
-            document.getElementById('dateTime').innerText = now.toLocaleString('en-US', options);
-        }
-
-        // Update the date and time every second
-        setInterval(updateDateTime, 1000);
-        updateDateTime(); // Initial call to display immediately
-
-            document.getElementById('importBtn').addEventListener('click', function() {
-                document.getElementById('importFile').click();
-            });
-
-            document.getElementById('importFile').addEventListener('change', function() {
-                var formData = new FormData();
-                formData.append('file', this.files[0]);
-
-                fetch('import.php', {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json()).then(data => {
-                    if (data.success) {
-                        showToast('Data imported successfully!', 'success');
-                        location.reload();
-                    } else {
-                        console.error('[Participant Import Error]', data.error);
-                        showToast(data.error || 'Import failed.', 'error');
-                    }
-                }).catch(function(error) {
-                    console.error('[Participant Import Error]', error);
-                    showToast('Import failed. Check console for details.', 'error');
-                });
-            });
-
-            document.getElementById('exportBtn').addEventListener('click', function() {
-    // Get the selected sector value from the filter
-    var selectedSector = document.getElementById('projectSelect').value;
-    // Redirect to the export.php script with the selected sector as a GET parameter
-    window.location.href = 'exportilcdb.php?sector=' + encodeURIComponent(selectedSector);
-});
-
-// Update statistics when sector is selected
-document.getElementById('sectorSelect').addEventListener('change', function() {
-    document.getElementById('filterForm').submit();
-});
-
-            
-
-</script>
+<script src="../../js/sdm-preview.js"></script>
+<?php include "participant_list_js.php"; ?>
 
 <style>
     .info-box-icon {

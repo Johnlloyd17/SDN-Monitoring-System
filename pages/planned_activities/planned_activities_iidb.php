@@ -1,39 +1,38 @@
 <?php
-require_once __DIR__ . '/../auth_check.php'; require_auth();
-?>
-<!DOCTYPE html>
-<html>
-<?php
+require_once __DIR__ . '/../auth_check.php';
+require_auth();
 
-if (!isset($_SESSION['role'])) {
+$plannedView = 'iidb';
+require_once __DIR__ . '/planned_rows.php';
+$plannedCfg = planned_view_config($plannedView);
+
+if (!isset($_SESSION['role']) || $plannedCfg === null) {
     header("Location: ../../login.php");
-} else {
-    ob_start();
-    include('../head_css.php');
+    exit;
+}
+ob_start();
+include('../head_css.php');
+$plannedParams = planned_filter_params($plannedCfg);
+$plannedManage = planned_can_manage($plannedCfg);
 ?>
 <body class="skin-black">
-    <!-- header logo: style can be found in header.less -->
-    <?php
+<?php
     include "../connection.php";
-    ?>
+?>
     <?php include('../header.php'); ?>
 
     <div class="wrapper row-offcanvas row-offcanvas-left">
-        <!-- Left side column. contains the logo and sidebar -->
         <?php include('../sidebar-left.php'); ?>
 
-        <!-- Right side column. Contains the navbar and content of the page -->
-        <!-- Right side column. Contains the navbar and content of the page -->
         <aside class="right-side">
-            <!-- Content Header (Page header) -->
             <section class="content-header">
                 <div class="header-title">
                     <img src="icons/logo.png" alt="Logo" class="header-logo" />
                     <div class="header-info">
-                        <h3>Planned Activities - IIDB</h3>
+                        <h3><?php echo htmlspecialchars($plannedCfg['heading'], ENT_QUOTES); ?></h3>
                         <p class="header-address">DICT SDN Office</p>
                     </div>
-                    <div class="header-date-time" id="dateTime"></div> <!-- Date and Time Container -->
+                    <div class="header-date-time" id="dateTime"></div>
                 </div>
             </section>
             <section class="content">
@@ -42,329 +41,64 @@ if (!isset($_SESSION['role'])) {
                         <div class="box-header">
                             <div class="col-md-12 col-sm-12 col-xs-12"><br>
                                 <div class="panel panel-default">
-                                <div class="panel-heading">
-                                Targets and Initiatives
-                                    </div>
+                                    <div class="panel-heading">Targets and Initiatives</div>
                                     <div class="panel-body">
-    <form method="post" id="filterForm">
-        <div class="row">
-        <div class="col-md-3 col-sm-6 col-xs-12">
-    <div class="form-group">
-        <label for="indicatorSelect">Select Indicator</label>
-        <select id="indicatorSelect" name="indicator" class="form-control" onchange="this.form.submit()">
-            <option value="">All Indicators</option>
-            <?php
-            $indicatorQuery = "SELECT DISTINCT indicator FROM targets_initiatives WHERE project = 'IIDB' and indicator IS NOT NULL AND indicator != ''";
-            if (!empty($_POST['year'])) {
-                $year = mysqli_real_escape_string($con, $_POST['year']);
-                $icsQuery .= " AND YEAR(start) = '$year'";
-            }
-            $indicatorsQuery = mysqli_query($con, $indicatorQuery);
-            if ($indicatorsQuery) {
-                while ($indicator = mysqli_fetch_assoc($indicatorsQuery)) {
-                    echo '<option value="' . htmlspecialchars($indicator['indicator']) . '"' . (isset($_POST['indicator']) && $_POST['indicator'] == $indicator['indicator'] ? ' selected' : '') . '>' . htmlspecialchars($indicator['indicator']) . '</option>';
-                }
-            } else {
-                echo "Error fetching indicators: " . mysqli_error($con);
-            }
-            ?>
-        </select>
+<?php echo planned_render_filters($con, $plannedCfg, $plannedParams); ?>
+<div style="padding:10px; display: flex; justify-content: space-between;">
+    <div>
+<?php if ($plannedManage) { ?>
+        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
+        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+<?php } ?>
     </div>
 </div>
-<div class="col-md-3 col-sm-6 col-xs-12">
-    <div class="form-group">
-        <label for="yearSelect">Select Year</label>
-        <select id="yearSelect" name="year" class="form-control" onchange="this.form.submit()">
-            <option value="">All Years</option>
-            <?php
-            $yearQuery = "SELECT DISTINCT YEAR(start) AS year FROM targets_initiatives WHERE project = 'IIDB' and start IS NOT NULL AND start != ''";
+                                        <div class="box-body table-responsive">
+                                            <table id="table" class="table table-bordered table-striped">
+                                                <thead>
+<?php echo planned_render_headers($plannedManage); ?>
+</thead>
+                                                <tbody>
+<?php echo planned_render_rows(planned_fetch_rows($con, $plannedCfg, $plannedParams), $plannedManage); ?>
+</tbody>
+                                            </table>
+                                            <?php include "../deleteModal.php"; ?>
+                                        <?php include "edit_modal.php"; ?>
+                                        <?php include "view_modal.php"; ?>
+                                        <?php include "add_modal.php"; ?>
+                                        </div><!-- /.box-body -->
+                                    </div><!-- /.panel-body -->
+                                </div><!-- /.panel -->
+                            </div><!-- /.col -->
+                        </div><!-- /.box-header -->
+                    </div><!-- /.box -->
+                </div><!-- /.row -->
 
-            if (!empty($_POST['indicator'])) {
-                $indicator = mysqli_real_escape_string($con, $_POST['indicator']);
-                $yearQuery .= " AND indicator = '$indicator'";
-            }
-
-            $yearResult = mysqli_query($con, $yearQuery);
-            if ($yearResult) {
-                while ($year = mysqli_fetch_assoc($yearResult)) {
-                    echo '<option value="' . htmlspecialchars($year['year']) . '"' .
-                         (isset($_POST['year']) && $_POST['year'] == $year['year'] ? ' selected' : '') . '>' .
-                         htmlspecialchars($year['year']) . '</option>';
-                }
-            } else {
-                echo "Error fetching years: " . mysqli_error($con);
-            }
-            ?>
-        </select>
-    </div>
-</div>
-
-    </form>
-</div>
-</div><div style="padding:10px; display: flex; justify-content: space-between;">
-                                            <div>
-                                            <?php if ($_SESSION['role'] === 'Administrator') { ?>
-                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
-                                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                                        
-                                                    <?php } elseif ($_SESSION['username'] === 'iidbsdn') { ?>
-                                                        <!-- Limited access for specific user -->
-                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
-                                                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                                    <?php } ?>
-                                            </div>
-                                           
-                                        </div>
-                                
-                                <div class="box-body table-responsive">
-                                <form method="post">
-                                <table id="table" class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'iidbsdn') {
-                                            ?>
-                                                <th style="width: 20px !important;"><input type="checkbox" name="chk_delete[]" class="cbxMain" onchange="checkMain(this)"/></th>
-                                                <th>No.</th>
-                                            <?php 
-                                            }
-                                            ?>
-                                                            <th>Start Date</th>
-                                                            <th>End Date</th>
-                                                            <th>Bureau</th>
-                                                            <th>Project</th>
-                                                            <th>Activity Name</th>
-                                                            <th>Training Venue</th>
-                                                            <th>Municipality/City</th>
-                                                            <th>Barangay</th>
-                                                            <th>District</th>
-                                                            <th>Requesting Agency</th>
-                                                            <th>Mode of Implementation</th>
-                                                            <th>Target Sector</th>
-                                                            <th>Responsible Person</th>
-                                                            <th>Name of Resource Person</th>
-                                                            <th>No. of Participants</th>
-                                                            <th>No. of Completers</th>
-                                                            <th>Male</th>
-                                                            <th>Female</th>
-                                                            <th>Approved Activity Design</th>
-                                                            <th>Link to MOVs</th>
-                                                            <th>Remarks</th>
-                                                            <?php 
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'iidbsdn') {
-                                            ?>
-                                                <th style="width: 40px !important;">Option</th>
-                                            <?php 
-                                            }
-                                            ?>
-                                        </tr>
-                                    </thead>
-                                        <tbody>
-                                        <?php
-                                                      $counter = 1;  // Initialize counter
-                                                      $tableQuery = "SELECT * FROM targets_initiatives WHERE project = 'IIDB'";
-                                                      
-                                                      if (isset($_POST['indicator']) && $_POST['indicator'] != '') {
-                                                          $tableQuery .= " AND indicator = '" . mysqli_real_escape_string($con, $_POST['indicator']) . "'";
-                                                      }
-                                                      if (isset($_POST['year']) && $_POST['year'] != '') {
-                                                       $tableQuery .= " AND YEAR(start) = '" . mysqli_real_escape_string($con, $_POST['year']) . "'";
-                                                   }
-                                                      $tableQuery .= " ORDER BY indicator ASC"; // Order by start date
-                                                      $result = mysqli_query($con, $tableQuery);
-                                   
-                                                
-                                                  if (!$result) {
-                                                      die('Error: ' . mysqli_error($con));
-                                                  }
-                                                  
-                                                  while ($row = mysqli_fetch_assoc($result)) {
-                                                    echo '<tr>';
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'iidbsdn') {
-                                                echo '<td><input type="checkbox" name="chk_delete[]" class="chk_delete" value="'.$row['id'].'" /></td>';
-                                                echo ' <td>' . $counter++ . '</td>'; // Assuming 'id' is the primary key
-                                            }
-                                            echo '
-                                                <td>' . $row['start'] . '</td>
-                                                                <td>' . $row['end'] . '</td>
-                                                                <td>' . $row['project'] . '</td>
-                                                                <td>' . $row['subproject'] . '</td>
-                                                                <td>' . $row['activity'] . '</td>
-                                                                <td>' . $row['training'] . '</td>
-                                                                <td>' . $row['municipality'] . '</td>
-                                                                <td>' . $row['barangay'] . '</td>
-                                                                <td>' . $row['district'] . '</td>
-                                                                <td>' . $row['agency'] . '</td>
-                                                                <td>' . $row['subproject'] . '</td>
-                                                                <td>' . $row['sector'] . '</td>
-                                                                <td>' . $row['person'] . '</td>
-                                                                <td>' . $row['resource'] . '</td>
-                                                                <td>' . $row['participants'] . '</td>
-                                                                <td>' . $row['completers'] . '</td>
-                                                                <td>' . $row['male'] . '</td>
-                                                                <td>' . $row['female'] . '</td>
-                                                                <td>' . $row['approved'] . '</td>
-                                                                <td>' . $row['mov'] . '</td>
-                                                                <td>' . $row['remarks'] . '</td>';
-                                            if ($_SESSION['role'] === 'Administrator' || $_SESSION['username'] === 'iidbsdn') {
-                                                echo '<td>
-                                                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                                                    <button class="btn btn-primary btn-sm btn-view-item" data-id="'.$row['id'].'" data-name="'.htmlspecialchars($row['activity'], ENT_QUOTES).'"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
-                                                </td>';
-                                            }
-                                            echo '</tr>';
-                                        }
-                                        ?>
-                                                </table>
-
-
-                                    <?php include "../deleteModal.php"; ?>
-
-                                    </form>
-                                </div><!-- /.box-body -->
-                            </div><!-- /.box -->
-
-                            <?php include "../edit_notif.php"; ?>
-
-                            <?php include "../added_notif.php"; ?>
-
-                            <?php include "../delete_notif.php"; ?>
-
-                            <?php include "../duplicate_error.php"; ?>
-
-            <?php include "edit_modal.php"; ?>
-            <?php include "view_modal.php"; ?>
-            <?php include "add_modal.php"; ?>
-
-            <?php include "function.php"; ?>
-
-
-                    </div>   <!-- /.row -->
-                </section><!-- /.content -->
-            </aside><!-- /.right-side -->
-        </div><!-- ./wrapper -->
-        <!-- jQuery 2.0.2 -->
-        <?php }
-        include "../footer.php"; ?>
+<?php
+    ob_end_flush();
+    include "../footer.php";
+    include "planned_list_js.php";
+?>
 <script type="text/javascript">
+    $(function () {
+        if ($.fn.DataTable.isDataTable('#table')) {
+            $('#table').DataTable().destroy();
+        }
+        $('#table').dataTable({
+            "aoColumnDefs": [ { "bSortable": false, "aTargets": [0] } ],
+            "aaSorting": []
+        });
+    });
 
-var select_all = document.getElementById("cbxMainphoto"); //select all checkbox
-var checkboxes = document.getElementsByClassName("chk_deletephoto"); //checkbox items
-
-//select all checkboxes
-select_all.addEventListener("change", function(e){
-    for (i = 0; i < checkboxes.length; i++) { 
-        checkboxes[i].checked = select_all.checked;
+    function updateDateTime() {
+        var now = new Date();
+        var options = {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        };
+        document.getElementById('dateTime').innerText = now.toLocaleString('en-US', options);
     }
-});
-
-
-for (var i = 0; i < checkboxes.length; i++) {
-    checkboxes[i].addEventListener('change', function(e){ //".checkbox" change 
-        //uncheck "select all", if one of the listed checkbox item is unchecked
-        if(this.checked == false){
-            select_all.checked = false;
-        }
-        //check "select all" if all checkbox items are checked
-        if(document.querySelectorAll('.checkbox:checked').length == checkboxes.length){
-            select_all.checked = true;
-        }
-    });
-}
-    $(function() {
-        $("#table").dataTable({
-           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
-        });
-
-        $(document).on('click', '.btn-edit-item', function() {
-            var id = $(this).data('id');
-            $.get('../../ajax/planned_get_item.php', { action: 'item', id: id }, function(data) {
-                $('#edit_hidden_id').val(data.id || '');
-                $('#edit_start').val(data.start || '');
-                $('#edit_end').val(data.end || '');
-                $('#edit_project').val(data.project || '');
-                $('#edit_subproject').val(data.subproject || '');
-                $('#edit_indicator').val(data.indicator || '');
-                $('#edit_activity').val(data.activity || '');
-                $('#edit_training').val(data.training || '');
-                $('#edit_municipality').val(data.municipality || '');
-                $('#edit_barangay').val(data.barangay || '');
-                $('#edit_district').val(data.district || '');
-                $('#edit_agency').val(data.agency || '');
-                $('#edit_mode').val(data.mode || '');
-                $('#edit_sector').val(data.sector || '');
-                $('#edit_person').val(data.person || '');
-                $('#edit_resource').val(data.resource || '');
-                $('#edit_participants').val(data.participants || '');
-                $('#edit_completers').val(data.completers || '');
-                $('#edit_male').val(data.male || '');
-                $('#edit_female').val(data.female || '');
-                $('#edit_approved').val(data.approved || '');
-                $('#edit_mov').val(data.mov || '');
-                $('#edit_remarks').val(data.remarks || '');
-                $('#edit_type').val(data.type || '');
-                $('#editModal').modal('show');
-            }, 'json');
-        });
-
-        $(document).on('click', '.btn-view-item', function() {
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            $('#view_item_title').text(name);
-            $('#view_hidden_id').val(id);
-            $.get('../../ajax/planned_get_item.php', { action: 'photos', id: id }, function(data) {
-                var grid = $('#photoGrid');
-                grid.empty();
-                if (data.length === 0) {
-                    grid.html('<div class="col-md-12 text-center"><p>No files uploaded yet.</p></div>');
-                } else {
-                    $.each(data, function(i, photo) {
-                        var filePath = 'photo/' + photo.filename;
-                        var ext = photo.filename.split('.').pop().toLowerCase();
-                        var thumb = '';
-                        if (['jpg','jpeg','png','gif'].indexOf(ext) !== -1) {
-                            thumb = '<img src="' + filePath + '" alt="' + photo.filename + '" class="file-thumbnail"/>';
-                        } else if (ext === 'pdf') {
-                            thumb = '<div class="file-thumbnail-pdf"><embed src="' + filePath + '" type="application/pdf" width="100%" height="100%" /></div>';
-                        } else {
-                            thumb = '<div class="file-thumbnail-office"><i class="fas fa-file"></i></div>';
-                        }
-                        var nameNoNum = photo.filename.replace(/\d+/g, '');
-                        grid.append(
-                            '<div class="col-md-4">' +
-                            '<input type="checkbox" name="chk_deletephoto[]" class="chk_deletephoto" value="' + photo.id + '" />' +
-                            '<div class="file-item">' + thumb +
-                            '<div class="file-info"><span class="filename">' + nameNoNum + '</span>' +
-                            '<a href="' + filePath + '" download class="download-btn"><i class="fas fa-download"></i></a>' +
-                            '</div></div></div>'
-                        );
-                    });
-                }
-                $('#viewModal').modal('show');
-            }, 'json');
-        });
-    });
-   // Function to update the date and time
-   function updateDateTime() {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit', 
-                hour12: true 
-            };
-            document.getElementById('dateTime').innerText = now.toLocaleString('en-US', options);
-        }
-
-        // Update the date and time every second
-        setInterval(updateDateTime, 1000);
-        updateDateTime(); // Initial call to display immediately
-            
-      
-
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
 </script>
 
 <style>
@@ -472,7 +206,6 @@ for (var i = 0; i < checkboxes.length; i++) {
             table th:nth-child(1) { width: 30px; } /* Example width for checkbox column */
             table th:nth-child(2) { width: 50px; } /* Example width for No. column */
             /* Add more specific widths as needed */
-            <style>
     /* File item container */
     .file-item {
         position: relative;
@@ -583,8 +316,8 @@ for (var i = 0; i < checkboxes.length; i++) {
         }
         /* Other styles remain unchanged */
         
+
 </style>
 
-    </style>
-    </body>
+</body>
 </html>

@@ -10,7 +10,7 @@ $filterSector = isset($_GET['sector']) ? mysqli_real_escape_string($con, $_GET['
 
 // Initialize the base SQL query
 $query = "SELECT 
-           start, end, activity, activity, fullname, sex, contact, 
+           `start`, `end`, activity, indicator, fullname, sex, contact, 
             email, mode, agency, sector, project, person, remarks 
           FROM tblparticipant WHERE project = 'ILCDB'"; // Start with a base query that retrieves all records
 
@@ -31,9 +31,11 @@ header('Content-Disposition: attachment; filename=DICT-SDN ILCDB Participant Dat
 // Open output stream for writing CSV data
 $output = fopen('php://output', 'w');
 
-// Output column headers for the CSV file
+// Output column headers for the CSV file. The old header listed 13 names while
+// the query selected activity twice and never selected indicator, so the
+// Indicators column was silently dropped from every export.
 fputcsv($output, array(
-    'Start Date', 'End Date', 'Activity Name', 'Fullname', 'Sex', 'Contact', 
+    'Start Date', 'End Date', 'Activity Name', 'Indicators', 'Fullname', 'Sex', 'Contact', 
     'Email Address', 'Mode of Implementation', 'Agency', 'Target Sector', 
     'Project', 'Responsible Person', 'Remarks'
 ));

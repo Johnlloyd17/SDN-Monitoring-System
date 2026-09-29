@@ -19,18 +19,7 @@ if (!isset($_SESSION['role'])) {
         <?php
         $isAdminUat = !isset($_SESSION['staff']);
 
-        function uatCoordFmt($lat, $lng) {
-            $parts = array();
-            if ($lat !== null && $lat !== '' && !is_nan((float)$lat)) {
-                $v = (float)$lat;
-                $parts[] = number_format(abs($v), 6, '.', '') . ($v < 0 ? 'S' : 'N');
-            }
-            if ($lng !== null && $lng !== '' && !is_nan((float)$lng)) {
-                $w = (float)$lng;
-                $parts[] = number_format(abs($w), 6, '.', '') . ($w < 0 ? 'W' : 'E');
-            }
-            return $parts ? implode('  ', $parts) : '';
-        }
+        require_once __DIR__ . '/uat_rows.php';
         ?>
 
         <div class="wrapper row-offcanvas row-offcanvas-left">
@@ -79,22 +68,14 @@ if (!isset($_SESSION['role'])) {
                                                         <div class="row">
                                                             <?php
                                                             $uatTableCheck = @mysqli_query($con, "SELECT 1 FROM uat LIMIT 0");
-                                                            if ($uatTableCheck) {
-                                                                $rUatTotal = mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(*) AS total FROM uat"));
-                                                                $rUatItems = mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(*) AS total FROM uat_items"));
-                                                                $rUatLocations = mysqli_fetch_assoc(mysqli_query($con, "SELECT COUNT(DISTINCT uat_id) AS total FROM uat_items"));
-                                                            } else {
-                                                                $rUatTotal = ['total' => 0];
-                                                                $rUatItems = ['total' => 0];
-                                                                $rUatLocations = ['total' => 0];
-                                                            }
+                                                            $uatStats = uat_render_stats($con);
                                                             ?>
                                                             <div class="col-md-4 col-sm-6 col-xs-12">
                                                                 <div class="info-box">
                                                                     <span class="info-box-icon bg-aqua"><i class="fa fa-map-marker"></i></span>
                                                                     <div class="info-box-content">
                                                                         <span class="info-box-text">Total UAT Locations</span>
-                                                                        <span class="info-box-number"><?php echo $rUatTotal['total']; ?></span>
+                                                                        <span class="info-box-number" id="statUatTotal"><?php echo $uatStats['total']; ?></span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -103,7 +84,7 @@ if (!isset($_SESSION['role'])) {
                                                                     <span class="info-box-icon bg-green"><i class="fa fa-boxes"></i></span>
                                                                     <div class="info-box-content">
                                                                         <span class="info-box-text">Total Equipment Items</span>
-                                                                        <span class="info-box-number"><?php echo $rUatItems['total']; ?></span>
+                                                                        <span class="info-box-number" id="statUatItems"><?php echo $uatStats['items']; ?></span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -112,7 +93,7 @@ if (!isset($_SESSION['role'])) {
                                                                     <span class="info-box-icon bg-yellow"><i class="fa fa-wifi"></i></span>
                                                                     <div class="info-box-content">
                                                                         <span class="info-box-text">Locations With Equipment</span>
-                                                                        <span class="info-box-number"><?php echo $rUatLocations['total']; ?></span>
+                                                                        <span class="info-box-number" id="statUatLocations"><?php echo $uatStats['locations']; ?></span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -180,54 +161,9 @@ if (!isset($_SESSION['role'])) {
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    <?php
-                                                                    $uatCounter = 1;
-                                                                    if ($uatTableCheck) {
-                                                                        $uatQuery = "SELECT u.*, COUNT(it.id) AS item_count
-                                                                                     FROM uat u
-                                                                                     LEFT JOIN uat_items it ON it.uat_id = u.id
-                                                                                     WHERE 1=1";
-
-                                                                        if (isset($_POST['uat_search']) && trim($_POST['uat_search']) != '') {
-                                                                            $uatSearch = mysqli_real_escape_string($con, trim($_POST['uat_search']));
-                                                                            $uatQuery .= " AND (u.municipality LIKE '%$uatSearch%'
-                                                                                      OR u.strategy LIKE '%$uatSearch%'
-                                                                                      OR u.transport_location LIKE '%$uatSearch%')";
-                                                                        }
-
-                                                                        $uatQuery .= " GROUP BY u.id ORDER BY u.created_at DESC, u.id DESC";
-                                                                        $uatResult = mysqli_query($con, $uatQuery);
-                                                                        if ($uatResult) {
-                                                                            while ($row = mysqli_fetch_assoc($uatResult)) {
-                                                                                $uatId = intval($row['id']);
-                                                                                $municipality = htmlspecialchars($row['municipality']);
-                                                                                $strategy = htmlspecialchars($row['strategy']);
-                                                                                $transportLocation = htmlspecialchars($row['transport_location']);
-                                                                                $coords = uatCoordFmt($row['latitude'], $row['longitude']);
-                                                                                $coordDisplay = $coords !== '' ? htmlspecialchars($coords) : '<span class="text-muted">—</span>';
-                                                                    echo '
-                                                                    <tr>
-                                                                            <td><input type="checkbox" class="chk_delete_uat" name="uat_chk_delete[]" value="' . $uatId . '" onchange="updateUatDeleteBtn()" /></td>
-                                                                            <td>' . $uatCounter++ . '</td>
-                                                                            <td>' . $municipality . '</td>
-                                                                            <td>' . $strategy . '</td>
-                                                                            <td><a href="javascript:void(0);" class="uat-location-link" onclick="openUatDetail(' . $uatId . ', \'' . ($isAdminUat ? 'edit' : 'view') . '\')" title="Open equipment list">' . $transportLocation . '</a></td>
-                                                                            <td>' . $coordDisplay . '</td>
-                                                                            <td>' . intval($row['item_count']) . '</td>
-                                                                            <td>
-                                                                                <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
-                                                                                    <button type="button" class="btn btn-default btn-xs" onclick="openUatDetail(' . $uatId . ', \'view\')" title="View"><i class="fa fa-eye"></i></button>
-                                                                                    ' . ($isAdminUat ? '<button type="button" class="btn btn-warning btn-xs" onclick="openUatDetail(' . $uatId . ', \'edit\')" title="Edit"><i class="fa fa-pencil"></i></button>' : '') . '
-                                                                                    <button type="button" class="btn btn-info btn-xs" onclick="openPrintUat(' . $uatId . ')" title="Print"><i class="fa fa-print"></i></button>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>';
-                                                                            }
-                                                                        }
-                                                                    } else {
-                                                                        echo '<tr><td colspan="8" class="text-center" style="padding:20px;"><i class="fa fa-info-circle"></i> UAT table not found. Please run the database migration first.</td></tr>';
-                                                                    }
-                                                                    ?>
+<?php
+    uat_render_rows($con, isset($_POST['uat_search']) ? $_POST['uat_search'] : '', $isAdminUat);
+?>
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -244,16 +180,6 @@ if (!isset($_SESSION['role'])) {
                                     <?php include "add_modal.php"; ?>
                                     <?php include "edit_modal.php"; ?>
                                     <?php include "function.php"; ?>
-
-                                    <?php if (isset($_SESSION['new_uat'])) {
-                                        unset($_SESSION['new_uat']);
-                                    ?>
-                                        <script type="text/javascript">
-                                            $(document).ready(function() {
-                                                showToast('UAT record created successfully.', 'success');
-                                            });
-                                        </script>
-                                    <?php } ?>
 
                                     <!-- Print UAT Modal -->
                                     <div class="modal fade" id="printUatModal" tabindex="-1" role="dialog">
@@ -284,6 +210,34 @@ if (!isset($_SESSION['role'])) {
         <?php include dirname(__DIR__) . '/scripts.php'; ?>
 
         <script>
+            // Re-render the table + statistics cards in place. Called after every
+            // successful save/delete so the page never has to reload.
+            function loadUatData() {
+                var searchInput = document.getElementById('uatSearch');
+                var params = searchInput ? { search: searchInput.value } : {};
+
+                $.getJSON('../../ajax/uat_data.php', params, function (resp) {
+                    if (!resp || !resp.success) {
+                        showToast('Failed to refresh the UAT list.', 'error');
+                        return;
+                    }
+
+                    document.getElementById('uatTableBody').innerHTML = resp.rows;
+
+                    var s = resp.stats || {};
+                    if (!s.table_missing) {
+                        document.getElementById('statUatTotal').textContent = s.total;
+                        document.getElementById('statUatItems').textContent = s.items;
+                        document.getElementById('statUatLocations').textContent = s.locations;
+                    }
+
+                    showUatTable();
+                    updateUatDeleteBtn();
+                }).fail(function () {
+                    showToast('Network error while refreshing the UAT list.', 'error');
+                });
+            }
+
             function showUatTable(limit) {
                 var rows = document.querySelectorAll('#uatTable tbody tr');
                 var lb = document.getElementById('perPageSelect');
@@ -332,7 +286,7 @@ if (!isset($_SESSION['role'])) {
                 }, function(resp) {
                     if (resp.success) {
                         showToast(resp.deleted + ' UAT record(s) deleted successfully.', 'success');
-                        setTimeout(function() { location.reload(); }, 600);
+                        loadUatData();
                     } else {
                         showToast(resp.message || 'Failed to delete UAT records.', 'error');
                     }

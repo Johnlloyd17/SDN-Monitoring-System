@@ -1,52 +1,50 @@
 <?php
 require_once __DIR__ . '/../pages/auth_check.php'; require_auth_api();
+require_once __DIR__ . '/../pages/fwfa_letter/letter_rows.php';
 ?>
 <?php
+header('Content-Type: application/json; charset=utf-8');
 
-header('Content-Type: application/json');
+if (!isset($con)) { include __DIR__ . '/../pages/connection.php'; }
 
-include '../pages/connection.php';
+$module = letter_module();
+$action = isset($_GET['action']) ? (string) $_GET['action'] : '';
+$id     = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-$action = isset($_GET['action']) ? $_GET['action'] : '';
-
-if ($action === 'item' && isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $stmt = mysqli_prepare($con, "SELECT * FROM locationrequests WHERE id = ?");
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($result);
-    mysqli_stmt_close($stmt);
-
-    if ($row) {
-        echo json_encode($row);
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Item not found']);
-    }
-    exit;
+if (!in_array($action, array('item', 'photos'), true) || $id <= 0) {
+    letter_json_out(array('error' => 'Invalid action.'), 400);
 }
 
-if ($action === 'photos' && isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $stmt = mysqli_prepare($con, "SELECT * FROM tblactivityphoto WHERE activityid = ?");
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+// The photo table is shared with the activity and planned-activity modules, so
+// every request is anchored to a letter row first. Without this check a caller
+// could read or remove another module's attachment by passing its id.
+$stmt = mysqli_prepare($con, "SELECT * FROM {$module['table']} WHERE id = ?");
+mysqli_stmt_bind_param($stmt, 'i', $id);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+$row = $res ? mysqli_fetch_assoc($res) : null;
+mysqli_stmt_close($stmt);
 
-    $photos = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $filePath = "photo/" . basename($row['filename']);
-        $ext = strtolower(pathinfo($row['filename'], PATHINFO_EXTENSION));
-        $row['filepath'] = $filePath;
-        $row['type'] = $ext;
-        $photos[] = $row;
-    }
-    mysqli_stmt_close($stmt);
-
-    echo json_encode($photos);
-    exit;
+if (!$row) {
+    letter_json_out(array('error' => 'Item not found'), 404);
 }
 
-http_response_code(400);
-echo json_encode(['error' => 'Invalid action']);
+if ($action === 'item') {
+    letter_json_out($row);
+}
+
+$stmt = mysqli_prepare($con, "SELECT * FROM {$module['photos']} WHERE activityid = ? ORDER BY id ASC");
+mysqli_stmt_bind_param($stmt, 'i', $id);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+
+$photos = array();
+while ($p = mysqli_fetch_assoc($res)) {
+    $name = basename($p['filename']);
+    $p['filepath'] = 'photo/' . rawurlencode($name);
+    $p['type']     = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+    $photos[] = $p;
+}
+mysqli_stmt_close($stmt);
+
+letter_json_out($photos);

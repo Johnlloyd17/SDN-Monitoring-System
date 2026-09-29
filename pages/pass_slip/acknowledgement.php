@@ -356,6 +356,7 @@ $knownSerials = load_known_serials($con);
 
     </div>
 
-</body>
 
+<?php $sdn_asset_prefix = '../../'; include '../session_bootstrap.php'; ?>
+</body>
 </html>
