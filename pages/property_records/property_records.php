@@ -19,9 +19,15 @@ if (!isset($_SESSION['role'])) {
         <?php include('../sidebar-left.php'); ?>
 
        <aside class="right-side">
-    <section class="content-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="margin: 0;">Inventory Records</h1>
-        <div class="header-date-time" id="dateTime"></div>
+    <section class="content-header">
+        <div class="header-title">
+            <img src="../../img/property image.png" alt="Logo" class="header-logo" />
+            <div class="header-info">
+                <h3>Inventory Records</h3>
+                <p class="header-address">Equipment &amp; Asset Inventory Records</p>
+            </div>
+            <div class="header-date-time" id="dateTime"></div>
+        </div>
     </section>
     <section class="content">
         <div class="row">
@@ -55,7 +61,7 @@ if (!isset($_SESSION['role'])) {
                                     $qValue = mysqli_query($con, "SELECT SUM(CAST(REPLACE(cost, ',', '') AS DECIMAL(15,2)) * quantity) AS total FROM inventory WHERE cost IS NOT NULL AND cost != ''");
                                     $rValue = mysqli_fetch_assoc($qValue);
                                     ?>
-                                    <div class="col-md-4 col-sm-6 col-xs-12">
+                                    <div class="col-md-3 col-sm-6 col-xs-12">
                                         <a href="#" style="text-decoration:none;">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-aqua"><i class="fa fa-boxes"></i></span>
@@ -66,7 +72,7 @@ if (!isset($_SESSION['role'])) {
                                             </div>
                                         </a>
                                     </div>
-                                    <div class="col-md-4 col-sm-6 col-xs-12">
+                                    <div class="col-md-3 col-sm-6 col-xs-12">
                                         <a href="#" style="text-decoration:none;">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-green"><i class="fa fa-php"></i></span>
@@ -77,7 +83,7 @@ if (!isset($_SESSION['role'])) {
                                             </div>
                                         </a>
                                     </div>
-                                    <div class="col-md-4 col-sm-6 col-xs-12">
+                                    <div class="col-md-3 col-sm-6 col-xs-12">
                                         <a href="../pass_slip/pass_slip.php" style="text-decoration:none;">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-yellow"><i class="fa fa-hand-holding"></i></span>
@@ -88,7 +94,7 @@ if (!isset($_SESSION['role'])) {
                                             </div>
                                         </a>
                                     </div>
-                                    <div class="col-md-4 col-sm-6 col-xs-12">
+                                    <div class="col-md-3 col-sm-6 col-xs-12">
                                         <a href="../pass_slip/pass_slip.php" style="text-decoration:none;">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-red"><i class="fa fa-exclamation-triangle"></i></span>
@@ -310,18 +316,30 @@ if (!isset($_SESSION['role'])) {
                         </div>
                         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                             <input type="hidden" name="hidden_id" id="view_hidden_id" value="" />
-                            <input type="checkbox" id="viewSelectAll" /> <label>Select All</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span><input type="checkbox" id="viewSelectAll" /> <label>Select All</label></span>
+                                <button type="button" class="btn btn-danger btn-sm" id="removePhotoBtn"><i class="fa fa-trash"></i> Remove Selected</button>
+                            </div>
                             <div class="row" id="photoGrid">
                                 <div class="col-md-12 text-center text-muted">No files found.</div>
                             </div>
+                            <div id="photoUploadZone" style="margin-top:14px; border-top:1px solid #eee; padding-top:12px;">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <input name="photos[]" id="photoFileInput" class="form-control input-sm" type="file" multiple />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-primary btn-sm" id="addPhotoBtn" style="width:100%;"><i class="fa fa-plus"></i> Add</button>
+                                    </div>
+                                </div>
+                                <div id="photoPendingWrap" style="display:none; margin-top:10px;">
+                                    <div class="modal-section-header"><i class="fa fa-cloud-upload"></i> Ready to Upload</div>
+                                    <div class="row" id="photoPendingGrid"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
-                            <div class="col-md-6 text-left">
-                                <input name="photos[]" id="photoFileInput" class="form-control input-sm" type="file" multiple />
-                            </div>
-                            <button type="button" class="btn btn-primary btn-sm" id="addPhotoBtn"><i class="fa fa-plus"></i> Add</button>
-                            <button type="button" class="btn btn-danger btn-sm" id="removePhotoBtn"><i class="fa fa-trash"></i> Remove Selected</button>
-                            <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                          
                         </div>
                     </div>
                 </div>
@@ -401,6 +419,176 @@ if (!isset($_SESSION['role'])) {
             </div>
         </div>
 
+        <!-- ========================= GROUPED ITEMS MODAL ======================= -->
+        <div id="groupModal" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-sdm-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <span><i class="fa fa-th-list"></i> Group &mdash; <span id="groupTitle"></span></span>
+                            <button type="button" class="btn btn-xs <?php echo $_SESSION['role'] === 'staff' ? 'btn-default' : 'btn-primary'; ?>" id="groupEditDetailsBtn"><i class="fa <?php echo $_SESSION['role'] === 'staff' ? 'fa-lock' : 'fa-pencil'; ?>"></i> <?php echo $_SESSION['role'] === 'staff' ? 'Group Details' : 'Edit Group Details'; ?></button>
+                            <small id="groupCount" class="text-muted"></small>
+                        </h4>
+                    </div>
+                    <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                        <div id="groupAlert" style="display:none;"></div>
+
+                        <!-- Add unit -->
+                        <?php if ($_SESSION['role'] !== 'staff') { ?>
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><i class="fa fa-plus"></i> Add Unit &mdash; shared fields are carried over automatically</div>
+                            <div class="panel-body">
+                                <div id="groupAddSection">
+                                    <div class="row">
+                                        <div class="col-md-2 form-group"><label>Quantity:</label><input type="number" name="ga_qty" id="ga_qty" class="form-control input-sm" value="1" min="1" /></div>
+                                        <div class="col-md-5 form-group"><label>Serial Number:</label><input type="text" name="ga_serial" id="ga_serial" class="form-control input-sm" placeholder="Serial Number" /></div>
+                                        <div class="col-md-2 form-group"><label>Date Acquired:</label><input type="date" name="ga_date" id="ga_date" class="form-control input-sm" /></div>
+                                        <div class="col-md-3 form-group"><label>Assigned / Deployed:</label><input type="text" name="ga_assigned" id="ga_assigned" class="form-control input-sm" placeholder="Who/where it is deployed (blank = unassigned)" /></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 form-group"><label>Remarks:</label><input type="text" name="ga_remarks" id="ga_remarks" class="form-control input-sm" placeholder="Remarks" /></div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button type="button" class="btn btn-success btn-sm" id="groupAddBtn"><i class="fa fa-plus"></i> Add Unit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php } ?>
+
+                        <!-- Group metrics -->
+                        <div class="row" style="margin-bottom:8px;">
+                            <div class="col-md-3 col-sm-6 col-xs-12">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-aqua"><i class="fa fa-boxes"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Total Units</span>
+                                        <span class="info-box-number" id="gMetricUnits">&ndash;</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-green"><i class="fa fa-user"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Deployed / Assigned</span>
+                                        <span class="info-box-number" id="gMetricDeployed">&ndash;</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-yellow"><i class="fa fa-inbox"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Unassigned</span>
+                                        <span class="info-box-number" id="gMetricUnassigned">&ndash;</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-red"><i class="fa fa-php"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Total Asset Value</span>
+                                        <span class="info-box-number" id="gMetricValue">&ndash;</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Existing units -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <span><i class="fa fa-list"></i> Existing Units</span>
+                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    <?php if ($_SESSION['role'] !== 'staff') { ?>
+                                    <button class="btn btn-danger btn-xs" id="groupDeleteSelectedBtn" disabled><i class="fa fa-trash"></i> Delete Selected</button>
+                                    <?php } ?>
+                                    <div class="input-group input-group-sm" style="width:220px;">
+                                        <input type="text" id="groupSerialSearch" class="form-control" placeholder="Search serial no..." autocomplete="off" />
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" id="groupSerialClear" title="Clear"><i class="fa fa-times"></i></button>
+                                        </span>
+                                    </div>
+                                    <select id="groupStatusFilter" class="form-control input-sm" style="width:150px;">
+                                        <option value="all">Status: All</option>
+                                        <option value="deployed">Deployed / Assigned</option>
+                                        <option value="unassigned">Unassigned</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="panel-body" style="padding:0;">
+                                <div style="max-height:240px; overflow-y:auto;">
+                                    <table class="table table-bordered table-striped" style="margin-bottom:0;">
+                                        <thead>
+                                            <tr>
+                                                <?php if ($_SESSION['role'] !== 'staff') { ?>
+                                                <th style="width:30px;"><input type="checkbox" id="cbxGroupMain" /></th>
+                                                <?php } ?>
+                                                <th style="width:40px;">#</th>
+                                                <th>Serial Number</th>
+                                                <th>Date Acquired</th>
+                                                <th>Assigned / Deployed</th>
+                                                <th>Remarks</th>
+                                                <th style="width:90px;">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="groupMembersBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================= GROUP DETAILS EDIT MODAL ======================= -->
+        <?php
+        $sharedFieldDefs = array(
+            array('Project', 'gSharedProject'),
+            array('Item No.', 'gSharedItem'),
+            array('Unit Cost', 'gSharedCost'),
+            array('Est. Useful Life', 'gSharedLife'),
+            array('Received From', 'gSharedReceived'),
+            array('Inventory Item No.', 'gSharedInvNo'),
+        );
+        ?>
+        <div id="groupEditModal" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-sdm-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title"><i class="fa <?php echo $_SESSION['role'] === 'staff' ? 'fa-lock' : 'fa-pencil'; ?>"></i> Group Details &mdash; <span id="groupEditTitle"></span></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="groupEditAlert" style="display:none;"></div>
+                        <div class="row">
+                            <?php foreach ($sharedFieldDefs as $sharedFieldDef) { ?>
+                            <div class="col-md-4">
+                                <?php if ($_SESSION['role'] !== 'staff') { ?>
+                                <div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label><input type="text" class="form-control input-sm" id="<?php echo $sharedFieldDef[1]; ?>" placeholder="<?php echo $sharedFieldDef[0]; ?>" /></div>
+                                <?php } else { ?>
+                                <div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label><div class="form-control-static" id="<?php echo $sharedFieldDef[1]; ?>">&ndash;</div></div>
+                                <?php } ?>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+                        <?php if ($_SESSION['role'] !== 'staff') { ?>
+                        <button type="button" class="btn btn-primary btn-sm" id="groupSaveSharedBtn"><i class="fa fa-save"></i> Save Changes</button>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div id="ajaxToast" class="alert" style="position:fixed; top:1em; right:1em; z-index:9999; display:none; min-width:250px;"></div>
 
@@ -423,7 +611,11 @@ if (!isset($_SESSION['role'])) {
             table th { white-space: normal; text-align: center; word-wrap: break-word; overflow-wrap: break-word; max-width: 200px; }
             table td { white-space: nowrap; text-align: center; vertical-align: middle; }
             table th, table td { padding: 8px; border: 1px solid #ddd; }
-            .header-title { display: flex; align-items: center; justify-content: space-between; }
+            .header-title { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+            .header-logo { height: 60px; width: auto; margin-right: 10px; }
+            .header-info { display: flex; flex-direction: column; }
+            .header-info h3 { margin: 0; font-weight: 600; }
+            .header-address { margin: 0; font-size: 14px; color: #555; }
             .header-date-time { font-size: 16px; color: #555; margin-left: auto; }
             .file-item {
                 position: relative; text-align: center; margin-bottom: 15px;
@@ -454,6 +646,14 @@ if (!isset($_SESSION['role'])) {
             .download-btn i { font-size: 14px; vertical-align: middle; }
             .file-item input[type="checkbox"] { position: absolute; top: 10px; left: 10px; z-index: 10; }
             .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; z-index: 10; }
+            .cell-group { cursor: pointer; }
+            .cell-group:hover { background-color: #dce6f0; }
+            tr.group-highlight td { background-color: #ffe082 !important; }
+            tr.group-summary-row td { background-color: #f4f8fb; border-top: 2px solid #cfd8e3; }
+            tr.group-summary-row td:first-child { background-color: #e8f0f8; }
+            tr.group-summary-row .fa-cubes { color: #2c6fad; margin-right: 6px; }
+            tr.group-summary-row .text-bold { font-weight: 700; color: #2c6fad; }
+            tr.group-summary-row .group-badge { font-weight: 400; cursor: pointer; }
         </style>
 
         <script>
@@ -463,6 +663,12 @@ if (!isset($_SESSION['role'])) {
             var perPage = 5;
             var totalPages = 1;
             var searchTimeout = null;
+            var USER_ROLE = <?php echo json_encode($_SESSION['role'] ?? ''); ?>;
+            var CAN_ADD_UNIT = USER_ROLE !== 'staff';
+            var currentGroup = { desc: '', unit: '', archetypeId: 0, count: 0, members: [] };
+            var lastRows = [];
+            var groupDeleteIds = [];
+            var GROUP_COLSPAN = <?php echo $_SESSION['role'] === 'staff' ? 6 : 7; ?>;
             function getFilters() {
                 return {
                     project: document.getElementById('projectSelect').value,
@@ -531,34 +737,67 @@ if (!isset($_SESSION['role'])) {
                     return;
                 }
                 var html = '';
+                lastRows = rows;
                 rows.forEach(function(row) {
                     var id = parseInt(row.id);
-                    html += '<tr>' +
-                        '<td><input type="checkbox" class="chk_delete" data-id="' + id + '" /></td>' +
-                        '<td>' + row.row_num + '</td>' +
-                        '<td>' + escHtml(row.project) + '</td>' +
-                        '<td>' + escHtml(row.item) + '</td>' +
-                        '<td>' + escHtml(row.quantity) + '</td>' +
-                        '<td>' + escHtml(row.unit) + '</td>' +
-                        '<td>' + escHtml(row.description) + '</td>' +
-                        '<td>' + escHtml(row.serial) + '</td>' +
-                        '<td>' + fmtNum(row.cost) + '</td>' +
-                        '<td>' + fmtNum(row.total_cost) + '</td>' +
-                        '<td>' + escHtml(row.date) + '</td>' +
-                        '<td>' + escHtml(row.received) + '</td>' +
-                        '<td>' + escHtml(row.inventory_item_no) + '</td>' +
-                        '<td>' + escHtml(row.assigned_to) + '</td>' +
-                        '<td>' + (row.life ? escHtml(row.life) + ' yrs' : '-') + '</td>' +
-                        '<td>' + escHtml(row.remarks) + '</td>' +
-                        '<td class="option-buttons">' +
-                            '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
-                            '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>' +
-                            '<button class="btn btn-info btn-xs viewBtn" data-id="' + id + '" data-desc="' + escHtml(row.description) + '" title="Files"><i class="fa fa-eye"></i></button>' +
-                            '<button class="btn btn-success btn-xs passSlipBtn" data-id="' + id + '" data-desc="' + escHtml(row.description) + '" title="Pass Slip History"><i class="fa fa-file-text-o"></i></button>' +
-                            '<button class="btn btn-default btn-xs printRowBtn" data-id="' + id + '" title="Print"><i class="fa fa-print"></i></button>' +
-                            '</div>' +
-                        '</td>' +
-                    '</tr>';
+                    var isGroup = parseInt(row.is_group) === 1;
+                    var ng = escHtml(row.description);
+                    var nu = escHtml(row.unit);
+                    var groupClickable = ' class="cell-group" data-id="' + id + '" data-desc="' + ng + '" data-unit="' + nu + '" title="View group"';
+                    if (isGroup) {
+                        html += '<tr class="group-summary-row">' +
+                            '<td></td>' +
+                            '<td>' + row.row_num + '</td>' +
+                            '<td>' + escHtml(row.project) + '</td>' +
+                            '<td>' + escHtml(row.item) + '</td>' +
+                            '<td class="text-bold">' + escHtml(row.quantity) + '</td>' +
+                            '<td>' + nu + '</td>' +
+                            '<td' + groupClickable + '><i class="fa fa-cubes" aria-hidden="true"></i> ' + ng + '</td>' +
+                            '<td' + groupClickable + '><span class="label label-info group-badge">' + escHtml(row.group_badge) + '</span></td>' +
+                            '<td>' + fmtNum(row.cost) + '</td>' +
+                            '<td>' + fmtNum(row.total_cost) + '</td>' +
+                            '<td>&ndash;</td>' +
+                            '<td>' + escHtml(row.received) + '</td>' +
+                            '<td>' + escHtml(row.inventory_item_no) + '</td>' +
+                            '<td>&ndash;</td>' +
+                            '<td>' + (row.life ? escHtml(row.life) + ' yrs' : '-') + '</td>' +
+                            '<td>&ndash;</td>' +
+                            '<td class="option-buttons">' +
+                                '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
+                                (CAN_ADD_UNIT
+                                    ? '<button class="btn btn-primary btn-xs groupEditShortcut" data-id="' + id + '" data-desc="' + ng + '" data-unit="' + nu + '" title="Edit Group Details"><i class="fa fa-pencil-square-o"></i></button>'
+                                    : '<button class="btn btn-default btn-xs groupEditShortcut" data-id="' + id + '" data-desc="' + ng + '" data-unit="' + nu + '" title="View Group Details"><i class="fa fa-lock"></i></button>') +
+                                '</div>' +
+                            '</td>' +
+                        '</tr>';
+                    } else {
+                        html += '<tr>' +
+                            '<td><input type="checkbox" class="chk_delete" data-id="' + id + '" /></td>' +
+                            '<td>' + row.row_num + '</td>' +
+                            '<td>' + escHtml(row.project) + '</td>' +
+                            '<td>' + escHtml(row.item) + '</td>' +
+                            '<td>' + escHtml(row.quantity) + '</td>' +
+                            '<td>' + nu + '</td>' +
+                            '<td>' + ng + '</td>' +
+                            '<td>' + escHtml(row.serial) + '</td>' +
+                            '<td>' + fmtNum(row.cost) + '</td>' +
+                            '<td>' + fmtNum(row.total_cost) + '</td>' +
+                            '<td>' + escHtml(row.date) + '</td>' +
+                            '<td>' + escHtml(row.received) + '</td>' +
+                            '<td>' + escHtml(row.inventory_item_no) + '</td>' +
+                            '<td>' + escHtml(row.assigned_to) + '</td>' +
+                            '<td>' + (row.life ? escHtml(row.life) + ' yrs' : '-') + '</td>' +
+                            '<td>' + escHtml(row.remarks) + '</td>' +
+                            '<td class="option-buttons">' +
+                                '<div style="display:flex;gap:5px;flex-wrap:wrap;">' +
+                                '<button class="btn btn-primary btn-xs editBtn" data-id="' + id + '" title="Edit"><i class="fa fa-pencil-square-o"></i></button>' +
+                                '<button class="btn btn-info btn-xs viewBtn" data-id="' + id + '" data-desc="' + ng + '" title="Files"><i class="fa fa-eye"></i></button>' +
+                                '<button class="btn btn-success btn-xs passSlipBtn" data-id="' + id + '" data-desc="' + ng + '" title="Pass Slip History"><i class="fa fa-file-text-o"></i></button>' +
+                                '<button class="btn btn-default btn-xs printRowBtn" data-id="' + id + '" title="Print"><i class="fa fa-print"></i></button>' +
+                                '</div>' +
+                            '</td>' +
+                        '</tr>';
+                    }
                 });
                 tbody.innerHTML = html;
             }
@@ -725,8 +964,10 @@ if (!isset($_SESSION['role'])) {
             });
 
             // ========== EDIT ITEM ==========
+            var isGroupContext = false;
             $(document).on('click', '.editBtn', function() {
                 var id = $(this).attr('data-id');
+                isGroupContext = $(this).attr('data-in-group') === '1';
                 $.getJSON(basePath + 'inventory_get_item.php?action=item&id=' + id, function(item) {
                     $('#edit_hidden_id').val(item.id);
                     $('#edit_project').val(item.project);
@@ -772,9 +1013,12 @@ if (!isset($_SESSION['role'])) {
                     dataType: 'json',
                     success: function(res) {
                         if (res.success) {
+                            var groupEdit = isGroupContext;
+                            isGroupContext = false;
                             $('#editModal').modal('hide');
                             showToast('Item updated successfully!', 'success');
                             loadData(currentPage);
+                            if (groupEdit) refreshCurrentGroup();
                         } else {
                             $('#editAlert').html('<div class="alert alert-danger">' + escHtml(res.error) + '</div>').show();
                         }
@@ -787,6 +1031,10 @@ if (!isset($_SESSION['role'])) {
                         btn.value = 'Save';
                     }
                 });
+            });
+
+            $('#editModal').on('hidden.bs.modal', function() {
+                isGroupContext = false;
             });
 
             // ========== VIEW PHOTOS ==========
@@ -897,19 +1145,80 @@ if (!isset($_SESSION['role'])) {
                 document.querySelectorAll('.photoChk').forEach(function(cb) { cb.checked = c; });
             });
 
+            var pendingPhotos = [];
+            function pendingPreviewHtml(file, i) {
+                var ext = (file.name.split('.').pop() || '').toLowerCase();
+                var preview;
+                if (['jpg','jpeg','png','gif','webp','bmp'].indexOf(ext) >= 0) {
+                    if (!file._url) file._url = URL.createObjectURL(file);
+                    preview = '<img src="' + file._url + '" alt="" class="file-thumbnail" style="object-fit:cover;" />';
+                } else if (ext === 'pdf') {
+                    preview = '<div class="file-thumbnail-pdf"><i class="fa fa-file-pdf-o" style="font-size:44px; color:#e74c3c;"></i></div>';
+                } else if (['doc','docx','xls','xlsx','ppt','pptx'].indexOf(ext) >= 0) {
+                    var icon = 'fa-file-word-o';
+                    if (['doc','docx'].indexOf(ext) !== -1) icon = 'fa-file-word-o';
+                    else if (['xls','xlsx'].indexOf(ext) !== -1) icon = 'fa-file-excel-o';
+                    else icon = 'fa-file-powerpoint-o';
+                    preview = '<div class="file-thumbnail-office" style="font-size:44px; color:#2c6fad;"><i class="fa ' + icon + '"></i></div>';
+                } else {
+                    preview = '<div class="file-thumbnail" style="font-size:44px; color:#999;"><i class="fa fa-file-o"></i></div>';
+                }
+                return '<div class="col-md-4">' +
+                    '<div class="file-item">' +
+                    '<button type="button" class="btn btn-danger btn-xs pendingRemoveBtn" data-idx="' + i + '" title="Remove from upload" style="position:absolute; top:4px; right:4px; z-index:5;"><i class="fa fa-times"></i></button>' +
+                    preview +
+                    '<div class="file-info"><span class="filename">' + escHtml(file.name) + '</span></div>' +
+                    '</div></div>';
+            }
+            function renderPending() {
+                var grid = document.getElementById('photoPendingGrid');
+                var wrap = document.getElementById('photoPendingWrap');
+                if (!grid || !wrap) return;
+                if (pendingPhotos.length === 0) {
+                    wrap.style.display = 'none';
+                    grid.innerHTML = '';
+                    return;
+                }
+                var html = '';
+                pendingPhotos.forEach(function(f, i) { html += pendingPreviewHtml(f, i); });
+                grid.innerHTML = html;
+                wrap.style.display = '';
+            }
+            function clearPending() {
+                pendingPhotos.forEach(function(f) { if (f._url) URL.revokeObjectURL(f._url); delete f._url; });
+                pendingPhotos = [];
+                renderPending();
+            }
+            $(document).on('click', '.pendingRemoveBtn', function() {
+                var i = parseInt($(this).attr('data-idx'));
+                if (isNaN(i)) return;
+                if (pendingPhotos[i] && pendingPhotos[i]._url) { URL.revokeObjectURL(pendingPhotos[i]._url); }
+                pendingPhotos.splice(i, 1);
+                renderPending();
+            });
+            $('#photoFileInput').on('change', function() {
+                if (!this.files) return;
+                for (var i = 0; i < this.files.length; i++) {
+                    var f = this.files[i];
+                    var dup = pendingPhotos.some(function(p) { return p.name === f.name && p.size === f.size && p.lastModified === f.lastModified; });
+                    if (!dup) pendingPhotos.push(f);
+                }
+                this.value = '';
+                renderPending();
+            });
             $('#addPhotoBtn').on('click', function() {
                 var inventoryId = document.getElementById('view_hidden_id').value;
-                var fileInput = document.getElementById('photoFileInput');
-                if (!fileInput.files || fileInput.files.length === 0) {
+                if (pendingPhotos.length === 0) {
                     showToast('Please select files to upload.', 'warning');
                     return;
                 }
+                var btn = document.getElementById('addPhotoBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Uploading...';
                 var fd = new FormData();
                 fd.append('action', 'add_photo');
                 fd.append('hidden_id', inventoryId);
-                for (var i = 0; i < fileInput.files.length; i++) {
-                    fd.append('photos[]', fileInput.files[i]);
-                }
+                pendingPhotos.forEach(function(f) { fd.append('photos[]', f); });
                 $.ajax({
                     url: basePath + 'inventory_crud.php',
                     type: 'POST',
@@ -918,16 +1227,27 @@ if (!isset($_SESSION['role'])) {
                     contentType: false,
                     dataType: 'json',
                     success: function(res) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-plus"></i> Add';
                         if (res.success) {
                             showToast(res.message, 'success');
+                            clearPending();
                             loadPhotos(inventoryId);
-                            fileInput.value = '';
                         } else {
                             showToast(res.error || 'Upload failed.', 'danger');
                         }
                     },
-                    error: function() { showToast('Network error.', 'danger'); }
+                    error: function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-plus"></i> Add';
+                        showToast('Network error.', 'danger');
+                    }
                 });
+            });
+            $('#viewModal').on('hidden.bs.modal', function() {
+                clearPending();
+                var fi = document.getElementById('photoFileInput');
+                if (fi) fi.value = '';
             });
 
             $('#removePhotoBtn').on('click', function() {
@@ -962,10 +1282,21 @@ if (!isset($_SESSION['role'])) {
                 $('#deleteModal').modal('show');
             });
 
-            $('#confirmDeleteBtn').on('click', function() {
-                var ids = getSelectedIds();
+$('#confirmDeleteBtn').on('click', function() {
+                var groupMode = groupDeleteIds.length > 0;
+                var ids;
                 var fd = new FormData();
-                fd.append('action', 'delete');
+                if (groupMode) {
+                    ids = groupDeleteIds;
+                    groupDeleteIds = [];
+                    fd.append('action', 'group_delete');
+                    fd.append('group_description', currentGroup.desc);
+                    fd.append('group_unit', currentGroup.unit === null ? '' : currentGroup.unit);
+                } else {
+                    ids = getSelectedIds();
+                    if (ids.length === 0) { $('#deleteModal').modal('hide'); showToast('No items selected.', 'warning'); return; }
+                    fd.append('action', 'delete');
+                }
                 ids.forEach(function(id) { fd.append('ids[]', id); });
 
                 $.ajax({
@@ -977,11 +1308,362 @@ if (!isset($_SESSION['role'])) {
                     dataType: 'json',
                     success: function(res) {
                         $('#deleteModal').modal('hide');
+                        if (!res.success) { showToast(res.error || res.message || 'Delete failed.', 'danger'); return; }
                         showToast(res.message, 'success');
+                        if (groupMode) refreshCurrentGroup();
                         loadData(currentPage);
                         loadFilters();
                     },
                     error: function() { showToast('Network error.', 'danger'); }
+                });
+            });
+
+            // ========== GROUPED ITEMS MODAL ==========
+function memberRowHtml(u, index) {
+    var chk = CAN_ADD_UNIT ? '<td><input type="checkbox" class="chk_delete_group" data-id="' + u.id + '" /></td>' : '';
+    return '<tr class="group-member-row" data-id="' + u.id + '">' +
+        chk +
+        '<td>' + index + '</td>' +
+        '<td>' + escHtml(u.serial) + '</td>' +
+        '<td>' + escHtml(u.date) + '</td>' +
+        '<td>' + escHtml(u.assigned_to) + '</td>' +
+        '<td>' + escHtml(u.remarks) + '</td>' +
+        '<td>' +
+            '<div style="display:flex;gap:4px;justify-content:center;">' +
+            (CAN_ADD_UNIT ?
+                '<button class="btn btn-primary btn-xs editBtn" data-id="' + u.id + '" data-in-group="1" title="Edit"><i class="fa fa-pencil-square-o"></i></button>'
+                : '') +
+            '<button class="btn btn-info btn-xs viewBtn" data-id="' + u.id + '" data-desc="' + escHtml(u.serial) + '" title="View Files"><i class="fa fa-eye"></i></button>' +
+            '<button class="btn btn-default btn-xs printRowBtn" data-id="' + u.id + '" title="Print sticker"><i class="fa fa-print"></i></button>' +
+            '</div>' +
+        '</td>' +
+        '</tr>';
+}
+function renderGroupMembers(highlightId) {
+                var tbody = document.getElementById('groupMembersBody');
+                var searchBox = document.getElementById('groupSerialSearch');
+                var filterText = searchBox ? searchBox.value.trim().toLowerCase() : '';
+                var statusEl = document.getElementById('groupStatusFilter');
+                var statusFilter = statusEl ? statusEl.value : 'all';
+                var cbxAll = document.getElementById('cbxGroupMain');
+                if (cbxAll) cbxAll.checked = false;
+
+    var isDeployed = function(u) {
+        var a = (u.assigned_to || '').trim().toLowerCase();
+        return a !== '' && a !== 'unassigned' && a !== '(unassigned)';
+    };
+    var all = currentGroup.members || [];
+    var visible = all.filter(function(u) {
+        if (filterText && (u.serial || '').toLowerCase().indexOf(filterText) === -1) return false;
+        if (statusFilter === 'deployed') return isDeployed(u);
+        if (statusFilter === 'unassigned') return !isDeployed(u);
+        return true;
+    });
+
+    var countText = '\u00b7 ' + currentGroup.count + ' units in this group';
+    if (visible.length !== currentGroup.count) countText += ' \u2014 ' + visible.length + ' shown';
+    document.getElementById('groupCount').textContent = countText;
+
+    if (visible.length === 0) {
+        var msg = 'No units match the current filters.';
+        if (!filterText && statusFilter === 'all') msg = 'No units in this group yet.';
+        else if (filterText && statusFilter === 'all') msg = 'No serial number matches "' + escHtml(searchBox.value.trim()) + '".';
+        else if (!filterText) msg = 'No ' + (statusFilter === 'deployed' ? 'deployed' : 'unassigned') + ' units in this group.';
+        tbody.innerHTML = '<tr><td colspan="' + GROUP_COLSPAN + '" class="text-center text-muted">' + msg + '</td></tr>';
+        updateGroupDeleteBtn();
+        return;
+    }
+    var html = '';
+    visible.forEach(function(u, i) {
+        html += memberRowHtml(u, i + 1);
+    });
+    tbody.innerHTML = html;
+    if (highlightId) {
+        var el = tbody.querySelector('tr[data-id="' + highlightId + '"]');
+        if (el) {
+            el.classList.add('group-highlight');
+            if (typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'center' });
+        }
+    }
+updateGroupDeleteBtn();
+}
+
+            function updateGroupDeleteBtn() {
+                var checked = document.querySelectorAll('.chk_delete_group:checked').length;
+                var btn = document.getElementById('groupDeleteSelectedBtn');
+                if (btn) btn.disabled = checked === 0;
+            }
+
+            $('#cbxGroupMain').on('change', function() {
+                var checked = this.checked;
+                document.querySelectorAll('.chk_delete_group').forEach(function(cb) { cb.checked = checked; });
+                updateGroupDeleteBtn();
+            });
+            $(document).on('change', '.chk_delete_group', function() {
+                var all = document.querySelectorAll('.chk_delete_group').length;
+                var checked = document.querySelectorAll('.chk_delete_group:checked').length;
+                var cbxMain = document.getElementById('cbxGroupMain');
+                if (cbxMain) cbxMain.checked = (all > 0 && all === checked);
+                updateGroupDeleteBtn();
+            });
+            $('#groupDeleteSelectedBtn').on('click', function() {
+                groupDeleteIds = [];
+                document.querySelectorAll('.chk_delete_group:checked').forEach(function(cb) {
+                    groupDeleteIds.push(cb.getAttribute('data-id'));
+                });
+                if (groupDeleteIds.length === 0) { showToast('No units selected.', 'warning'); return; }
+                $('#deleteModal').modal('show');
+            });
+
+            function resetGroupAddForm() {
+                document.getElementById('ga_serial').value = '';
+                document.getElementById('ga_date').value = '';
+                document.getElementById('ga_assigned').value = '';
+                document.getElementById('ga_remarks').value = '';
+                document.getElementById('ga_qty').value = '1';
+                document.getElementById('groupAlert').style.display = 'none';
+            }
+
+            function fillSharedFields(a) {
+                var put = function(id, display, raw) {
+                    var el = document.getElementById(id);
+                    if (!el) return;
+                    if (el.tagName === 'INPUT') el.value = raw === undefined ? display : raw;
+                    else el.textContent = display;
+                };
+                put('gSharedProject', a && a.project ? a.project : '\u2013', a && a.project ? a.project : '');
+                put('gSharedItem', a && a.item ? a.item : '\u2013', a && a.item ? a.item : '');
+                put('gSharedCost', a && a.cost ? a.cost : '\u2013', a && a.cost ? a.cost : '');
+                put('gSharedLife', a && a.life ? a.life + ' yrs' : '\u2013', a && a.life ? a.life : '');
+                put('gSharedReceived', a && a.received ? a.received : '\u2013', a && a.received ? a.received : '');
+                put('gSharedInvNo', a && a.inventory_item_no ? a.inventory_item_no : '\u2013', a && a.inventory_item_no ? a.inventory_item_no : '');
+            }
+
+            function resetGroupMetrics() {
+                ['gMetricUnits', 'gMetricDeployed', 'gMetricUnassigned', 'gMetricValue'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = '\u2013';
+                });
+            }
+
+            function updateGroupMetrics() {
+                var members = currentGroup.members || [];
+                var deployed = 0;
+                var unassigned = 0;
+                var value = 0;
+                members.forEach(function(u) {
+                    var a = String(u.assigned_to || '').trim().toLowerCase();
+                    if (a !== '' && a !== 'unassigned' && a !== '(unassigned)') deployed++;
+                    else unassigned++;
+                    var c = parseFloat(String(u.cost || '').replace(/,/g, ''));
+                    if (!isNaN(c)) {
+                        var q = parseFloat(u.quantity);
+                        if (!q && q !== 0) q = 1;
+                        value += c * q;
+                    }
+                });
+                var set = function(id, txt) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = txt;
+                };
+                set('gMetricUnits', members.length);
+                set('gMetricDeployed', deployed);
+                set('gMetricUnassigned', unassigned);
+                set('gMetricValue', 'php ' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            }
+
+            function openGroupModal(desc, unit, highlightId) {
+                currentGroup.desc = desc;
+                currentGroup.unit = unit || '';
+                currentGroup.archetypeId = highlightId ? parseInt(highlightId) : 0;
+                currentGroup.count = 0;
+                currentGroup.members = [];
+
+                document.getElementById('groupTitle').textContent = desc + (unit ? ' \u00b7 ' + unit : '');
+                document.getElementById('groupCount').textContent = '';
+                document.getElementById('groupMembersBody').innerHTML = '<tr><td colspan="5" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+                var gaSec = document.getElementById('groupAddSection'); if (gaSec) gaSec.style.display = CAN_ADD_UNIT ? '' : 'none';
+                resetGroupAddForm(); document.getElementById('groupSerialSearch').value = '';
+                var statusEl = document.getElementById('groupStatusFilter'); if (statusEl) statusEl.value = 'all';
+                resetGroupMetrics();
+ 
+                $('#groupModal').modal('show');
+                $(document).on('keyup', '#groupSerialSearch', function() {
+                    renderGroupMembers();
+                });
+                $(document).on('click', '#groupSerialClear', function() {
+                    document.getElementById('groupSerialSearch').value = '';
+                    renderGroupMembers();
+                });
+                $(document).on('change', '#groupStatusFilter', function() {
+                    renderGroupMembers();
+                });
+                var url = basePath + 'inventory_get_item.php?action=group' +
+                    '&description=' + encodeURIComponent(desc) +
+                    '&unit=' + encodeURIComponent(unit || '') +
+                    (highlightId ? '&archetype_id=' + encodeURIComponent(highlightId) : '');
+
+                $.getJSON(url, function(res) {
+                    if (currentGroup.desc !== desc) return; // stale
+                    currentGroup.count = res.count;
+                    currentGroup.members = res.members || [];
+                    fillSharedFields(res.archetype);
+                    updateGroupMetrics();
+                    renderGroupMembers(highlightId);
+                }).fail(function() {
+                    document.getElementById('groupMembersBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load group.</td></tr>';
+                });
+            }
+
+
+function refreshCurrentGroup(highlightId) {
+    if (!currentGroup.desc) return;
+    var url = basePath + 'inventory_get_item.php?action=group' +
+        '&description=' + encodeURIComponent(currentGroup.desc) +
+        '&unit=' + encodeURIComponent(currentGroup.unit || '') +
+        (currentGroup.archetypeId ? '&archetype_id=' + encodeURIComponent(currentGroup.archetypeId) : '');
+    $.getJSON(url, function(res) {
+        currentGroup.count = res.count;
+        currentGroup.members = res.members || [];
+        fillSharedFields(res.archetype);
+        updateGroupMetrics();
+        renderGroupMembers(highlightId);
+    });
+}
+            $(document).on('click', '.cell-group', function() {
+                var desc = $(this).attr('data-desc');
+                var unit = $(this).attr('data-unit');
+                var id = $(this).attr('data-id');
+                openGroupModal(desc, unit, id);
+            });
+
+            $(document).on('click', '.groupEditShortcut', function() {
+                var desc = $(this).attr('data-desc');
+                var unit = $(this).attr('data-unit');
+                var id = parseInt($(this).attr('data-id'));
+                if (!desc) return;
+                var row = null;
+                if (typeof lastRows !== 'undefined' && lastRows) {
+                    for (var i = 0; i < lastRows.length; i++) {
+                        if (lastRows[i].id == id) { row = lastRows[i]; break; }
+                    }
+                }
+                currentGroup = { desc: desc, unit: unit || '', archetypeId: id || 0, count: 0, members: [] };
+                fillSharedFields(row);
+                var t = document.getElementById('groupEditTitle');
+                if (t) t.textContent = desc + (unit ? ' \u00b7 ' + unit : '');
+                $('#groupEditModal').modal('show');
+            });
+
+       $('#groupModal').on('hidden.bs.modal', function() {
+    document.getElementById('groupMembersBody').innerHTML = '';
+    document.getElementById('groupSerialSearch').value = '';
+    var statusEl = document.getElementById('groupStatusFilter'); if (statusEl) statusEl.value = 'all';
+    resetGroupMetrics();
+    currentGroup = { desc: '', unit: '', archetypeId: 0, count: 0, members: [] };
+});
+
+            $('#groupSaveSharedBtn').on('click', function() {
+                if (!CAN_ADD_UNIT) return;
+                if (!currentGroup.desc) return;
+
+                var btn = document.getElementById('groupSaveSharedBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+                var fd = new FormData();
+                fd.append('action', 'group_update');
+                fd.append('group_description', currentGroup.desc);
+                fd.append('group_unit', currentGroup.unit);
+                fd.append('shared_project', document.getElementById('gSharedProject').value);
+                fd.append('shared_item', document.getElementById('gSharedItem').value);
+                fd.append('shared_cost', document.getElementById('gSharedCost').value);
+                fd.append('shared_life', document.getElementById('gSharedLife').value);
+                fd.append('shared_received', document.getElementById('gSharedReceived').value);
+                fd.append('shared_inv_no', document.getElementById('gSharedInvNo').value);
+
+                $.ajax({
+                    url: basePath + 'inventory_crud.php',
+                    type: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(res) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+                        if (!res.success) { showToast(res.error || res.message || 'Update failed.', 'danger'); return; }
+                        showToast(res.message, 'success');
+                        refreshCurrentGroup();
+                        loadData(currentPage);
+                        loadFilters();
+                        $('#groupEditModal').modal('hide');
+                    },
+                    error: function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-save"></i> Save Changes';
+                        showToast('Network error.', 'danger');
+                    }
+                });
+            });
+
+            $('#groupEditDetailsBtn').on('click', function() {
+                if (!currentGroup.desc) return;
+                var t = document.getElementById('groupEditTitle');
+                if (t) t.textContent = currentGroup.desc + (currentGroup.unit ? ' \u00b7 ' + currentGroup.unit : '');
+                $('#groupEditModal').modal('show');
+            });
+
+            $('#groupAddBtn').on('click', function() {
+                if (!CAN_ADD_UNIT) return;
+                if (!currentGroup.desc) return;
+
+                var btn = document.getElementById('groupAddBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
+
+                var fd = new FormData();
+                fd.append('action', 'add_unit');
+                fd.append('group_description', currentGroup.desc);
+                fd.append('group_unit', currentGroup.unit);
+                fd.append('archetype_id', currentGroup.archetypeId || 0);
+                fd.append('txt_quantity', document.getElementById('ga_qty').value);
+                fd.append('txt_serial', document.getElementById('ga_serial').value);
+                fd.append('txt_date', document.getElementById('ga_date').value);
+                fd.append('txt_assigned_to', document.getElementById('ga_assigned').value);
+                fd.append('txt_remarks', document.getElementById('ga_remarks').value);
+
+                $.ajax({
+                    url: basePath + 'inventory_crud.php',
+                    type: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.success && res.unit) {
+                            currentGroup.members.unshift(res.unit);
+                            currentGroup.count++;
+                            renderGroupMembers();
+                            resetGroupAddForm();
+                            showToast('Unit added successfully!', 'success');
+                            loadData(currentPage);
+                            loadFilters();
+                        } else {
+                            var el = document.getElementById('groupAlert');
+                            el.innerHTML = '<div class="alert alert-danger">' + escHtml(res.error) + '</div>';
+                            el.style.display = '';
+                        }
+                    },
+                    error: function() {
+                        var el = document.getElementById('groupAlert');
+                        el.innerHTML = '<div class="alert alert-danger">Network error. Please try again.</div>';
+                        el.style.display = '';
+                    },
+                    complete: function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-plus"></i> Add Unit';
+                    }
                 });
             });
 

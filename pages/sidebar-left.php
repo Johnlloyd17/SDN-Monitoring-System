@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/auth_check.php'; require_auth();
+require_once __DIR__ . '/auth_check.php';
+require_auth();
 ?>
 <?php
 
@@ -96,13 +97,13 @@ if ($_SESSION['role'] == "Administrator") {
                 <li><a href="../report/ilcdb.php"><i class="fa fa-chart-line"></i> Reports/Graphs</a></li>
             </ul>
         </li>
-   <li class="treeview">
+        <li class="treeview">
             <a href="#">
                 <i class="fa fa-archive"></i> <span>Property Management</span> <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
-                <li><a href="../property_records/classifications.php"><i class="fa fa-tags"></i> Classifications</a></li>
+             
                 <li><a href="../uat/uat.php"><i class="fa fa-file-signature"></i> UAT Management</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
             </ul>
@@ -268,31 +269,31 @@ echo '
 ';
 ?>
 <script>
-(function() {
-    document.body.classList.add('fixed');
+    (function() {
+        document.body.classList.add('fixed');
 
-    var currentPath = window.location.pathname;
-    var links = document.querySelectorAll('.sidebar-menu a');
-    for (var i = 0; i < links.length; i++) {
-        var href = links[i].getAttribute('href');
-        if (!href || href === '#') continue;
-        var linkPath;
-        try {
-            linkPath = new URL(href, window.location.href).pathname;
-        } catch (e) {
-            continue;
-        }
-        if (linkPath === currentPath) {
-            var li = links[i].closest('li');
-            if (li) li.classList.add('active');
-            var parentTreeview = links[i].closest('.treeview');
-            if (parentTreeview) {
-                parentTreeview.classList.add('active', 'menu-open');
-                var submenu = parentTreeview.querySelector('.treeview-menu');
-                if (submenu) submenu.style.display = 'block';
+        var currentPath = window.location.pathname;
+        var links = document.querySelectorAll('.sidebar-menu a');
+        for (var i = 0; i < links.length; i++) {
+            var href = links[i].getAttribute('href');
+            if (!href || href === '#') continue;
+            var linkPath;
+            try {
+                linkPath = new URL(href, window.location.href).pathname;
+            } catch (e) {
+                continue;
             }
-            break;
+            if (linkPath === currentPath) {
+                var li = links[i].closest('li');
+                if (li) li.classList.add('active');
+                var parentTreeview = links[i].closest('.treeview');
+                if (parentTreeview) {
+                    parentTreeview.classList.add('active', 'menu-open');
+                    var submenu = parentTreeview.querySelector('.treeview-menu');
+                    if (submenu) submenu.style.display = 'block';
+                }
+                break;
+            }
         }
-    }
-})();
+    })();
 </script>

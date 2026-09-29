@@ -20,9 +20,15 @@ if (!isset($_SESSION['role'])) {
             <?php include('../sidebar-left.php'); ?>
 
             <aside class="right-side">
-                <section class="content-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1 style="margin: 0;">Office Equipment Pass Slip</h1>
-                    <div class="header-date-time" id="dateTime"></div>
+                <section class="content-header">
+                    <div class="header-title">
+                        <img src="../../img/property image.png" alt="Logo" class="header-logo" />
+                        <div class="header-info">
+                            <h3>Office Equipment Pass Slip</h3>
+                            <p class="header-address">Equipment Borrowing &amp; Pass Slip Records</p>
+                        </div>
+                        <div class="header-date-time" id="dateTime"></div>
+                    </div>
                 </section>
                 <section class="content">
                     <div class="row">
@@ -1619,6 +1625,30 @@ include dirname(__DIR__) . '/scripts.php'; ?>
             border: 1px solid #ddd;
         }
 
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .header-logo {
+            height: 60px;
+            width: auto;
+            margin-right: 10px;
+        }
+        .header-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .header-info h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+        .header-address {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
         .header-date-time {
             font-size: 16px;
             color: #555;

@@ -226,6 +226,98 @@ if ($action === 'delete') {
     exit;
 }
 
+if ($action === 'group_delete') {
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'staff') {
+        echo json_encode(['success' => false, 'error' => 'Staff accounts cannot delete inventory records.']);
+        exit;
+    }
+
+    $ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+    if (!is_array($ids)) $ids = [$ids];
+
+    $groupDescription = normText($_POST['group_description'] ?? '');
+    $groupUnit = normText($_POST['group_unit'] ?? '');
+    if ($groupDescription === null) {
+        echo json_encode(['success' => false, 'error' => 'Missing group description.']);
+        exit;
+    }
+
+    $deleted = 0;
+    foreach ($ids as $rawId) {
+        $id = intval($rawId);
+        if ($id <= 0) continue;
+
+        $q = mysqli_query($con, "SELECT description, unit FROM inventory WHERE id = $id LIMIT 1");
+        $row = $q ? mysqli_fetch_assoc($q) : null;
+        if (!$row) continue;
+
+        $rowDesc = trim((string)$row['description']);
+        $rowUnit = ($row['unit'] === null || trim((string)$row['unit']) === '') ? null : trim((string)$row['unit']);
+        if ($rowDesc !== $groupDescription || $rowUnit !== $groupUnit) continue;
+
+        $itemName = $row['description'];
+        if (mysqli_query($con, "DELETE FROM inventory WHERE id = $id")) {
+            $action_log = 'Deleted Item: ' . $itemName;
+            mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
+            $deleted++;
+        }
+    }
+
+    echo json_encode(['success' => $deleted > 0, 'deleted' => $deleted, 'message' => "$deleted unit(s) deleted from group"]);
+    exit;
+}
+
+if ($action === 'group_update') {
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'staff') {
+        echo json_encode(['success' => false, 'error' => 'Staff accounts cannot modify group shared fields.']);
+        exit;
+    }
+
+    $groupDescription = normText($_POST['group_description'] ?? '');
+    $groupUnit = normText($_POST['group_unit'] ?? '');
+    if ($groupDescription === null) {
+        echo json_encode(['success' => false, 'error' => 'Missing group description.']);
+        exit;
+    }
+
+    $project = normText($_POST['shared_project'] ?? '');
+    $item = normText($_POST['shared_item'] ?? '');
+    $cost = isset($_POST['shared_cost']) ? normText(str_replace(',', '', $_POST['shared_cost'])) : null;
+    $life = normIntOrNull($_POST['shared_life'] ?? '');
+    $received = normText($_POST['shared_received'] ?? '');
+    $inventoryItemNo = normText($_POST['shared_inv_no'] ?? '');
+
+    $unitMatch = $groupUnit === null
+        ? 'unit IS NULL'
+        : 'unit = ' . sqlVal($con, $groupUnit);
+
+    $check = mysqli_query($con, "SELECT COUNT(*) c FROM inventory WHERE TRIM(description) = " . sqlVal($con, $groupDescription) . " AND $unitMatch AND (serial IS NOT NULL AND TRIM(serial) <> '')");
+    $exists = $check ? intval(mysqli_fetch_assoc($check)['c']) : 0;
+    if ($exists === 0) {
+        echo json_encode(['success' => false, 'error' => 'No serial-numbered units match this group.']);
+        exit;
+    }
+
+    $sql = "UPDATE inventory SET
+            project = " . sqlVal($con, $project) . ",
+            item = " . sqlVal($con, $item) . ",
+            cost = " . sqlVal($con, $cost) . ",
+            life = " . sqlVal($con, $life) . ",
+            received = " . sqlVal($con, $received) . ",
+            inventory_item_no = " . sqlVal($con, $inventoryItemNo) . "
+            WHERE TRIM(description) = " . sqlVal($con, $groupDescription) . " AND $unitMatch AND (serial IS NOT NULL AND TRIM(serial) <> '')";
+
+    if (mysqli_query($con, $sql)) {
+        $affected = mysqli_affected_rows($con);
+        $action_log = 'Updated group shared fields: ' . $groupDescription;
+        mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
+        echo json_encode(['success' => true, 'updated' => $affected, 'message' => "$affected unit(s) updated"]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Update failed.']);
+    }
+    exit;
+}
+
 if ($action === 'add_photo') {
     $id = intval($_POST['hidden_id'] ?? 0);
     if ($id <= 0) {
@@ -273,6 +365,95 @@ if ($action === 'remove_photos') {
     }
 
     echo json_encode(['success' => $removed > 0, 'removed' => $removed, 'message' => "$removed file(s) removed"]);
+    exit;
+}
+
+if ($action === 'add_unit') {
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'staff') {
+        echo json_encode(['success' => false, 'error' => 'Staff accounts cannot add inventory records.']);
+        exit;
+    }
+
+    $groupDescription = normText($_POST['group_description'] ?? '');
+    $groupUnit = normText($_POST['group_unit'] ?? '');
+    if ($groupDescription === null) {
+        echo json_encode(['success' => false, 'error' => 'Missing group description.']);
+        exit;
+    }
+
+    $quantity = normIntOrNull($_POST['txt_quantity'] ?? '');
+    $serial = normText($_POST['txt_serial'] ?? '');
+    $date = normDateOrNull($_POST['txt_date'] ?? '');
+    $assignedTo = normText($_POST['txt_assigned_to'] ?? '');
+    $remarks = normText($_POST['txt_remarks'] ?? '');
+
+    $filled = fieldsFilled(array($quantity, $serial, $date, $assignedTo, $remarks));
+    if (!$filled) {
+        echo json_encode(['success' => false, 'error' => 'Please fill in at least one field before saving.']);
+        exit;
+    }
+
+    $project = null;
+    $item = null;
+    $received = null;
+    $cost = null;
+    $inventoryItemNo = null;
+    $life = null;
+    $archetypeId = intval($_POST['archetype_id'] ?? 0);
+    if ($archetypeId > 0) {
+        $archStmt = mysqli_prepare($con, "SELECT project, item, received, cost, inventory_item_no, life, description, unit FROM inventory WHERE id = ?");
+        mysqli_stmt_bind_param($archStmt, 'i', $archetypeId);
+        mysqli_stmt_execute($archStmt);
+        $archResult = mysqli_stmt_get_result($archStmt);
+        $archRow = mysqli_fetch_assoc($archResult);
+        mysqli_stmt_close($archStmt);
+        if ($archRow && trim((string)$archRow['description']) === $groupDescription && trim((string)$archRow['unit']) === $groupUnit) {
+            $project = $archRow['project'];
+            $item = $archRow['item'];
+            $received = $archRow['received'];
+            $cost = $archRow['cost'];
+            $inventoryItemNo = $archRow['inventory_item_no'];
+            $life = $archRow['life'];
+        }
+    }
+
+    $serialTrimmed = $serial === null ? '' : $serial;
+    if ($serialTrimmed !== '') {
+        $checkQ = mysqli_query($con, "SELECT description FROM inventory WHERE serial_unique = '" . mysqli_real_escape_string($con, $serialTrimmed) . "' LIMIT 1");
+        if ($checkQ && ($dupRow = mysqli_fetch_assoc($checkQ))) {
+            $dupDesc = ($dupRow['description'] !== null && $dupRow['description'] !== '') ? $dupRow['description'] : 'an existing item';
+            echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to ' . $dupDesc]);
+            exit;
+        }
+    }
+
+    $action_log = 'Added Item:' . $groupDescription;
+    mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
+
+    $query = "INSERT INTO inventory (project, item, quantity, unit, description, received, inventory_item_no, assigned_to, serial, date, cost, life, remarks) VALUES (" .
+        sqlVal($con, $project) . ", " . sqlVal($con, $item) . ", " . sqlVal($con, $quantity) . ", " . sqlVal($con, $groupUnit) . ", " . sqlVal($con, $groupDescription) . ", " .
+        sqlVal($con, $received) . ", " . sqlVal($con, $inventoryItemNo) . ", " . sqlVal($con, $assignedTo) . ", " . sqlVal($con, $serial) . ", " . sqlVal($con, $date) . ", " .
+        sqlVal($con, $cost) . ", " . sqlVal($con, $life) . ", " . sqlVal($con, $remarks) . ")";
+
+    if (mysqli_query($con, $query)) {
+        $id = mysqli_insert_id($con);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Unit added successfully',
+            'unit' => array(
+                'id' => $id,
+                'quantity' => $quantity,
+                'serial' => $serial,
+                'date' => $date,
+                'assigned_to' => $assignedTo,
+                'remarks' => $remarks,
+            ),
+        ]);
+    } else if (mysqli_errno($con) === 1062) {
+        echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to another item.']);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Failed to add unit: ' . mysqli_error($con)]);
+    }
     exit;
 }
 
