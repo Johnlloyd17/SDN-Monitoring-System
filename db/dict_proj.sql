@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 10, 2026 at 06:59 AM
+-- Generation Time: Oct 05, 2026 at 12:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -107,6 +107,7 @@ CREATE TABLE `classifications` (
   `id` int(11) NOT NULL,
   `category` varchar(255) NOT NULL,
   `sub_item` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT 'active',
   `date_created` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -115,430 +116,11 @@ CREATE TABLE `classifications` (
 -- Dumping data for table `classifications`
 --
 
-INSERT INTO `classifications` (`id`, `category`, `sub_item`, `status`, `date_created`) VALUES
-(1, 'Computer Systems', 'Central Processing Unit', 'active', '2026-07-23 11:19:33'),
-(2, 'Computer Systems', 'Desktop PCs', 'active', '2026-07-23 11:19:33'),
-(3, 'Computer Systems', 'Portable/Laptop Computer', 'active', '2026-07-23 11:19:33'),
-(4, 'Computer Systems', 'Tablet PC/Handheld and Pocket PC/PDA/Smart Phone', 'active', '2026-07-23 11:19:33'),
-(5, 'Computer Systems', 'Server/Workstation/Minicomputer', 'active', '2026-07-23 11:19:33'),
-(6, 'Computer Systems', 'Mainframe', 'active', '2026-07-23 11:19:33'),
-(7, 'Peripherals', 'Digital Camera (CDD Camera)', 'active', '2026-07-23 11:19:33'),
-(8, 'Peripherals', 'Film Processor', 'active', '2026-07-23 11:19:33'),
-(9, 'Peripherals', 'Hardware Lock', 'active', '2026-07-23 11:19:33'),
-(10, 'Peripherals', 'Monitor', 'active', '2026-07-23 11:19:33'),
-(11, 'Peripherals', 'VGA Cards/Boards', 'active', '2026-07-23 11:19:33'),
-(12, 'Storage Devices', 'CD Recorder', 'active', '2026-07-23 11:19:33'),
-(13, 'Storage Devices', 'CD Tower', 'active', '2026-07-23 11:19:33'),
-(14, 'Storage Devices', 'CD Writer', 'active', '2026-07-23 11:19:33'),
-(15, 'Storage Devices', 'CD-ROM Drive/Disk', 'active', '2026-07-23 11:19:33'),
-(16, 'Storage Devices', 'Compact Flash Card', 'active', '2026-07-23 11:19:33'),
-(17, 'Storage Devices', 'Computer Tape/Cartridge', 'active', '2026-07-23 11:19:33'),
-(18, 'Storage Devices', 'Floppy Drive', 'active', '2026-07-23 11:19:33'),
-(19, 'Storage Devices', 'Hard Disk Drive (Internal/External/Portable)', 'active', '2026-07-23 11:19:33'),
-(20, 'Storage Devices', 'JAZ Drive', 'active', '2026-07-23 11:19:33'),
-(21, 'Storage Devices', 'Magneto-Optical Disk Drive', 'active', '2026-07-23 11:19:33'),
-(22, 'Storage Devices', 'Memory Stick (Standard/PRO/Duo/PRO Duo/Micro)', 'active', '2026-07-23 11:19:33'),
-(23, 'Storage Devices', 'Multimedia Card (MMC)', 'active', '2026-07-23 11:19:33'),
-(24, 'Storage Devices', 'Removable Storage Disk', 'active', '2026-07-23 11:19:33'),
-(25, 'Storage Devices', 'SCSI Drive Module', 'active', '2026-07-23 11:19:33'),
-(26, 'Storage Devices', 'Secure Digital Card (SD/miniSD/microSD/SDHC/SDXC)', 'active', '2026-07-23 11:19:33'),
-(27, 'Storage Devices', 'SmartMedia Card', 'active', '2026-07-23 11:19:33'),
-(28, 'Storage Devices', 'Solid State Drive (SSD)', 'active', '2026-07-23 11:19:33'),
-(29, 'Storage Devices', 'Tape Backup/Tape Drive', 'active', '2026-07-23 11:19:33'),
-(30, 'Storage Devices', 'Zip Drive', 'active', '2026-07-23 11:19:33'),
-(31, 'Storage Devices', 'Storage Area Network (SAN)/Network Attached Storage (NAS)', 'active', '2026-07-23 11:19:33'),
-(32, 'Storage Devices', 'USB Flash Drive', 'active', '2026-07-23 11:19:33'),
-(33, 'Printers', 'Band Printer', 'active', '2026-07-23 11:19:33'),
-(34, 'Printers', 'Barcode/POS Printer', 'active', '2026-07-23 11:19:33'),
-(35, 'Printers', 'Billboard Printer', 'active', '2026-07-23 11:19:33'),
-(36, 'Printers', 'Design Jet Printer', 'active', '2026-07-23 11:19:33'),
-(37, 'Printers', 'Digital Copy Printer', 'active', '2026-07-23 11:19:33'),
-(38, 'Printers', 'Dot Matrix Printer', 'active', '2026-07-23 11:19:33'),
-(39, 'Printers', 'Film Printer', 'active', '2026-07-23 11:19:33'),
-(40, 'Printers', 'Impact Printer', 'active', '2026-07-23 11:19:33'),
-(41, 'Printers', 'Ink Jet/Bubble Jet Printer', 'active', '2026-07-23 11:19:33'),
-(42, 'Printers', 'Large Format Printer', 'active', '2026-07-23 11:19:33'),
-(43, 'Printers', 'Laser Printer', 'active', '2026-07-23 11:19:33'),
-(44, 'Printers', 'LED Printer', 'active', '2026-07-23 11:19:33'),
-(45, 'Printers', 'Line Printer', 'active', '2026-07-23 11:19:33'),
-(46, 'Printers', 'Passbook Printer', 'active', '2026-07-23 11:19:33'),
-(47, 'Printers', 'Plotter', 'active', '2026-07-23 11:19:33'),
-(48, 'Printers', 'POS Printer', 'active', '2026-07-23 11:19:33'),
-(49, 'Printers', 'Poster Printer', 'active', '2026-07-23 11:19:33'),
-(50, 'Printers', 'Printer Server', 'active', '2026-07-23 11:19:33'),
-(51, 'Printers', 'Serial Printer', 'active', '2026-07-23 11:19:33'),
-(52, 'Printers', 'Signmaker Printer', 'active', '2026-07-23 11:19:33'),
-(53, 'Printers', 'Sticker Marker Printer', 'active', '2026-07-23 11:19:33'),
-(54, 'Printers', 'Thermal Printer', 'active', '2026-07-23 11:19:33'),
-(55, 'Cards', 'Controller Card', 'active', '2026-07-23 11:19:34'),
-(56, 'Cards', 'Enhancement Card', 'active', '2026-07-23 11:19:34'),
-(57, 'Cards', 'Expansion Card', 'active', '2026-07-23 11:19:34'),
-(58, 'Cards', 'Video/Graphics Card', 'active', '2026-07-23 11:19:34'),
-(59, 'Multimedia', 'Headphone/Earphone', 'active', '2026-07-23 11:19:34'),
-(60, 'Multimedia', 'Multimedia Kit', 'active', '2026-07-23 11:19:34'),
-(61, 'Multimedia', 'Multimedia Projector System', 'active', '2026-07-23 11:19:34'),
-(62, 'Multimedia', 'Multimedia Speaker System', 'active', '2026-07-23 11:19:34'),
-(63, 'Multimedia', 'Multimedia Storage System', 'active', '2026-07-23 11:19:34'),
-(64, 'Multimedia', 'Other Multimedia Products', 'active', '2026-07-23 11:19:34'),
-(65, 'Input/Output Device', 'Barcode Reader', 'active', '2026-07-23 11:19:34'),
-(66, 'Input/Output Device', 'CCTV/Video Camera', 'active', '2026-07-23 11:19:34'),
-(67, 'Input/Output Device', 'Digital Copier', 'active', '2026-07-23 11:19:34'),
-(68, 'Input/Output Device', 'Digitizer', 'active', '2026-07-23 11:19:34'),
-(69, 'Input/Output Device', 'Facial Scanner', 'active', '2026-07-23 11:19:34'),
-(70, 'Input/Output Device', 'Fingerprint Scanner', 'active', '2026-07-23 11:19:34'),
-(71, 'Input/Output Device', 'Image Scanner', 'active', '2026-07-23 11:19:34'),
-(72, 'Input/Output Device', 'Iris Scanner', 'active', '2026-07-23 11:19:34'),
-(73, 'Input/Output Device', 'Keyboard', 'active', '2026-07-23 11:19:34'),
-(74, 'Input/Output Device', 'Light Pen', 'active', '2026-07-23 11:19:34'),
-(75, 'Input/Output Device', 'Microphone', 'active', '2026-07-23 11:19:34'),
-(76, 'Input/Output Device', 'MIDI Keyboard/Other Digital Musical Instruments', 'active', '2026-07-23 11:19:34'),
-(77, 'Input/Output Device', 'Motion Sensor', 'active', '2026-07-23 11:19:34'),
-(78, 'Input/Output Device', 'Mouse', 'active', '2026-07-23 11:19:34'),
-(79, 'Input/Output Device', 'Palm Scanner', 'active', '2026-07-23 11:19:34'),
-(80, 'Input/Output Device', 'RFID Reader', 'active', '2026-07-23 11:19:34'),
-(81, 'Input/Output Device', '3D Scanner', 'active', '2026-07-23 11:19:34'),
-(82, 'Input/Output Device', 'Touch Screen', 'active', '2026-07-23 11:19:34'),
-(83, 'Input/Output Device', 'Web Camera', 'active', '2026-07-23 11:19:34'),
-(84, 'Power Protection System', 'Automatic Voltage Regulator', 'active', '2026-07-23 11:19:34'),
-(85, 'Power Protection System', 'Battery Charger', 'active', '2026-07-23 11:19:34'),
-(86, 'Power Protection System', 'Emergency Power Unit', 'active', '2026-07-23 11:19:34'),
-(87, 'Power Protection System', 'Programmable/Portable Data Collector', 'active', '2026-07-23 11:19:34'),
-(88, 'Power Protection System', 'Surge Protector/Suppressor', 'active', '2026-07-23 11:19:34'),
-(89, 'Power Protection System', 'Uninterruptible Power Supply System', 'active', '2026-07-23 11:19:34'),
-(90, 'System Memory Boards', 'Math Coprocessor', 'active', '2026-07-23 11:19:34'),
-(91, 'System Memory Boards', 'Memory Card', 'active', '2026-07-23 11:19:34'),
-(92, 'System Memory Boards', 'Memory Module', 'active', '2026-07-23 11:19:34'),
-(93, 'System Memory Boards', 'Memory Upgrades', 'active', '2026-07-23 11:19:34'),
-(94, 'System Memory Boards', 'SIMM/DIMM RAM', 'active', '2026-07-23 11:19:34'),
-(95, 'System Memory Boards', 'SDRAM/RDRAM/DDR3/DDR SDRAM', 'active', '2026-07-23 11:19:34'),
-(96, 'Data Communications and Networking Equipment', 'Adapters', 'active', '2026-07-23 11:19:34'),
-(97, 'Data Communications and Networking Equipment', 'Bridges', 'active', '2026-07-23 11:19:34'),
-(98, 'Data Communications and Networking Equipment', 'Echo Canceller', 'active', '2026-07-23 11:19:34'),
-(99, 'Data Communications and Networking Equipment', 'Fax Machines', 'active', '2026-07-23 11:19:34'),
-(100, 'Data Communications and Networking Equipment', 'Fax Modem/Card', 'active', '2026-07-23 11:19:34'),
-(101, 'Data Communications and Networking Equipment', 'Microwave Repeater System', 'active', '2026-07-23 11:19:34'),
-(102, 'Data Communications and Networking Equipment', 'Modem', 'active', '2026-07-23 11:19:34'),
-(103, 'Data Communications and Networking Equipment', 'Multimedia Messaging System', 'active', '2026-07-23 11:19:34'),
-(104, 'Data Communications and Networking Equipment', 'Multiplexers', 'active', '2026-07-23 11:19:34'),
-(105, 'Data Communications and Networking Equipment', 'Network Desktop', 'active', '2026-07-23 11:19:34'),
-(106, 'Data Communications and Networking Equipment', 'Network Interface Cards', 'active', '2026-07-23 11:19:34'),
-(107, 'Data Communications and Networking Equipment', 'Network PC Cards', 'active', '2026-07-23 11:19:34'),
-(108, 'Data Communications and Networking Equipment', 'Network Servers', 'active', '2026-07-23 11:19:34'),
-(109, 'Data Communications and Networking Equipment', 'Network Tools', 'active', '2026-07-23 11:19:34'),
-(110, 'Data Communications and Networking Equipment', 'PABX/Telephone System/Cellular Phones', 'active', '2026-07-23 11:19:34'),
-(111, 'Data Communications and Networking Equipment', 'Paging Systems', 'active', '2026-07-23 11:19:34'),
-(112, 'Data Communications and Networking Equipment', 'PC Telex Interface Cards', 'active', '2026-07-23 11:19:34'),
-(113, 'Data Communications and Networking Equipment', 'Remote Access Server', 'active', '2026-07-23 11:19:34'),
-(114, 'Data Communications and Networking Equipment', 'Routers', 'active', '2026-07-23 11:19:34'),
-(115, 'Data Communications and Networking Equipment', 'Repeater', 'active', '2026-07-23 11:19:34'),
-(116, 'Data Communications and Networking Equipment', 'Signaling Converter', 'active', '2026-07-23 11:19:34'),
-(117, 'Data Communications and Networking Equipment', 'Structured Cabling', 'active', '2026-07-23 11:19:34'),
-(118, 'Data Communications and Networking Equipment', 'Switches and Hubs', 'active', '2026-07-23 11:19:34'),
-(119, 'Data Communications and Networking Equipment', 'Switching System', 'active', '2026-07-23 11:19:34'),
-(120, 'Data Communications and Networking Equipment', 'Telephone Adaptor', 'active', '2026-07-23 11:19:34'),
-(121, 'Data Communications and Networking Equipment', 'Telephone Remote Control Power Controller', 'active', '2026-07-23 11:19:34'),
-(122, 'Data Communications and Networking Equipment', 'Test and Measurement System', 'active', '2026-07-23 11:19:34'),
-(123, 'Data Communications and Networking Equipment', 'Transceiver', 'active', '2026-07-23 11:19:34'),
-(124, 'Data Communications and Networking Equipment', 'Trunked Mobile Radio', 'active', '2026-07-23 11:19:34'),
-(125, 'Data Communications and Networking Equipment', 'Video Conferencing System/Kit', 'active', '2026-07-23 11:19:34'),
-(126, 'Data Communications and Networking Equipment', 'Voice Mail/Voice Messaging System', 'active', '2026-07-23 11:19:34'),
-(127, 'Data Communications and Networking Equipment', 'Wires and Cabling System', 'active', '2026-07-23 11:19:34'),
-(128, 'ICT Support Services', 'Application Service Subscription', 'active', '2026-07-23 11:19:34'),
-(129, 'ICT Support Services', 'Cloud Computing Services', 'active', '2026-07-23 11:19:34'),
-(130, 'ICT Support Services', 'Computer Facilities Management', 'active', '2026-07-23 11:19:34'),
-(131, 'ICT Support Services', 'Computer Hardware Servicing, Repair and Maintenance', 'active', '2026-07-23 11:19:34'),
-(132, 'ICT Support Services', 'Contact Center Services', 'active', '2026-07-23 11:19:34'),
-(133, 'ICT Support Services', 'Contingency Planning and Disaster Recovery Support Services', 'active', '2026-07-23 11:19:34'),
-(134, 'ICT Support Services', 'Data Conversion/Encoding', 'active', '2026-07-23 11:19:34'),
-(135, 'ICT Support Services', 'Data Processing Services', 'active', '2026-07-23 11:19:34'),
-(136, 'ICT Support Services', 'Hardware, Software and Network Evaluation', 'active', '2026-07-23 11:19:34'),
-(137, 'ICT Support Services', 'Hosting and ICT Infrastructure Provisioning Services (IaaS)', 'active', '2026-07-23 11:19:34'),
-(138, 'ICT Support Services', 'ICT Backup Storage Services', 'active', '2026-07-23 11:19:34'),
-(139, 'ICT Support Services', 'Infrastructure as a Service (IaaS)', 'active', '2026-07-23 11:19:34'),
-(140, 'ICT Support Services', 'Internet Service Provider', 'active', '2026-07-23 11:19:34'),
-(141, 'ICT Support Services', 'Multimedia and Graphics Design', 'active', '2026-07-23 11:19:34'),
-(142, 'ICT Support Services', 'Network Penetration Testing', 'active', '2026-07-23 11:19:34'),
-(143, 'ICT Support Services', 'Platform-as-a-Service (PaaS)', 'active', '2026-07-23 11:19:34'),
-(144, 'ICT Support Services', 'PKI Subscription Services', 'active', '2026-07-23 11:19:34'),
-(145, 'ICT Support Services', 'Risk/Vulnerability Assessment', 'active', '2026-07-23 11:19:34'),
-(146, 'ICT Support Services', 'Software-as-a-Service (SaaS)', 'active', '2026-07-23 11:19:34'),
-(147, 'ICT Support Services', 'Telecommunication Infrastructure Design, Installation and Testing', 'active', '2026-07-23 11:19:34'),
-(148, 'ICT Support Services', 'Total ICT Systems Solution Integration', 'active', '2026-07-23 11:19:34'),
-(149, 'ICT Consulting Services', 'Application Programming', 'active', '2026-07-23 11:19:34'),
-(150, 'ICT Consulting Services', 'Application Source Code Review', 'active', '2026-07-23 11:19:34'),
-(151, 'ICT Consulting Services', 'Application Systems Customization and Maintenance', 'active', '2026-07-23 11:19:34'),
-(152, 'ICT Consulting Services', 'Applications Systems Design and Development', 'active', '2026-07-23 11:19:34'),
-(153, 'ICT Consulting Services', 'Business Continuity Planning', 'active', '2026-07-23 11:19:34'),
-(154, 'ICT Consulting Services', 'Business Process Management (BPM)', 'active', '2026-07-23 11:19:34'),
-(155, 'ICT Consulting Services', 'Business Process Reengineering (BPR)', 'active', '2026-07-23 11:19:34'),
-(156, 'ICT Consulting Services', 'Change Management Plan Design', 'active', '2026-07-23 11:19:34'),
-(157, 'ICT Consulting Services', 'Communication Plan Design', 'active', '2026-07-23 11:19:34'),
-(158, 'ICT Consulting Services', 'E-Governance Audit', 'active', '2026-07-23 11:19:34'),
-(159, 'ICT Consulting Services', 'Enterprise Architecture Formulation', 'active', '2026-07-23 11:19:34'),
-(160, 'ICT Consulting Services', 'Formulation of Terms of Reference', 'active', '2026-07-23 11:19:34'),
-(161, 'ICT Consulting Services', 'ICT Capacity Planning', 'active', '2026-07-23 11:19:34'),
-(162, 'ICT Consulting Services', 'ICT Competency Plan Development', 'active', '2026-07-23 11:19:34'),
-(163, 'ICT Consulting Services', 'ICT Contract Management', 'active', '2026-07-23 11:19:34'),
-(164, 'ICT Consulting Services', 'ICT Course Design and Development', 'active', '2026-07-23 11:19:34'),
-(165, 'ICT Consulting Services', 'ICT Infrastructure and Network Management Services', 'active', '2026-07-23 11:19:34'),
-(166, 'ICT Consulting Services', 'ICT Infrastructure Library Management', 'active', '2026-07-23 11:19:34'),
-(167, 'ICT Consulting Services', 'ICT Management Auditing', 'active', '2026-07-23 11:19:34'),
-(168, 'ICT Consulting Services', 'ICT Organizational Design', 'active', '2026-07-23 11:19:34'),
-(169, 'ICT Consulting Services', 'ICT Policy and Standards Design', 'active', '2026-07-23 11:19:34'),
-(170, 'ICT Consulting Services', 'ICT Procurement Management', 'active', '2026-07-23 11:19:34'),
-(171, 'ICT Consulting Services', 'ICT Project Feasibility Study', 'active', '2026-07-23 11:19:34'),
-(172, 'ICT Consulting Services', 'ICT Project Management', 'active', '2026-07-23 11:19:34'),
-(173, 'ICT Consulting Services', 'ICT Quality Management System Assessment', 'active', '2026-07-23 11:19:34'),
-(174, 'ICT Consulting Services', 'ICT Recruitment and Placement', 'active', '2026-07-23 11:19:34'),
-(175, 'ICT Consulting Services', 'ICT Security Audit', 'active', '2026-07-23 11:19:34'),
-(176, 'ICT Consulting Services', 'ICT Solutions Engineering', 'active', '2026-07-23 11:19:34'),
-(177, 'ICT Consulting Services', 'ICT Training Needs Analysis', 'active', '2026-07-23 11:19:34'),
-(178, 'ICT Consulting Services', 'Information System Auditing', 'active', '2026-07-23 11:19:34'),
-(179, 'ICT Consulting Services', 'Information Systems Strategic Plan Evaluation', 'active', '2026-07-23 11:19:34'),
-(180, 'ICT Consulting Services', 'Information Systems Strategic Plan Formulation', 'active', '2026-07-23 11:19:34'),
-(181, 'ICT Consulting Services', 'Network Systems Design, Development, Installation and Testing', 'active', '2026-07-23 11:19:34'),
-(182, 'ICT Consulting Services', 'Organizational Knowledge Design and Development', 'active', '2026-07-23 11:19:34'),
-(183, 'ICT Consulting Services', 'Request for Proposal Formulation (RFP)', 'active', '2026-07-23 11:19:34'),
-(184, 'ICT Consulting Services', 'Risk Assessment and Evaluation', 'active', '2026-07-23 11:19:34'),
-(185, 'ICT Consulting Services', 'Website Design', 'active', '2026-07-23 11:19:34'),
-(186, 'ICT Consulting Services', 'Web Hosting', 'active', '2026-07-23 11:19:34'),
-(187, 'ICT Consulting Services', 'Web-Based Programming', 'active', '2026-07-23 11:19:34'),
-(189, 'Common-Use Supplies and Equipment', 'ACETATE', 'active', '2026-07-23 11:51:19'),
-(190, 'Common-Use Supplies and Equipment', 'AIR FRESHENER', 'active', '2026-07-23 11:51:19'),
-(191, 'Common-Use Supplies and Equipment', 'ALCOHOL, Ethyl, 1 Gallon', 'active', '2026-07-23 11:51:19'),
-(192, 'Common-Use Supplies and Equipment', 'ALCOHOL, Ethyl, 500ml', 'active', '2026-07-23 11:51:19'),
-(193, 'Common-Use Supplies and Equipment', 'BATTERY, dry cell, AAA', 'active', '2026-07-23 11:51:19'),
-(194, 'Common-Use Supplies and Equipment', 'BATTERY, dry Cell, size AA', 'active', '2026-07-23 11:51:19'),
-(195, 'Common-Use Supplies and Equipment', 'BINDING AND PUNCHING MACHINE, 50mm binding capacit', 'active', '2026-07-23 11:51:19'),
-(196, 'Common-Use Supplies and Equipment', 'BINDING RING/COMB, plastic, 32mm', 'active', '2026-07-23 11:51:19'),
-(197, 'Common-Use Supplies and Equipment', 'BLADE, for general purpose cutter/utility knife', 'active', '2026-07-23 11:51:19'),
-(198, 'Common-Use Supplies and Equipment', 'BROOM (Walis Ting-Ting)', 'active', '2026-07-23 11:51:19'),
-(199, 'Common-Use Supplies and Equipment', 'BROOM, Walis Tambo', 'active', '2026-07-23 11:51:19'),
-(200, 'Common-Use Supplies and Equipment', 'CALCULATOR, Compact', 'active', '2026-07-23 11:51:19'),
-(201, 'Common-Use Supplies and Equipment', 'CARBON FILM, Legal Size', 'active', '2026-07-23 11:51:19'),
-(202, 'Common-Use Supplies and Equipment', 'CARTOLINA, assorted colors', 'active', '2026-07-23 11:51:19'),
-(203, 'Common-Use Supplies and Equipment', 'CHALK, White Enamel', 'active', '2026-07-23 11:51:19'),
-(204, 'Common-Use Supplies and Equipment', 'CLEANER, toilet and urinal', 'active', '2026-07-23 11:51:19'),
-(205, 'Common-Use Supplies and Equipment', 'CLEANSER, Scouring Powder', 'active', '2026-07-23 11:51:19'),
-(206, 'Common-Use Supplies and Equipment', 'CLEARBOOK, A4', 'active', '2026-07-23 11:51:19'),
-(207, 'Common-Use Supplies and Equipment', 'CLEARBOOK, Legal size', 'active', '2026-07-23 11:51:19'),
-(208, 'Common-Use Supplies and Equipment', 'CLIP, Backfold, 19mm', 'active', '2026-07-23 11:51:19'),
-(209, 'Common-Use Supplies and Equipment', 'CLIP, Backfold, 25mm', 'active', '2026-07-23 11:51:19'),
-(210, 'Common-Use Supplies and Equipment', 'CLIP, Backfold, 32mm', 'active', '2026-07-23 11:51:19'),
-(211, 'Common-Use Supplies and Equipment', 'CLIP, Backfold, 50mm', 'active', '2026-07-23 11:51:19'),
-(212, 'Common-Use Supplies and Equipment', 'COMPUTER CONTINUOUS FORM, 1 ply, 280mm x 241mm', 'active', '2026-07-23 11:51:19'),
-(213, 'Common-Use Supplies and Equipment', 'COMPUTER CONTINUOUS FORM, 1 ply, 280mm x 378mm', 'active', '2026-07-23 11:51:19'),
-(214, 'Common-Use Supplies and Equipment', 'COMPUTER MOUSE, Wireless', 'active', '2026-07-23 11:51:19'),
-(215, 'Common-Use Supplies and Equipment', 'CORRECTION TAPE', 'active', '2026-07-23 11:51:19'),
-(216, 'Common-Use Supplies and Equipment', 'CUTTER/UTILITY KNIFE, Heavy Duty', 'active', '2026-07-23 11:51:19'),
-(217, 'Common-Use Supplies and Equipment', 'DATA FILE BOX', 'active', '2026-07-23 11:51:19'),
-(218, 'Common-Use Supplies and Equipment', 'DATA FOLDER', 'active', '2026-07-23 11:51:19'),
-(219, 'Common-Use Supplies and Equipment', 'DATER STAMP', 'active', '2026-07-23 11:51:19'),
-(220, 'Common-Use Supplies and Equipment', 'DESKTOP FOR BASIC USERS', 'active', '2026-07-23 11:51:19'),
-(221, 'Common-Use Supplies and Equipment', 'DESKTOP FOR MID-RANGE USERS', 'active', '2026-07-23 11:51:19'),
-(222, 'Common-Use Supplies and Equipment', 'DETERGENT BAR, 140g', 'active', '2026-07-23 11:51:19'),
-(223, 'Common-Use Supplies and Equipment', 'DETERGENT POWDER, all-purpose', 'active', '2026-07-23 11:51:19'),
-(224, 'Common-Use Supplies and Equipment', 'DIGITAL VOICE RECORDER', 'active', '2026-07-23 11:51:19'),
-(225, 'Common-Use Supplies and Equipment', 'DISINFECTANT SPRAY', 'active', '2026-07-23 11:51:19'),
-(226, 'Common-Use Supplies and Equipment', 'DOCUMENT CAMERA, 8 MP', 'active', '2026-07-23 11:51:19'),
-(227, 'Common-Use Supplies and Equipment', 'DRUM CART, BROTHER DR-3455, Black', 'active', '2026-07-23 11:51:19'),
-(228, 'Common-Use Supplies and Equipment', 'DUST PAN', 'active', '2026-07-23 11:51:19'),
-(229, 'Common-Use Supplies and Equipment', 'ELECTRIC FAN, Ceiling Mount, Orbit Type', 'active', '2026-07-23 11:51:19'),
-(230, 'Common-Use Supplies and Equipment', 'ELECTRIC FAN, Industrial, Ground Type', 'active', '2026-07-23 11:51:19'),
-(231, 'Common-Use Supplies and Equipment', 'ELECTRIC FAN, Stand Type', 'active', '2026-07-23 11:51:19'),
-(232, 'Common-Use Supplies and Equipment', 'ELECTRIC FAN, Wall Mount', 'active', '2026-07-23 11:51:19'),
-(233, 'Common-Use Supplies and Equipment', 'ENVELOPE, Documentary, A4', 'active', '2026-07-23 11:51:19'),
-(234, 'Common-Use Supplies and Equipment', 'ENVELOPE, Documentary, Legal', 'active', '2026-07-23 11:51:19'),
-(235, 'Common-Use Supplies and Equipment', 'ENVELOPE, Expanding, Kraft', 'active', '2026-07-23 11:51:19'),
-(236, 'Common-Use Supplies and Equipment', 'ENVELOPE, expanding, plastic', 'active', '2026-07-23 11:51:19'),
-(237, 'Common-Use Supplies and Equipment', 'ENVELOPE, Mailing', 'active', '2026-07-23 11:51:19'),
-(238, 'Common-Use Supplies and Equipment', 'ENVELOPE, Mailing with Window', 'active', '2026-07-23 11:51:19'),
-(239, 'Common-Use Supplies and Equipment', 'ENVELOPE, Mailing, White', 'active', '2026-07-23 11:51:19'),
-(240, 'Common-Use Supplies and Equipment', 'ERASER, Felt', 'active', '2026-07-23 11:51:19'),
-(241, 'Common-Use Supplies and Equipment', 'ERASER, Plastic/Rubber', 'active', '2026-07-23 11:51:19'),
-(242, 'Common-Use Supplies and Equipment', 'EXTERNAL HARD DRIVE', 'active', '2026-07-23 11:51:19'),
-(243, 'Common-Use Supplies and Equipment', 'FASTENER, metal', 'active', '2026-07-23 11:51:19'),
-(244, 'Common-Use Supplies and Equipment', 'FILE ORGANIZER', 'active', '2026-07-23 11:51:19'),
-(245, 'Common-Use Supplies and Equipment', 'FILE TAB DIVIDER, A4', 'active', '2026-07-23 11:51:19'),
-(246, 'Common-Use Supplies and Equipment', 'FILE TAB DIVIDER, legal', 'active', '2026-07-23 11:51:19'),
-(247, 'Common-Use Supplies and Equipment', 'FIRE EXTINGUISHER, dry chemical', 'active', '2026-07-23 11:51:19'),
-(248, 'Common-Use Supplies and Equipment', 'FLASH DRIVE, 64GB capacity', 'active', '2026-07-23 11:51:19'),
-(249, 'Common-Use Supplies and Equipment', 'FLOOR WAX, paste type, red', 'active', '2026-07-23 11:51:19'),
-(250, 'Common-Use Supplies and Equipment', 'FOLDER WITH TAB, A4', 'active', '2026-07-23 11:51:19'),
-(251, 'Common-Use Supplies and Equipment', 'FOLDER WITH TAB, LEGAL', 'active', '2026-07-23 11:51:19'),
-(252, 'Common-Use Supplies and Equipment', 'FOLDER, Fancy, A4', 'active', '2026-07-23 11:51:19'),
-(253, 'Common-Use Supplies and Equipment', 'FOLDER, L-type, A4', 'active', '2026-07-23 11:51:19'),
-(254, 'Common-Use Supplies and Equipment', 'FOLDER, L-type, Legal', 'active', '2026-07-23 11:51:19'),
-(255, 'Common-Use Supplies and Equipment', 'FOLDER, Morocco with Slide, Legal', 'active', '2026-07-23 11:51:19'),
-(256, 'Common-Use Supplies and Equipment', 'FOLDER, Pressboard', 'active', '2026-07-23 11:51:19'),
-(257, 'Common-Use Supplies and Equipment', 'FURNITURE CLEANER', 'active', '2026-07-23 11:51:19'),
-(258, 'Common-Use Supplies and Equipment', 'GLUE, All Purpose', 'active', '2026-07-23 11:51:19'),
-(259, 'Common-Use Supplies and Equipment', 'Glue, All-Purpose', 'active', '2026-07-23 11:51:19'),
-(260, 'Common-Use Supplies and Equipment', 'HAND SANITIZER, 500mL', 'active', '2026-07-23 11:51:19'),
-(261, 'Common-Use Supplies and Equipment', 'HAND SOAP, Liquid, 500ml', 'active', '2026-07-23 11:51:19'),
-(262, 'Common-Use Supplies and Equipment', 'HANDBOOK (RA 9184), 8th edition', 'active', '2026-07-23 11:51:19'),
-(263, 'Common-Use Supplies and Equipment', 'INDEX TAB', 'active', '2026-07-23 11:51:19'),
-(264, 'Common-Use Supplies and Equipment', 'Ink Cartridge, Canon CL-811, Colored', 'active', '2026-07-23 11:51:19'),
-(265, 'Common-Use Supplies and Equipment', 'Ink Cartridge, Canon PG-810, Black', 'active', '2026-07-23 11:51:19'),
-(266, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, EPSON C13T664100 (T6641), BLACK', 'active', '2026-07-23 11:51:19'),
-(267, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, EPSON C13T664200 (T6642), CYAN', 'active', '2026-07-23 11:51:19'),
-(268, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, EPSON C13T664300 (T6643), MAGENTA', 'active', '2026-07-23 11:51:19'),
-(269, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, EPSON C13T664400 (T6644), YELLOW', 'active', '2026-07-23 11:51:19'),
-(270, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP C2P04AA (HP62), BLACK', 'active', '2026-07-23 11:51:19'),
-(271, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP C2P06AA (HP62), TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(272, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CC640WA (HP60), BLACK', 'active', '2026-07-23 11:51:19'),
-(273, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CC643WA (HP60), TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(274, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CD888AA (HP703), TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(275, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CH561WA (HP61), BLACK', 'active', '2026-07-23 11:51:19'),
-(276, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CH562WA (HP61), TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(277, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN045AA (HP950XL), BLACK', 'active', '2026-07-23 11:51:19'),
-(278, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN046AA (HP951XL) CYAN', 'active', '2026-07-23 11:51:19'),
-(279, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN047AA (HP951XL) MAGENTA', 'active', '2026-07-23 11:51:19'),
-(280, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN048AA (HP951XL) YELLOW', 'active', '2026-07-23 11:51:19'),
-(281, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN692AA (HP704) BLACK', 'active', '2026-07-23 11:51:19'),
-(282, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CN693AA (HP704) TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(283, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CZ107AA (HP678) BLACK', 'active', '2026-07-23 11:51:19'),
-(284, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP CZ108AA (HP678) TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(285, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP F6V26AA (HP680) TRI-COLOR', 'active', '2026-07-23 11:51:19'),
-(286, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP F6V27AA (HP680) BLACK', 'active', '2026-07-23 11:51:19'),
-(287, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S51AA (HP955) CYAN ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(288, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S54AA (HP955) MAGENTA ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(289, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S57AA (HP955) YELLOW ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(290, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S60AA (HP955) BLACK ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(291, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S63AA (HP955XL) CYAN ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(292, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S66AA (HP955XL) MAGENTA', 'active', '2026-07-23 11:51:19'),
-(293, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S69AA (HP955XL) YELLOW', 'active', '2026-07-23 11:51:19'),
-(294, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP L0S72AA (HP955XL) BLACK ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(295, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP T6L89AA (HP905) CYAN ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(296, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP T6L93AA (HP905) MAGENTA ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(297, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP T6L97AA (HP905) YELLOW ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(298, 'Common-Use Supplies and Equipment', 'INK CARTRIDGE, HP T6M01AA (HP905) BLACK ORIGINAL', 'active', '2026-07-23 11:51:19'),
-(299, 'Common-Use Supplies and Equipment', 'INSECTICIDE', 'active', '2026-07-23 11:51:19'),
-(300, 'Common-Use Supplies and Equipment', 'LAPTOP, LIGHTWEIGHT', 'active', '2026-07-23 11:51:19'),
-(301, 'Common-Use Supplies and Equipment', 'LAPTOP, MID-RANGE', 'active', '2026-07-23 11:51:19'),
-(302, 'Common-Use Supplies and Equipment', 'LIGHT EMITTING DIODE (LED), Light Bulb, 7 watts', 'active', '2026-07-23 11:51:19'),
-(303, 'Common-Use Supplies and Equipment', 'LIGHT EMITTING DIODE (LED), Linear Tube, 18 watts', 'active', '2026-07-23 11:51:19'),
-(304, 'Common-Use Supplies and Equipment', 'MARKER, fluorescent', 'active', '2026-07-23 11:51:19'),
-(305, 'Common-Use Supplies and Equipment', 'MARKER, Permanent, Black', 'active', '2026-07-23 11:51:19'),
-(306, 'Common-Use Supplies and Equipment', 'MARKER, Permanent, Blue', 'active', '2026-07-23 11:51:19'),
-(307, 'Common-Use Supplies and Equipment', 'MARKER, Permanent, Red', 'active', '2026-07-23 11:51:19'),
-(308, 'Common-Use Supplies and Equipment', 'MARKER, Whiteboard, Black', 'active', '2026-07-23 11:51:19'),
-(309, 'Common-Use Supplies and Equipment', 'MARKER, Whiteboard, Blue', 'active', '2026-07-23 11:51:19'),
-(310, 'Common-Use Supplies and Equipment', 'MARKER, Whiteboard, Red', 'active', '2026-07-23 11:51:19'),
-(311, 'Common-Use Supplies and Equipment', 'MONOBLOC CHAIR, Beige', 'active', '2026-07-23 11:51:19'),
-(312, 'Common-Use Supplies and Equipment', 'MONOBLOC CHAIR, White', 'active', '2026-07-23 11:51:19'),
-(313, 'Common-Use Supplies and Equipment', 'MOP BUCKET, heavy duty, hard plastic', 'active', '2026-07-23 11:51:19'),
-(314, 'Common-Use Supplies and Equipment', 'MULTIMEDIA PROJECTOR, 4000 min', 'active', '2026-07-23 11:51:19'),
-(315, 'Common-Use Supplies and Equipment', 'NOTEPAD, Stick on, 76mm x 100mm', 'active', '2026-07-23 11:51:19'),
-(316, 'Common-Use Supplies and Equipment', 'NOTEPAD, Stick-on, 50mm x 76mm', 'active', '2026-07-23 11:51:19'),
-(317, 'Common-Use Supplies and Equipment', 'NOTEPAD, Stick-on, 76mm x 76mm', 'active', '2026-07-23 11:51:19'),
-(318, 'Common-Use Supplies and Equipment', 'PAD PAPER, ruled', 'active', '2026-07-23 11:51:19'),
-(319, 'Common-Use Supplies and Equipment', 'PAPER CLIP, vinyl/plastic coated, 33mm', 'active', '2026-07-23 11:51:19'),
-(320, 'Common-Use Supplies and Equipment', 'PAPER CLIP, Vinyl/Plastic Coated, Jumbo, 50mm', 'active', '2026-07-23 11:51:19'),
-(321, 'Common-Use Supplies and Equipment', 'PAPER SHREDDER', 'active', '2026-07-23 11:51:19'),
-(322, 'Common-Use Supplies and Equipment', 'PAPER TRIMMER/CUTTING MACHINE', 'active', '2026-07-23 11:51:19'),
-(323, 'Common-Use Supplies and Equipment', 'PAPER, Multi-Purpose, 70gsm (min.), Legal', 'active', '2026-07-23 11:51:19'),
-(324, 'Common-Use Supplies and Equipment', 'PAPER, Multi-Purpose, A4', 'active', '2026-07-23 11:51:19'),
-(325, 'Common-Use Supplies and Equipment', 'PAPER, MULTICOPY, A4', 'active', '2026-07-23 11:51:19'),
-(326, 'Common-Use Supplies and Equipment', 'PAPER, MULTICOPY, Legal', 'active', '2026-07-23 11:51:19'),
-(327, 'Common-Use Supplies and Equipment', 'PAPER, parchment', 'active', '2026-07-23 11:51:19'),
-(328, 'Common-Use Supplies and Equipment', 'PENCIL SHARPENER', 'active', '2026-07-23 11:51:19'),
-(329, 'Common-Use Supplies and Equipment', 'PENCIL, Lead/Graphite with Eraser', 'active', '2026-07-23 11:51:19'),
-(330, 'Common-Use Supplies and Equipment', 'PHILIPPINE NATIONAL FLAG', 'active', '2026-07-23 11:51:19'),
-(331, 'Common-Use Supplies and Equipment', 'PRINTER, impact, dot matrix, 24 pins, 136 columns', 'active', '2026-07-23 11:51:19'),
-(332, 'Common-Use Supplies and Equipment', 'PRINTER, Laser, Monochrome', 'active', '2026-07-23 11:51:19'),
-(333, 'Common-Use Supplies and Equipment', 'PUNCHER, Paper, Heavy Duty', 'active', '2026-07-23 11:51:19'),
-(334, 'Common-Use Supplies and Equipment', 'RAGS', 'active', '2026-07-23 11:51:19'),
-(335, 'Common-Use Supplies and Equipment', 'RECORD BOOK, 300 pages', 'active', '2026-07-23 11:51:19'),
-(336, 'Common-Use Supplies and Equipment', 'RECORD BOOK, 500 pages', 'active', '2026-07-23 11:51:19'),
-(337, 'Common-Use Supplies and Equipment', 'RIBBON CART, EPSON C13S015516 (#8750), Black', 'active', '2026-07-23 11:51:19'),
-(338, 'Common-Use Supplies and Equipment', 'RIBBON CART, EPSON C13S015632, Black', 'active', '2026-07-23 11:51:19'),
-(339, 'Common-Use Supplies and Equipment', 'RIBBON CARTRIDGE, EPSON C13S015531 (S015086)', 'active', '2026-07-23 11:51:19'),
-(340, 'Common-Use Supplies and Equipment', 'RUBBER BAND', 'active', '2026-07-23 11:51:19'),
-(341, 'Common-Use Supplies and Equipment', 'RULER, plastic, 450mm', 'active', '2026-07-23 11:51:19'),
-(342, 'Common-Use Supplies and Equipment', 'SCISSORS, Symmetrical / Asymmetrical', 'active', '2026-07-23 11:51:19'),
-(343, 'Common-Use Supplies and Equipment', 'SCOURING PAD', 'active', '2026-07-23 11:51:19'),
-(344, 'Common-Use Supplies and Equipment', 'SIGN PEN, Extra Fine Tip, Black', 'active', '2026-07-23 11:51:19'),
-(345, 'Common-Use Supplies and Equipment', 'SIGN PEN, Extra Fine Tip, Blue', 'active', '2026-07-23 11:51:19'),
-(346, 'Common-Use Supplies and Equipment', 'SIGN PEN, Extra fine tip, Red', 'active', '2026-07-23 11:51:19'),
-(347, 'Common-Use Supplies and Equipment', 'SIGN PEN, Fine Tip, Black', 'active', '2026-07-23 11:51:19'),
-(348, 'Common-Use Supplies and Equipment', 'SIGN PEN, Fine Tip, Blue', 'active', '2026-07-23 11:51:19'),
-(349, 'Common-Use Supplies and Equipment', 'SIGN PEN, Fine Tip, Red', 'active', '2026-07-23 11:51:19'),
-(350, 'Common-Use Supplies and Equipment', 'SIGN PEN, Medium Tip, Black', 'active', '2026-07-23 11:51:19'),
-(351, 'Common-Use Supplies and Equipment', 'SIGN PEN, Medium Tip, Blue', 'active', '2026-07-23 11:51:19'),
-(352, 'Common-Use Supplies and Equipment', 'SIGN PEN, Medium Tip, Red', 'active', '2026-07-23 11:51:19'),
-(353, 'Common-Use Supplies and Equipment', 'STAMP PAD, felt', 'active', '2026-07-23 11:51:19'),
-(354, 'Common-Use Supplies and Equipment', 'STAMP PAD, Ink', 'active', '2026-07-23 11:51:19'),
-(355, 'Common-Use Supplies and Equipment', 'STAPLE REMOVER, plier type', 'active', '2026-07-23 11:51:19'),
-(356, 'Common-Use Supplies and Equipment', 'STAPLE WIRE, Heavy Duty (Binder Type), 23/13', 'active', '2026-07-23 11:51:19'),
-(357, 'Common-Use Supplies and Equipment', 'STAPLE WIRE, standard', 'active', '2026-07-23 11:51:19'),
-(358, 'Common-Use Supplies and Equipment', 'STAPLER, Heavy Duty (Binder)', 'active', '2026-07-23 11:51:19'),
-(359, 'Common-Use Supplies and Equipment', 'STAPLER, Standard Type', 'active', '2026-07-23 11:51:19'),
-(360, 'Common-Use Supplies and Equipment', 'STENO NOTEBOOK', 'active', '2026-07-23 11:51:19'),
-(361, 'Common-Use Supplies and Equipment', 'TAPE DISPENSER, Table Top', 'active', '2026-07-23 11:51:19'),
-(362, 'Common-Use Supplies and Equipment', 'TAPE, electrical', 'active', '2026-07-23 11:51:19'),
-(363, 'Common-Use Supplies and Equipment', 'TAPE, Masking, 24mm', 'active', '2026-07-23 11:51:19'),
-(364, 'Common-Use Supplies and Equipment', 'TAPE, Masking, 48mm', 'active', '2026-07-23 11:51:19'),
-(365, 'Common-Use Supplies and Equipment', 'TAPE, Packaging, 48mm', 'active', '2026-07-23 11:51:19'),
-(366, 'Common-Use Supplies and Equipment', 'TAPE, Transparent, 24mm', 'active', '2026-07-23 11:51:19'),
-(367, 'Common-Use Supplies and Equipment', 'TAPE, Transparent, 48mm', 'active', '2026-07-23 11:51:19'),
-(368, 'Common-Use Supplies and Equipment', 'TISSUE, Interfolded Paper Towel', 'active', '2026-07-23 11:51:19'),
-(369, 'Common-Use Supplies and Equipment', 'TOILET TISSUE PAPER, 2 ply', 'active', '2026-07-23 11:51:19'),
-(370, 'Common-Use Supplies and Equipment', 'TONER CART,  BROTHER TN-2130, Black', 'active', '2026-07-23 11:51:19'),
-(371, 'Common-Use Supplies and Equipment', 'TONER CART,  BROTHER TN-3320, Black', 'active', '2026-07-23 11:51:19'),
-(372, 'Common-Use Supplies and Equipment', 'TONER CART,  BROTHER TN-3350, Black', 'active', '2026-07-23 11:51:19'),
-(373, 'Common-Use Supplies and Equipment', 'TONER CART, BROTHER TN-3478, Black', 'active', '2026-07-23 11:51:19'),
-(374, 'Common-Use Supplies and Equipment', 'TONER CART, HP CE400A, Black', 'active', '2026-07-23 11:51:19'),
-(375, 'Common-Use Supplies and Equipment', 'TONER CART, HP CE401A, Cyan', 'active', '2026-07-23 11:51:19'),
-(376, 'Common-Use Supplies and Equipment', 'TONER CART, HP CE402A, Yellow', 'active', '2026-07-23 11:51:19'),
-(377, 'Common-Use Supplies and Equipment', 'TONER CART, HP CE403A, Magenta', 'active', '2026-07-23 11:51:19'),
-(378, 'Common-Use Supplies and Equipment', 'TONER CART, HP Q7553A, Black', 'active', '2026-07-23 11:51:19'),
-(379, 'Common-Use Supplies and Equipment', 'TONER CART, SAMSUNG ML-D2850B, Black', 'active', '2026-07-23 11:51:19'),
-(380, 'Common-Use Supplies and Equipment', 'TONER CART, SAMSUNG MLT-D104S, Black', 'active', '2026-07-23 11:51:19'),
-(381, 'Common-Use Supplies and Equipment', 'TONER CART, SAMSUNG MLT-D108S, Black', 'active', '2026-07-23 11:51:19'),
-(382, 'Common-Use Supplies and Equipment', 'TONER CART, SAMSUNG SCX-D6555A, Black', 'active', '2026-07-23 11:51:19'),
-(383, 'Common-Use Supplies and Equipment', 'Toner Cartridge, Brother TN-456 Black, High Yield', 'active', '2026-07-23 11:51:19'),
-(384, 'Common-Use Supplies and Equipment', 'Toner Cartridge, Brother TN-456 Cyan, High Yield', 'active', '2026-07-23 11:51:19'),
-(385, 'Common-Use Supplies and Equipment', 'Toner Cartridge, Brother TN-456 Magenta, High', 'active', '2026-07-23 11:51:19'),
-(386, 'Common-Use Supplies and Equipment', 'Toner Cartridge, Brother TN-456 Yellow, High Yield', 'active', '2026-07-23 11:51:19'),
-(387, 'Common-Use Supplies and Equipment', 'Toner Cartridge, Canon CRG-324 II', 'active', '2026-07-23 11:51:19'),
-(388, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CB435A, Black', 'active', '2026-07-23 11:51:19'),
-(389, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE255A, Black', 'active', '2026-07-23 11:51:19'),
-(390, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE278A, Black', 'active', '2026-07-23 11:51:19'),
-(391, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE285A (HP85A), Black', 'active', '2026-07-23 11:51:19'),
-(392, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE310A, Black', 'active', '2026-07-23 11:51:19'),
-(393, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE311A, Cyan', 'active', '2026-07-23 11:51:19'),
-(394, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE312A, Yellow', 'active', '2026-07-23 11:51:19'),
-(395, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE313A, Magenta', 'active', '2026-07-23 11:51:19'),
-(396, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CE505A, Black', 'active', '2026-07-23 11:51:19'),
-(397, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF217A (HP17A), Black,', 'active', '2026-07-23 11:51:19'),
-(398, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF226A (HP26A), Black,', 'active', '2026-07-23 11:51:19'),
-(399, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF281A (HP81A), Black,', 'active', '2026-07-23 11:51:19'),
-(400, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF283A (HP83A), LaserJet,', 'active', '2026-07-23 11:51:19'),
-(401, 'Common-Use Supplies and Equipment', 'Toner Cartridge, HP CF283XC (HP83X) Blk Contract L', 'active', '2026-07-23 11:51:19'),
-(402, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF287A (HP87), Black', 'active', '2026-07-23 11:51:19'),
-(403, 'Common-Use Supplies and Equipment', 'Toner Cartridge, HP CF325XC (HP25X) Black LaserJet', 'active', '2026-07-23 11:51:19'),
-(404, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF350A, Black LJ', 'active', '2026-07-23 11:51:19'),
-(405, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF351A, Cyan LJ', 'active', '2026-07-23 11:51:19'),
-(406, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF352A, Yellow LJ', 'active', '2026-07-23 11:51:19'),
-(407, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF353A, Magenta LJ', 'active', '2026-07-23 11:51:19'),
-(408, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF360A (HP508A), Black', 'active', '2026-07-23 11:51:19'),
-(409, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF361A (HP508A), Cyan', 'active', '2026-07-23 11:51:19'),
-(410, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF362A (HP508A), Yellow', 'active', '2026-07-23 11:51:19'),
-(411, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF363A (HP508A), Magenta', 'active', '2026-07-23 11:51:19'),
-(412, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF400A (HP201A), Black', 'active', '2026-07-23 11:51:19'),
-(413, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF401A (HP201A), Cyan', 'active', '2026-07-23 11:51:19'),
-(414, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF402A (HP201A), Yellow', 'active', '2026-07-23 11:51:19'),
-(415, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF403A (HP201A), Magenta', 'active', '2026-07-23 11:51:19'),
-(416, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF410A (HP410A), black', 'active', '2026-07-23 11:51:19'),
-(417, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF411A (HP410A), Cyan', 'active', '2026-07-23 11:51:19'),
-(418, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF412A (HP410A), Yellow', 'active', '2026-07-23 11:51:19'),
-(419, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP CF413A (HP410A), Magenta', 'active', '2026-07-23 11:51:19'),
-(420, 'Common-Use Supplies and Equipment', 'TONER CARTRIDGE, HP Q2612A, Black', 'active', '2026-07-23 11:51:19'),
-(421, 'Common-Use Supplies and Equipment', 'TRASHBAG, XXL size', 'active', '2026-07-23 11:51:19'),
-(422, 'Common-Use Supplies and Equipment', 'TWINE, plastic', 'active', '2026-07-23 11:51:19'),
-(423, 'Common-Use Supplies and Equipment', 'WASTEBASKET', 'active', '2026-07-23 11:51:19'),
-(424, 'Common-Use Supplies and Equipment', 'WRAPPING PAPER, kraft', 'active', '2026-07-23 11:51:19');
+INSERT INTO `classifications` (`id`, `category`, `sub_item`, `description`, `status`, `date_created`) VALUES
+(425, 'Hardware', '', 'Physical devices including desktop computers, laptops, servers, tablets, mobile phones, and hardware parts', 'active', '2026-09-23 08:45:47'),
+(426, 'Peripherals and Accessories', '', 'Input and output devices such as printers, scanners, monitors, keyboards, mice, and external storage drives', 'active', '2026-09-23 08:45:47'),
+(427, 'Network and Connectivity Equipment', '', 'Data communication tools including routers, switches, modems, hubs, and communication stations/networks', 'active', '2026-09-23 08:45:47'),
+(428, 'Software and Digital Assets', '', 'Operating systems, productivity applications, computer software licenses, and databases', 'active', '2026-09-23 08:45:47');
 
 -- --------------------------------------------------------
 
@@ -588,6 +170,97 @@ INSERT INTO `cybersecurity_metrics` (`id`, `category`, `subcategory`, `year`, `t
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `employees`
+--
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `full_name`, `created_at`, `updated_at`) VALUES
+(1, 'ENGR. PEEGEE P. GUMA', '2026-09-24 01:14:35', '2026-09-24 01:14:35'),
+(2, 'ENGR. RICARDO T. BACOLOD JR.', '2026-09-24 01:14:52', '2026-09-24 01:14:52'),
+(3, 'MIKKO LUMPOT', '2026-09-24 01:15:03', '2026-09-24 01:15:03'),
+(4, 'ENGR. ECE VAN BACLAY', '2026-09-24 01:15:45', '2026-09-24 01:15:45'),
+(5, 'JOVIT LEOPOLDO', '2026-09-24 01:16:33', '2026-09-24 01:16:33'),
+(6, 'JAY RICO RECIMO', '2026-09-24 01:17:39', '2026-09-24 01:17:39');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ics`
+--
+
+CREATE TABLE `ics` (
+  `id` int(11) NOT NULL,
+  `ics_no` varchar(50) NOT NULL,
+  `date_issued` date NOT NULL,
+  `received_by` varchar(255) DEFAULT NULL,
+  `received_by_position` varchar(255) DEFAULT NULL,
+  `received_from` varchar(255) DEFAULT NULL,
+  `received_from_position` varchar(255) DEFAULT NULL,
+  `date_received` date DEFAULT NULL,
+  `total` decimal(12,2) DEFAULT 0.00,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ics`
+--
+
+INSERT INTO `ics` (`id`, `ics_no`, `date_issued`, `received_by`, `received_by_position`, `received_from`, `received_from_position`, `date_received`, `total`, `created_by`, `created_at`) VALUES
+(3, '13202609-001-1', '2026-09-14', 'MARIO P. CUNADO', 'REGIONAL DIRECTOR, CARAGA REGION', 'LAWRENCE P. SALANG', 'TECHNICAL OPERATIONS DIVISION CHIEF', NULL, 7680.00, 'dictsdn', '2026-09-14 14:53:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ics_attachments`
+--
+
+CREATE TABLE `ics_attachments` (
+  `id` int(11) NOT NULL,
+  `ics_no` varchar(50) NOT NULL,
+  `filename` varchar(255) NOT NULL,
+  `uploaded_by` varchar(255) DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ics_items`
+--
+
+CREATE TABLE `ics_items` (
+  `id` int(11) NOT NULL,
+  `ics_id` int(11) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `unit_cost` decimal(12,2) DEFAULT 0.00,
+  `date_acquired` date DEFAULT NULL,
+  `inventory_item_no` varchar(100) DEFAULT NULL,
+  `estimated_useful_life` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ics_items`
+--
+
+INSERT INTO `ics_items` (`id`, `ics_id`, `qty`, `unit`, `description`, `unit_cost`, `date_acquired`, `inventory_item_no`, `estimated_useful_life`) VALUES
+(4, 3, 1, 'unit', 'HP INK tank ALL IN ONE PRINTER', 7680.00, '2019-09-26', '13202409-099-1', '5 years');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `inventory`
 --
 
@@ -595,231 +268,105 @@ CREATE TABLE `inventory` (
   `id` int(11) NOT NULL,
   `project` varchar(255) DEFAULT NULL,
   `item` varchar(255) DEFAULT NULL,
-  `classification` varchar(255) DEFAULT NULL,
-  `item_type` enum('equipment','consumable') DEFAULT 'equipment',
   `quantity` int(11) DEFAULT NULL,
   `unit` varchar(50) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `received` varchar(255) DEFAULT NULL,
-  `property` varchar(255) DEFAULT NULL,
-  `ics` varchar(255) DEFAULT NULL,
+  `inventory_item_no` varchar(255) DEFAULT NULL,
+  `assigned_to` varchar(255) DEFAULT NULL,
   `serial` varchar(255) DEFAULT NULL,
   `date` date DEFAULT NULL,
-  `officer` varchar(255) DEFAULT NULL,
   `cost` text DEFAULT NULL,
+  `total_cost` decimal(15,2) GENERATED ALWAYS AS (if(`cost` is null or trim(`cost`) = '' or `quantity` is null,NULL,`quantity` * cast(replace(`cost`,',','') as decimal(15,2)))) STORED,
   `life` int(11) DEFAULT NULL,
-  `transferred` varchar(255) DEFAULT NULL,
   `remarks` text DEFAULT NULL,
-  `status` enum('Available','For Deployment','Deployed','Temporary Deployed','Defective','Replaced') DEFAULT 'Available'
+  `serial_unique` varchar(255) GENERATED ALWAYS AS (if(`serial` is null or trim(`serial`) = '',NULL,trim(`serial`))) STORED
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `inventory`
 --
 
-INSERT INTO `inventory` (`id`, `project`, `item`, `classification`, `item_type`, `quantity`, `unit`, `description`, `received`, `property`, `ics`, `serial`, `date`, `officer`, `cost`, `life`, `transferred`, `remarks`, `status`) VALUES
-(6429, 'FreeWifi4All', '1', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-565', '13202408-051', 'KIT303190278', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Socorro District Hospital', 'Deployed', 'Deployed'),
-(6430, 'FreeWifi4All', '2', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-566', '13202408-051', 'KIT303220804', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Socorro National High School', 'Deployed', 'Deployed'),
-(6431, 'FreeWifi4All', '3', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-567', '13202408-051', 'KIT303188903', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Salog Barangay Hall', 'Deployed', 'Deployed'),
-(6432, 'FreeWifi4All', '4', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-568', '13202408-051', 'KIT303190292', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Sohoton Cove', 'Deployed', 'Deployed'),
-(6433, 'FreeWifi4All', '5', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-569', '13202408-051', 'KIT303294613', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'CLOUD 9', 'Deployed', 'Deployed'),
-(6434, 'FreeWifi4All', '6', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-570', '13202408-051', 'KIT303220833', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'General Luna Nationa! High School', 'Deployed', 'Deployed'),
-(6435, 'FreeWifi4All', '7', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-571', '13202408-051', 'KIT303190302', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Sta. Fe Brgy. Hall', 'Deployed', 'Deployed'),
-(6436, 'FreeWifi4All', '8', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-572', '13202408-051', 'KIT303220808', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Consuelo Elementary School', 'Deployed', 'Deployed'),
-(6437, 'FreeWifi4All', '9', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-573', '13202408-051', 'KIT303189821', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Dapa New Government Center', 'Available', 'Available'),
-(6438, 'FreeWifi4All', '10', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-574', '13202408-051', 'KIT303190281', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'International Cargo Port', 'SIMC Temporary Deployed', 'Temporary Deployed'),
-(6439, 'FreeWifi4All', '11', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-575', '13202408-051', 'KIT303220818', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Bitoon Barangay Hall', 'Deployed', 'Deployed'),
-(6440, 'FreeWifi4All', '12', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-576', '13202408-051', 'KIT303189838', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Cabugao Barangay Hall', 'Deployed', 'Deployed'),
-(6441, 'FreeWifi4All', '13', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-577', '13202408-051', 'KIT303190294', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Bagakay Barangay Hall', 'Deployed', 'Deployed'),
-(6442, 'FreeWifi4All', '14', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-578', '13202408-051', 'KIT303190303', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'San Juan Barangay Hall/ Del Carmen NHS', 'Deployed', 'Deployed'),
-(6443, 'FreeWifi4All', '15', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-579', '13202408-051', 'KIT303190276', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'San Benito Elementary School', 'Deployed', 'Deployed'),
-(6444, 'FreeWifi4All', '16', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-580', '13202408-051', 'KIT303190288', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'San Benito National high School', 'Deployed', 'Deployed'),
-(6445, 'FreeWifi4All', '17', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-581', '13202408-051', 'KIT303220822', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Santa Monica Rural Health Unit', 'Deployed', 'Deployed'),
-(6446, 'FreeWifi4All', '18', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-582', '13202408-051', 'KIT303190299', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Burgos National High School', 'Deployed', 'Deployed'),
-(6447, 'FreeWifi4All', '19', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-583', '13202408-051', 'KIT303220824', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Matin.ao Barangay Hall', 'Deployed', 'Deployed'),
-(6448, 'FreeWifi4All', '20', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-584', '13202408-051', 'KIT303189827', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'San Isidro National High School', 'Deployed', 'Deployed'),
-(6449, 'FreeWifi4All', '21', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-585', '13202408-051', 'KIT303190295', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Roxas National High School', 'Deployed', 'Deployed'),
-(6450, 'FreeWifi4All', '22', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-586', '13202408-051', 'KIT303190298', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Caridad National High School', 'Deployed', 'Deployed'),
-(6451, 'FreeWifi4All', '23', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-587', '13202408-051', 'KIT303189834', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Pilar Elementary School', 'Deployed', 'Deployed'),
-(6452, 'FreeWifi4All', '24', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-588', '13202408-051', 'KIT303220918', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Consolacion Barangay Hall', 'Defective; Replaced from SDS Starlink KIT: KIT303220918', 'Available'),
-(6453, 'FreeWifi4All', '25', 'Satellite', 'equipment', 25, 'unit', 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', '', 'R132408-589', '13202408-051', 'KIT303157165', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '43,904.00', 0, 'Surigao City Public Market', 'For Deployment', 'For Deployment'),
-(6454, 'FreeWifi4All', '1', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-690', '13202408-051', 'ZAT420P010273', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Socorro District Hospital AP1', 'Deployed', 'Deployed'),
-(6455, 'FreeWifi4All', '2', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-691', '13202408-051', 'ZAT420P000615', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Salog Covered Court', 'Deployed', 'Deployed'),
-(6456, 'FreeWifi4All', '3', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-692', '13202408-051', 'ZAT420P034610', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Salog Barangay Hall', 'Deployed', 'Deployed'),
-(6457, 'FreeWifi4All', '4', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-693', '13202408-051', 'ZAT420P032444', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Salog Elementary School', 'Deployed', 'Deployed'),
-(6458, 'FreeWifi4All', '5', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-694', '13202408-051', 'ZAT420P010176', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Sohoton Cove Tourism Information Center', 'Deployed', 'Deployed'),
-(6459, 'FreeWifi4All', '6', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-695', '13202408-051', 'ZAT420P02598A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Socorro National High School AP1', 'Deployed', 'Deployed'),
-(6460, 'FreeWifi4All', '7', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-696', '13202408-051', 'ZAT420P019777', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Isidro NHS', 'Deployed', 'Deployed'),
-(6461, 'FreeWifi4All', '8', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-697', '13202408-051', 'ZAT420P03813A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Isidro ES', 'Deployed', 'Deployed'),
-(6462, 'FreeWifi4All', '9', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-698', '13202408-051', 'ZAT420P032296', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Brgy. Poblacion, Del Carmen', 'Deployed', 'Deployed'),
-(6463, 'FreeWifi4All', '10', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-699', '13202408-051', 'ZAT420P00869A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Cloud 9_Left Wing', 'Deployed', 'Deployed'),
-(6464, 'FreeWifi4All', '11', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-700', '13202408-051', 'ZAT420P04364C', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Cloud 9_Right Wing', 'Deployed', 'Deployed'),
-(6465, 'FreeWifi4All', '12', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-701', '13202408-051', 'ZAT420P001527', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'General Luna Nationa! High School AP1', 'Deployed', 'Deployed'),
-(6466, 'FreeWifi4All', '13', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-702', '13202408-051', 'ZAT420P015884', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'General Luna Nationa! High School AP2', 'Deployed', 'Deployed'),
-(6467, 'FreeWifi4All', '14', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-703', '13202408-051', 'ZAT420P017548', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'General Luna Central Elementary School', 'Deployed', 'Deployed'),
-(6468, 'FreeWifi4All', '15', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-704', '13202408-051', 'ZAT420P00891A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'General Luna Tourism Bldng.', 'Deployed', 'Deployed'),
-(6469, 'FreeWifi4All', '16', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-705', '13202408-051', 'ZAT420P009076', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Sta. Fe Brgy. Hall', 'Deployed', 'Deployed'),
-(6470, 'FreeWifi4All', '17', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-706', '13202408-051', 'ZAT420P017379', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Sta. Fe Elementary School', 'Deployed', 'Deployed'),
-(6471, 'FreeWifi4All', '18', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-707', '13202408-051', 'ZAT420P04378B', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Sta. Fe Boulevard/Children’s Park', 'Deployed', 'Deployed'),
-(6472, 'FreeWifi4All', '19', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-708', '13202408-051', 'ZAT420P014453', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consuelo National High School AP1', 'Deployed', 'Deployed'),
-(6473, 'FreeWifi4All', '20', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-709', '13202408-051', 'ZAT420P043491', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consuelo National High School AP2', 'Deployed', 'Deployed'),
-(6474, 'FreeWifi4All', '21', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-710', '13202408-051', 'ZAT42Y1004159', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consuelo Elementary School', 'Deployed', 'Deployed'),
-(6475, 'FreeWifi4All', '22', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-711', '13202408-051', 'ZAT42Y1004328', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Dapa Public Market AP1', '', 'Available'),
-(6476, 'FreeWifi4All', '23', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-712', '13202408-051', 'ZAT42Y1004404', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Dapa Passenger Area Port', '', 'Available'),
-(6477, 'FreeWifi4All', '24', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-713', '13202408-051', 'ZAT42Y100443C', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Dapa New Government Center AP1', '', 'Available'),
-(6478, 'FreeWifi4All', '25', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-714', '13202408-051', 'ZAT42Y1006772', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Dapa New Government Center AP2', '', 'Available'),
-(6479, 'FreeWifi4All', '26', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-715', '13202408-051', 'ZAT42Y102170B', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Dapa New Government Center AP3', '', 'Available'),
-(6480, 'FreeWifi4All', '27', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-716', '13202408-051', 'ZAT42Y1025371', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Surigao City Public Market', 'For Deployment', 'For Deployment'),
-(6481, 'FreeWifi4All', '28', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-717', '13202408-051', 'ZAT42Y1027816', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Surigao City Public Market', 'For Deployment', 'For Deployment'),
-(6482, 'FreeWifi4All', '29', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-718', '13202408-051', 'ZAT42Y1027837', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Surigao City Public Market', 'For Deployment', 'For Deployment'),
-(6483, 'FreeWifi4All', '30', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-719', '13202408-051', 'ZAT42Y1031466', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Bitoon Barangay Hall', 'Deployed', 'Deployed'),
-(6484, 'FreeWifi4All', '31', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-720', '13202408-051', 'ZAT420P00177A', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Bitoon Elementary School', 'Deployed', 'Deployed'),
-(6485, 'FreeWifi4All', '32', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-721', '13202408-051', 'ZAT420P002228', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Cabugao Barangay Hall', 'Deployed', 'Deployed'),
-(6486, 'FreeWifi4All', '33', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-722', '13202408-051', 'ZAT420P00250B', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Cabugao Elementary School', 'Deployed', 'Deployed'),
-(6487, 'FreeWifi4All', '34', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-723', '13202408-051', 'ZAT420P002536', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Bagakay Barangay Hall', 'Deployed', 'Deployed'),
-(6488, 'FreeWifi4All', '35', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-724', '13202408-051', 'ZAT420P040017', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Bagakay Elementary School', 'Deployed', 'Deployed'),
-(6489, 'FreeWifi4All', '36', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-725', '13202408-051', 'ZAT420P043213', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Juan ES/ Del Carmen ES', 'Deployed', 'Deployed'),
-(6490, 'FreeWifi4All', '37', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-726', '13202408-051', 'ZAT420P043234', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Sta. Cruz Brgy. Hall', 'Deployed', 'Deployed'),
-(6491, 'FreeWifi4All', '38', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-727', '13202408-051', 'ZAT420P043255', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Benito Central Elementary School', 'Deployed', 'Deployed'),
-(6492, 'FreeWifi4All', '39', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-728', '13202408-051', 'ZAT420P04345C', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Benito GYM', 'Deployed', 'Deployed'),
-(6493, 'FreeWifi4All', '40', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-729', '13202408-051', 'ZAT420P043850', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Benito National high School AP1', 'Deployed', 'Deployed'),
-(6494, 'FreeWifi4All', '41', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-730', '13202408-051', 'ZAT311U035807', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Benito National high School AP2', 'Deployed', 'Deployed'),
-(6495, 'FreeWifi4All', '42', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-731', '13202408-051', 'ZAT311U035828', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'San Benito National High School Tech4ED Center', 'Deployed', 'Deployed'),
-(6496, 'FreeWifi4All', '43', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-732', '13202408-051', 'ZAT311U035895', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Santa Monica Rural Health Unit', 'Deployed', 'Deployed'),
-(6497, 'FreeWifi4All', '44', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-733', '13202408-051', 'ZAT311U005991', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Santa Monica GYM', 'Deployed', 'Deployed'),
-(6498, 'FreeWifi4All', '45', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-734', '13202408-051', 'ZAT311U002162', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Burgos National High School', 'Deployed', 'Deployed'),
-(6499, 'FreeWifi4All', '46', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-735', '13202408-051', 'ZAT311U03569B', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Burgos Central Elem. School', 'Deployed', 'Deployed'),
-(6500, 'FreeWifi4All', '47', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-736', '13202408-051', 'ZAT420P000661', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consolacion Brgy. Hall', 'Deployed', 'Deployed'),
-(6501, 'FreeWifi4All', '48', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-737', '13202408-051', 'ZAT420P04359B', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consolacion National High School', 'Deployed', 'Deployed'),
-(6502, 'FreeWifi4All', '49', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-738', '13202408-051', 'ZAT420P043500', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Consolacion Elementary School', 'Deployed', 'Deployed'),
-(6503, 'FreeWifi4All', '50', 'Access Point', 'equipment', 50, 'unit', 'Ruijie/Reyee Model: RG-RAP2260(G)', '', 'R132408-739', '13202408-051', 'ZAR311U03593C', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '11,791.36', 0, 'Matin-ao Covered Court', 'Deployed', 'Deployed'),
-(6504, 'FreeWifi4All', '1', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-790', '13202408-051', 'ZAT42D4002890', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Socorro District Hospital', 'Deployed', 'Deployed'),
-(6505, 'FreeWifi4All', '2', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-791', '13202408-051', 'ZAT42D4000708', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Socorro National High School', 'Deployed', 'Deployed'),
-(6506, 'FreeWifi4All', '3', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-792', '13202408-051', 'ZAT42D4000805', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Salog Barangay Hall', 'Deployed', 'Deployed'),
-(6507, 'FreeWifi4All', '4', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-793', '13202408-051', 'ZAT42D4002958', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Sohoton Cove', 'Deployed', 'Deployed'),
-(6508, 'FreeWifi4All', '5', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-794', '13202408-051', 'ZAT50Y8001861', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'CLOUD 9', 'Deployed', 'Deployed'),
-(6509, 'FreeWifi4All', '6', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-795', '13202408-051', 'ZAT50Y8003664', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'General Luna Nationa! High School', 'Deployed', 'Deployed'),
-(6510, 'FreeWifi4All', '7', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-796', '13202408-051', 'ZAT50Y8000261', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Sta. Fe Brgy. Hall', 'Deployed', 'Deployed'),
-(6511, 'FreeWifi4All', '8', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-797', '13202408-051', 'H1TS60K002240', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Consuelo National High School', 'Deployed', 'Deployed'),
-(6512, 'FreeWifi4All', '9', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-798', '13202408-051', 'H1TS60K002215', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Dapa New Government Center', '', 'Available'),
-(6513, 'FreeWifi4All', '10', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-799', '13202408-051', 'H1TS60K00006A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Surigao City Public Market', 'For Deployment', 'For Deployment'),
-(6514, 'FreeWifi4All', '11', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-800', '13202408-051', 'H1TS60K00321A', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Bitoon Barangay Hall', 'Deployed', 'Deployed'),
-(6515, 'FreeWifi4All', '12', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-801', '13202408-051', 'H1TS60K00222C', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Cabugao Barangay Hall', 'Deployed', 'Deployed'),
-(6516, 'FreeWifi4All', '13', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-802', '13202408-051', 'H1TS60K003194', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Bagakay Barangay Hall', 'Deployed', 'Deployed'),
-(6517, 'FreeWifi4All', '14', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-803', '13202408-051', 'H1TS60K00241C', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'San Juan Barangay Hall / Del Carmen NHS', 'Deployed', 'Deployed'),
-(6518, 'FreeWifi4All', '15', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-804', '13202408-051', 'H1TS60K002502', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Sta. Cruz Brgy. Hall', 'Deployed', 'Deployed'),
-(6519, 'FreeWifi4All', '16', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-805', '13202408-051', 'H1TS60K001020', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'San Benito National high School', 'Deployed', 'Deployed'),
-(6520, 'FreeWifi4All', '17', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-806', '13202408-051', 'H1TS60K003173', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Santa Monica Rural Health Unit', 'Deployed', 'Deployed'),
-(6521, 'FreeWifi4All', '18', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-807', '13202408-051', 'ZAT32JE00292B', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Burgos National High School', 'Deployed', 'Deployed'),
-(6522, 'FreeWifi4All', '19', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-808', '13202408-051', 'ZAT42D400076B', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Matin.ao Barangay Hall', 'Deployed', 'Deployed'),
-(6523, 'FreeWifi4All', '20', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-809', '13202408-051', 'ZAT42D4001012', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'San Isidro National High School', 'Deployed', 'Deployed'),
-(6524, 'FreeWifi4All', '21', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-810', '13202408-051', 'ZAT50Y8002229', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Roxas National High School', 'Deployed', 'Deployed'),
-(6525, 'FreeWifi4All', '22', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-811', '13202408-051', 'ZAT507800311A', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Caridad Barangay Hall', 'Deployed', 'Deployed'),
-(6526, 'FreeWifi4All', '23', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-812', '13202408-051', 'ZAT3120003215', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Pilar National High School', 'Deployed', 'Deployed'),
-(6527, 'FreeWifi4All', '24', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-813', '13202408-051', 'ZAT42D400184C', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, 'Consolacion Barangay Hall', 'Deployed', 'Deployed'),
-(6528, 'FreeWifi4All', '25', 'Router/Switch', 'equipment', 25, 'unit', 'Ruije/Reyee Model: RG-EG310GH-P-E', '', 'R132408-814', '13202408-051', 'ZAT42D4000712', '2024-08-29', 'Engr. Ricardo T. Bacolod Jr.', '14,786.24', 0, '', '', 'Available'),
-(6529, 'FreeWifi4All', '1', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-865', '13202408-051', '6323C00211', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Socorro District Hospital', '', 'Available'),
-(6530, 'FreeWifi4All', '2', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-866', '13202408-051', '6323C00275', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Socorro National High School', '', 'Available'),
-(6531, 'FreeWifi4All', '3', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-867', '13202408-051', '6323C00221', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Salog Barangay Hall', '', 'Available'),
-(6532, 'FreeWifi4All', '4', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-868', '13202408-051', '6323C00230', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Sohoton Cove', '', 'Available'),
-(6533, 'FreeWifi4All', '5', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-869', '13202408-051', '6323C00225', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'CLOUD 9', '', 'Available'),
-(6534, 'FreeWifi4All', '6', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-870', '13202408-051', '6323C00215', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'General Luna Nationa! High School', '', 'Available'),
-(6535, 'FreeWifi4All', '7', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-871', '13202408-051', '6323C00217', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Sta. Fe Brgy. Hall', '', 'Available'),
-(6536, 'FreeWifi4All', '8', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-872', '13202408-051', '6323C00268', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Consuelo National High School', '', 'Available'),
-(6537, 'FreeWifi4All', '9', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-873', '13202408-051', '6323C00257', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Dapa New Government Center', '', 'Available'),
-(6538, 'FreeWifi4All', '10', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-874', '13202408-051', '6323C00214', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'International Cargo Port', '', 'Available'),
-(6539, 'FreeWifi4All', '11', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-875', '13202408-051', '6323C00224', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Bitoon Barangay Hall', '', 'Available'),
-(6540, 'FreeWifi4All', '12', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-876', '13202408-051', '6323C00284', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Cabugao Barangay Hall', '', 'Available'),
-(6541, 'FreeWifi4All', '13', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-877', '13202408-051', '6323C00233', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Bagakay Barangay Hall', '', 'Available'),
-(6542, 'FreeWifi4All', '14', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-878', '13202408-051', '6323C00236', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'San Juan Barangay Hall', '', 'Available'),
-(6543, 'FreeWifi4All', '15', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-879', '13202408-051', '6323C00213', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Sta. Cruz Brgy. Hall', '', 'Available'),
-(6544, 'FreeWifi4All', '16', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-880', '13202408-051', '6323C00250', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'San Benito National high School', '', 'Available'),
-(6545, 'FreeWifi4All', '17', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-881', '13202408-051', '6323C00231', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Santa Monica Rural Health Unit', '', 'Available'),
-(6546, 'FreeWifi4All', '18', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-882', '13202408-051', '6323C00258', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Burgos National High School', '', 'Available'),
-(6547, 'FreeWifi4All', '19', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-883', '13202408-051', '6323C00237', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Matin.ao Barangay Hall', '', 'Available'),
-(6548, 'FreeWifi4All', '20', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-884', '13202408-051', '6323C00220', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'San Isidro National High School', '', 'Available'),
-(6549, 'FreeWifi4All', '21', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-885', '13202408-051', '6323C00254', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Roxas National High School', '', 'Available'),
-(6550, 'FreeWifi4All', '22', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-886', '13202408-051', '6323C00276', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Caridad Barangay Hall', '', 'Available'),
-(6551, 'FreeWifi4All', '23', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-887', '13202408-051', '6323C00242', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Pilar National High School', '', 'Available'),
-(6552, 'FreeWifi4All', '24', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-888', '13202408-051', '6323C00251', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Consolacion Barangay Hall', '', 'Available'),
-(6553, 'FreeWifi4All', '25', 'UPS', 'equipment', 25, 'unit', 'Charge UPS Model: Light 1200', '', 'R132408-889', '13202408-051', '6323C00232', '2024-08-07', 'Engr. Ricardo T. Bacolod Jr.', '2,352.00', 0, 'Surigao City Boulevard', '', 'Available'),
-(6554, 'FreeWifi4All', '1', 'COMBOX', 'equipment', 20, 'unit', 'Communication Box', '', 'R132408-890', '13202408-051', 'CommBox 1', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6555, 'FreeWifi4All', '2', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-891', '13202408-051', 'CommBox 2', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6556, 'FreeWifi4All', '3', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-892', '13202408-051', 'CommBox 3', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6557, 'FreeWifi4All', '4', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-893', '13202408-051', 'CommBox 4', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6558, 'FreeWifi4All', '5', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-894', '13202408-051', 'CommBox 5', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6559, 'FreeWifi4All', '6', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-895', '13202408-051', 'CommBox 6', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6560, 'FreeWifi4All', '7', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-896', '13202408-051', 'CommBox 7', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6561, 'FreeWifi4All', '8', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-897', '13202408-051', 'CommBox 8', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6562, 'FreeWifi4All', '9', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-898', '13202408-051', 'CommBox 9', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6563, 'FreeWifi4All', '10', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-899', '13202408-051', 'CommBox 10', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6564, 'FreeWifi4All', '11', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-900', '13202408-051', 'CommBox 11', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6565, 'FreeWifi4All', '12', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-901', '13202408-051', 'CommBox 12', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6566, 'FreeWifi4All', '13', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-902', '13202408-051', 'CommBox 13', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6567, 'FreeWifi4All', '14', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-903', '13202408-051', 'CommBox 14', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6568, 'FreeWifi4All', '15', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-904', '13202408-051', 'CommBox 15', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6569, 'FreeWifi4All', '16', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-905', '13202408-051', 'CommBox 16', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6570, 'FreeWifi4All', '17', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-906', '13202408-051', 'CommBox 17', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6571, 'FreeWifi4All', '18', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-907', '13202408-051', 'CommBox 18', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6572, 'FreeWifi4All', '19', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-908', '13202408-051', 'CommBox 19', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6573, 'FreeWifi4All', '20', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-909', '13202408-051', 'CommBox 20', '2024-09-06', 'Engr. Roland P. Taganahan', '11,760.00', 0, '', '', 'Available'),
-(6574, 'FreeWifi4All', '21', 'COMBOX', 'equipment', 5, 'unit', 'Communication Box', '', 'R132408-910', '13202408-051', 'Commbox 21', '2024-09-06', 'Engr. Joe Mike G. Durac', '11,760.00', 0, '', '', 'Available'),
-(6575, 'FreeWifi4All', '22', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-911', '13202408-051', 'Commbox 22', '2024-09-06', 'Engr. Joe Mike G. Durac', '11,760.00', 0, '', '', 'Available'),
-(6576, 'FreeWifi4All', '23', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-912', '13202408-051', 'Commbox 23', '2024-09-06', 'Engr. Joe Mike G. Durac', '11,760.00', 0, '', '', 'Available'),
-(6577, 'FreeWifi4All', '24', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-913', '13202408-051', 'Commbox 24', '2024-09-06', 'Engr. Joe Mike G. Durac', '11,760.00', 0, '', '', 'Available'),
-(6578, 'FreeWifi4All', '25', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-914', '13202408-051', 'Commbox 25', '2024-09-06', 'Engr. Joe Mike G. Durac', '11,760.00', 0, '', '', 'Available'),
-(6579, 'FreeWifi4All', '26', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-915', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Hitaob Elementary School', '', 'Available'),
-(6580, 'FreeWifi4All', '27', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-916', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Telaje Barangay Hall', '', 'Available'),
-(6581, 'FreeWifi4All', '28', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-917', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Quezon Barangay Hall', '', 'Available'),
-(6582, 'FreeWifi4All', '29', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-918', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Tandag City Boulevard', '', 'Available'),
-(6583, 'FreeWifi4All', '30', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-919', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Jacinto P. Elpa National High School', '', 'Available'),
-(6584, 'FreeWifi4All', '31', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-920', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Congressional Office District 1', '', 'Available'),
-(6585, 'FreeWifi4All', '32', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-921', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Comelec Office', '', 'Available'),
-(6586, 'FreeWifi4All', '33', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-922', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Sumo-Sumo Barangay Hall', '', 'Available'),
-(6587, 'FreeWifi4All', '34', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-923', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Gamut Barangay Hall', '', 'Available'),
-(6588, 'FreeWifi4All', '35', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-924', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Bolhoon Brgy. Hall', '', 'Available'),
-(6589, 'FreeWifi4All', '36', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-925', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Carromata Barangay Hall', '', 'Available'),
-(6590, 'FreeWifi4All', '37', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-926', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'San Miguel Community Hospital', '', 'Available'),
-(6591, 'FreeWifi4All', '38', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-927', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Manlico Barangay Hall', '', 'Available'),
-(6592, 'FreeWifi4All', '39', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-928', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Tag-Anungan Barangay Hall', '', 'Available'),
-(6593, 'FreeWifi4All', '40', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-929', '13202408-051', 'N/A', '2024-08-27', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Tigao Brgy. Hall', '', 'Available'),
-(6594, 'FreeWifi4All', '41', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-930', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Cortes Municipal Hall', '', 'Available'),
-(6595, 'FreeWifi4All', '42', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-931', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Panikian Barangay Hall', '', 'Available'),
-(6596, 'FreeWifi4All', '43', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-932', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Carrascal Primary Health Care Facility', '', 'Available'),
-(6597, 'FreeWifi4All', '44', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-933', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Municipal Public Terminal/Market', '', 'Available'),
-(6598, 'FreeWifi4All', '45', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-934', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Unidad National High School', '', 'Available'),
-(6599, 'FreeWifi4All', '46', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-935', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Lianga National Comprehensive School', '', 'Available'),
-(6600, 'FreeWifi4All', '47', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-936', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Lianga District Hospital', '', 'Available'),
-(6601, 'FreeWifi4All', '48', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-937', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'General Island Barangay Hall', '', 'Available'),
-(6602, 'FreeWifi4All', '49', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-938', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Songkit Barangay Hall', '', 'Available'),
-(6603, 'FreeWifi4All', '50', 'COMBOX', 'equipment', 0, '', 'Communication Box', '', 'R132408-939', '13202408-051', 'N/A', '2024-09-13', 'Engr. Elizalde S. Ramos', '11,760.00', 0, 'Madrid Municipal Park', '', 'Available'),
-(6604, 'FreeWifi4All', '1', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-940', '13202408-051', 'CommBox 1', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Socorro District Hospital', '', 'Available'),
-(6605, 'FreeWifi4All', '2', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-941', '13202408-051', 'CommBox 2', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Socorro National High School', '', 'Available'),
-(6606, 'FreeWifi4All', '3', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-942', '13202408-051', 'CommBox 3', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Salog Barangay Hall', '', 'Available'),
-(6607, 'FreeWifi4All', '4', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-943', '13202408-051', 'CommBox 4', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Sohoton Cove', '', 'Available'),
-(6608, 'FreeWifi4All', '5', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-944', '13202408-051', 'CommBox 5', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'CLOUD 9', '', 'Available'),
-(6609, 'FreeWifi4All', '6', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-945', '13202408-051', 'CommBox 6', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'General Luna Nationa! High School', '', 'Available'),
-(6610, 'FreeWifi4All', '7', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-946', '13202408-051', 'CommBox 7', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Sta. Fe Brgy. Hall', '', 'Available'),
-(6611, 'FreeWifi4All', '8', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-947', '13202408-051', 'CommBox 8', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Consuelo National High School', '', 'Available'),
-(6612, 'FreeWifi4All', '9', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-948', '13202408-051', 'CommBox 9', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Dapa New Government Center', '', 'Available'),
-(6613, 'FreeWifi4All', '10', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-949', '13202408-051', 'CommBox 10', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'International Cargo Port', '', 'Available'),
-(6614, 'FreeWifi4All', '11', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-950', '13202408-051', 'CommBox 11', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Bitoon Barangay Hall', '', 'Available'),
-(6615, 'FreeWifi4All', '12', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-951', '13202408-051', 'CommBox 12', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Cabugao Barangay Hall', '', 'Available'),
-(6616, 'FreeWifi4All', '13', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-952', '13202408-051', 'CommBox 13', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Bagakay Barangay Hall', '', 'Available'),
-(6617, 'FreeWifi4All', '14', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-953', '13202408-051', 'CommBox 14', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'San Juan Barangay Hall', '', 'Available'),
-(6618, 'FreeWifi4All', '15', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-954', '13202408-051', 'CommBox 15', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Sta. Cruz Brgy. Hall', '', 'Available'),
-(6619, 'FreeWifi4All', '16', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-955', '13202408-051', 'CommBox 16', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'San Benito National high School', '', 'Available'),
-(6620, 'FreeWifi4All', '17', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-956', '13202408-051', 'CommBox 17', '2024-09-11', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Santa Monica Rural Health Unit', '', 'Available'),
-(6621, 'FreeWifi4All', '18', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-957', '13202408-051', 'CommBox 18', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Burgos National High School', '', 'Available'),
-(6622, 'FreeWifi4All', '19', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-958', '13202408-051', 'CommBox 19', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Matin.ao Barangay Hall', '', 'Available');
-INSERT INTO `inventory` (`id`, `project`, `item`, `classification`, `item_type`, `quantity`, `unit`, `description`, `received`, `property`, `ics`, `serial`, `date`, `officer`, `cost`, `life`, `transferred`, `remarks`, `status`) VALUES
-(6623, 'FreeWifi4All', '20', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-959', '13202408-051', 'CommBox 20', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'San Isidro National High School', '', 'Available'),
-(6624, 'FreeWifi4All', '21', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-960', '13202408-051', 'CommBox 21', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Roxas National High School', '', 'Available'),
-(6625, 'FreeWifi4All', '22', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-961', '13202408-051', 'CommBox 22', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Caridad Barangay Hall', '', 'Available'),
-(6626, 'FreeWifi4All', '23', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-962', '13202408-051', 'CommBox 23', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Pilar National High School', '', 'Available'),
-(6627, 'FreeWifi4All', '24', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-963', '13202408-051', 'CommBox 24', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Consolacion Barangay Hall', 'Deployed', 'Deployed'),
-(6628, 'FreeWifi4All', '25', 'COMBOX', 'equipment', 25, 'unit', 'Communication Box', '', 'R132408-964', '13202408-051', 'CommBox 25', '2024-09-13', 'Engr. Ricardo T. Bacolod Jr.', '11,760.00', 0, 'Surigao City Boulevard', '', 'Available'),
-(6646, '', '', '', 'equipment', 0, '', '', '', '', '', '', '0000-00-00', '', '', 0, '', '', 'Available');
+INSERT INTO `inventory` (`id`, `project`, `item`, `quantity`, `unit`, `description`, `received`, `inventory_item_no`, `assigned_to`, `serial`, `date`, `cost`, `life`, `remarks`) VALUES
+(6686, NULL, NULL, 1, 'Pcs', 'Ruijie/Reyee:EG310GH-P-E', NULL, NULL, NULL, 'ZAT32JE00292B', NULL, NULL, NULL, NULL),
+(6689, NULL, NULL, 1, 'Pcs', 'Starlink', NULL, NULL, NULL, '4PBA02411985', NULL, NULL, NULL, NULL),
+(6690, NULL, NULL, 1, 'Pcs', 'Starlink', NULL, NULL, NULL, 'W3WV000001085812', NULL, NULL, NULL, NULL),
+(6691, NULL, NULL, 1, 'Pcs', 'Secure', NULL, NULL, NULL, '310026735EA9440000751', NULL, NULL, NULL, NULL),
+(6692, NULL, NULL, 100, 'Pcs', 'Communication Box', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6693, NULL, NULL, 1, 'Pcs', 'Ruijie/Reyee:RG-RAP2260(G)', NULL, NULL, NULL, 'ZAT309N08236', NULL, NULL, NULL, NULL),
+(6694, NULL, NULL, 1, 'Pcs', 'Ruijie/Reyee:RG-RAP2026(G)', NULL, NULL, NULL, 'ZAT311U002162', NULL, NULL, NULL, NULL),
+(6695, NULL, NULL, 1, 'Pcs', 'Ruijie/Reyee:RG-RAP2260(G)', NULL, NULL, NULL, 'ZAT311U03569B', NULL, NULL, NULL, NULL),
+(6696, NULL, NULL, 100, 'box', 'Indoor UTP Cable', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6697, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'ZAT420P00869A', NULL, NULL, NULL, NULL),
+(6698, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'ZAT420P014453', NULL, NULL, NULL, NULL),
+(6699, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'ZAT420P04364C', NULL, NULL, NULL, NULL),
+(6700, NULL, NULL, 1, 'Pcs', 'Ruijie Router Switch', NULL, NULL, NULL, 'ZASL56001294', NULL, NULL, NULL, NULL),
+(6701, NULL, NULL, 1, 'Pcs', 'Ruijie Router Switch', NULL, NULL, NULL, 'ZAT50Y8001861', NULL, NULL, NULL, NULL),
+(6702, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310026735EA9440000316', NULL, NULL, NULL, NULL),
+(6703, NULL, NULL, 1, 'Pcs', 'Starlink Kit', NULL, NULL, NULL, '2DUNI00000218412', NULL, NULL, NULL, NULL),
+(6704, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900449', NULL, NULL, NULL, NULL),
+(6705, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900451', NULL, NULL, NULL, NULL),
+(6706, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900450', NULL, NULL, NULL, NULL),
+(6707, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900441', NULL, NULL, NULL, NULL),
+(6708, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900442', NULL, NULL, NULL, NULL),
+(6709, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900452', NULL, NULL, NULL, NULL),
+(6710, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900443', NULL, NULL, NULL, NULL),
+(6711, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900444', NULL, NULL, NULL, NULL),
+(6712, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900417', NULL, NULL, NULL, NULL),
+(6713, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900418', NULL, NULL, NULL, NULL),
+(6714, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900419', NULL, NULL, NULL, NULL),
+(6715, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900420', NULL, NULL, NULL, NULL),
+(6716, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900505', NULL, NULL, NULL, NULL),
+(6717, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900506', NULL, NULL, NULL, NULL),
+(6718, NULL, NULL, 1, '1', 'UPS', NULL, NULL, NULL, '310045623FB7012900507', NULL, NULL, NULL, NULL),
+(6719, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900508', NULL, NULL, NULL, NULL),
+(6720, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900085', NULL, NULL, NULL, NULL),
+(6721, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900086', NULL, NULL, NULL, NULL),
+(6722, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900087', NULL, NULL, NULL, NULL),
+(6723, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900088', NULL, NULL, NULL, NULL),
+(6724, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900305', NULL, NULL, NULL, NULL),
+(6725, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900306', NULL, NULL, NULL, NULL),
+(6726, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900307', NULL, NULL, NULL, NULL),
+(6727, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900308', NULL, NULL, NULL, NULL),
+(6728, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900193', NULL, NULL, NULL, NULL),
+(6729, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900194', NULL, NULL, NULL, NULL),
+(6730, NULL, NULL, 100, 'Pcs', 'Power Distribution Unit', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6731, NULL, NULL, 100, 'Rolls', 'Rolls Outdoor UTP Cable', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6732, NULL, NULL, 100, 'Rolls', 'Rolls Indoor UTP Cable', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6733, NULL, NULL, 2, 'Pcs', 'Ladder', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6734, NULL, NULL, 100, 'Pcs', 'DICT Free WI-FI Signage', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6735, NULL, NULL, 2, 'Pcs', 'Ruijie Outdoor AP', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(6736, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L004912', NULL, NULL, NULL, NULL),
+(6737, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L000871', NULL, NULL, NULL, NULL),
+(6738, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L000179', NULL, NULL, NULL, NULL),
+(6739, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L00418A', NULL, NULL, NULL, NULL),
+(6740, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003544', NULL, NULL, NULL, NULL),
+(6741, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003519', NULL, NULL, NULL, NULL),
+(6742, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L004013', NULL, NULL, NULL, NULL),
+(6743, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003185', NULL, NULL, NULL, NULL),
+(6744, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003658', NULL, NULL, NULL, NULL),
+(6745, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L00266A', NULL, NULL, NULL, NULL),
+(6746, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L00475A', NULL, NULL, NULL, NULL),
+(6747, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L000892', NULL, NULL, NULL, NULL),
+(6748, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L002718', NULL, NULL, NULL, NULL),
+(6749, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003004', NULL, NULL, NULL, NULL),
+(6750, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L000584', NULL, NULL, NULL, NULL),
+(6751, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L000280', NULL, NULL, NULL, NULL),
+(6752, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L004547', NULL, NULL, NULL, NULL),
+(6753, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L00144A', NULL, NULL, NULL, NULL),
+(6754, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L003257', NULL, NULL, NULL, NULL),
+(6755, NULL, NULL, 1, 'Pcs', 'Ruijie Indoor Access Point', NULL, NULL, NULL, 'H1UC13L00252B', NULL, NULL, NULL, NULL),
+(6756, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900028', NULL, NULL, NULL, NULL),
+(6757, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900026', NULL, NULL, NULL, NULL),
+(6758, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900250', NULL, NULL, NULL, NULL),
+(6759, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900252', NULL, NULL, NULL, NULL),
+(6760, NULL, NULL, 1, 'Pcs', 'UPS', NULL, NULL, NULL, '310045623FB7012900025', NULL, NULL, NULL, NULL),
+(6761, NULL, NULL, 1, 'Pcs', 'RG-RAP72Pro-OD - 5 -', NULL, NULL, NULL, 'H1UC13L001623', NULL, NULL, NULL, NULL),
+(6762, NULL, NULL, 1, 'Pcs', 'RG-RAP72Pro-OD - 5 -', NULL, NULL, NULL, 'H1UC13L001910', NULL, NULL, NULL, NULL),
+(6763, NULL, NULL, 1, 'Pcs', 'RG-RAP72Pro-OD - 5 -', NULL, NULL, NULL, 'H1UC13L00179A', NULL, NULL, NULL, NULL),
+(6764, NULL, NULL, 1, 'Pcs', 'RG-RAP72Pro-OD - 5 -', NULL, NULL, NULL, 'H1UC13L001475', NULL, NULL, NULL, NULL),
+(6765, NULL, NULL, 1, 'Pcs', 'RG-RAP72Pro-OD - 5 -', NULL, NULL, NULL, 'H1UC13L002746', NULL, NULL, NULL, NULL),
+(6804, NULL, NULL, 0, 'Pcs', 'test1', NULL, NULL, NULL, '485754438DBDA2B6', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -999,13 +546,38 @@ INSERT INTO `locationrequests` (`id`, `locality`, `barangay`, `district`, `locat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notification_dismissals`
+--
+
+CREATE TABLE `notification_dismissals` (
+  `id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `source_type` enum('bill','letter') NOT NULL,
+  `source_id` int(11) NOT NULL,
+  `dismissed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `re_notify_minutes` int(11) NOT NULL DEFAULT 1440
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notification_dismissals`
+--
+
+INSERT INTO `notification_dismissals` (`id`, `admin_id`, `source_type`, `source_id`, `dismissed_at`, `re_notify_minutes`) VALUES
+(78, 3, 'letter', 978, '2026-09-16 02:22:07', 15),
+(79, 3, 'letter', 976, '2026-09-16 02:31:28', 15),
+(80, 3, 'letter', 961, '2026-09-16 02:33:47', 15),
+(81, 3, 'bill', 223, '2026-09-16 02:33:59', 15);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pass_slip`
 --
 
 CREATE TABLE `pass_slip` (
   `id` int(11) NOT NULL,
   `pass_slip_no` varchar(50) NOT NULL,
-  `inventory_id` int(11) NOT NULL,
+  `inventory_id` int(11) DEFAULT NULL,
   `item_description` varchar(255) NOT NULL,
   `qty` int(11) NOT NULL,
   `unit` varchar(50) NOT NULL,
@@ -1018,22 +590,27 @@ CREATE TABLE `pass_slip` (
   `requested_by_return` varchar(255) DEFAULT NULL,
   `inspected_by_return` varchar(255) DEFAULT NULL,
   `approved_by_return` varchar(255) DEFAULT NULL,
-  `status` enum('borrowed','returned','overdue') DEFAULT 'borrowed',
+  `status` enum('borrowed','returned','overdue','deployed') DEFAULT 'borrowed',
   `purpose` text DEFAULT NULL,
   `condition_out` varchar(100) DEFAULT NULL,
   `condition_return` varchar(100) DEFAULT NULL,
   `remarks` text DEFAULT NULL,
   `created_by` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `requested_by_out_emp_id` int(11) DEFAULT NULL,
+  `inspected_by_out_emp_id` int(11) DEFAULT NULL,
+  `approved_by_out_emp_id` int(11) DEFAULT NULL,
+  `requested_by_return_emp_id` int(11) DEFAULT NULL,
+  `inspected_by_return_emp_id` int(11) DEFAULT NULL,
+  `approved_by_return_emp_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pass_slip`
 --
 
-INSERT INTO `pass_slip` (`id`, `pass_slip_no`, `inventory_id`, `item_description`, `qty`, `unit`, `serial_no`, `pullout_date`, `requested_by_out`, `inspected_by_out`, `approved_by_out`, `return_date`, `requested_by_return`, `inspected_by_return`, `approved_by_return`, `status`, `purpose`, `condition_out`, `condition_return`, `remarks`, `created_by`, `created_at`) VALUES
-(3, 'PS-2026-0001', 6429, 'Low Earth Orbit Satellite Internet Equipment Kit and Accessories', 5, 'unit', NULL, '2026-07-23', 'Doe', 'John', 'Bro', '2026-07-28', 'Doe', 'John', 'Bro', 'returned', 'test', 'Good', 'Good - No Damage', 'test', 'dictsdn', '2026-07-23 07:34:30'),
-(4, 'PS-2026-0001', 6529, 'Charge UPS Model: Light 1200', 5, 'unit', NULL, '2026-07-23', 'Doe', 'John', 'Bro', '2026-07-28', 'Doe', 'John', 'Bro', 'returned', 'test', 'Good', 'Good - No Damage', 'test', 'dictsdn', '2026-07-23 07:34:30');
+INSERT INTO `pass_slip` (`id`, `pass_slip_no`, `inventory_id`, `item_description`, `qty`, `unit`, `serial_no`, `pullout_date`, `requested_by_out`, `inspected_by_out`, `approved_by_out`, `return_date`, `requested_by_return`, `inspected_by_return`, `approved_by_return`, `status`, `purpose`, `condition_out`, `condition_return`, `remarks`, `created_by`, `created_at`, `requested_by_out_emp_id`, `inspected_by_out_emp_id`, `approved_by_out_emp_id`, `requested_by_return_emp_id`, `inspected_by_return_emp_id`, `approved_by_return_emp_id`) VALUES
+(216, 'PS-2026-0001', 6804, 'test1', 1, 'Pcs', '485754438DBDA2B6', '2026-09-29', 'ENGR. ECE VAN BACLAY', 'MIKKO LUMPOT', 'ENGR. RICARDO T. BACOLOD JR.', NULL, NULL, NULL, NULL, 'deployed', 'test', NULL, NULL, '', 'dictsdn', '2026-09-29 12:50:54', 4, 3, 2, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1048,14 +625,6 @@ CREATE TABLE `pass_slip_attachments` (
   `uploaded_by` varchar(255) DEFAULT NULL,
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `pass_slip_attachments`
---
-
-INSERT INTO `pass_slip_attachments` (`id`, `pass_slip_no`, `filename`, `uploaded_by`, `uploaded_at`) VALUES
-(4, 'PS-2026-0001', '1785207098802_DICT-Logo-icon_only.png', 'dictsdn', '2026-07-28 02:51:38'),
-(5, 'PS-2026-0001', '1785207109430_Annex-A-1-1-List-of-ICT-Equipment-Goods-Support-Services-and-Consulting-Services.pdf', 'dictsdn', '2026-07-28 02:51:49');
 
 -- --------------------------------------------------------
 
@@ -1361,6 +930,36 @@ INSERT INTO `procurement_tracking` (`id`, `pr_no`, `activity_id`, `activity_name
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `property_categories`
+--
+
+CREATE TABLE `property_categories` (
+  `code` char(2) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `property_categories`
+--
+
+INSERT INTO `property_categories` (`code`, `name`) VALUES
+('01', 'ICT Equipment'),
+('02', 'Office Equipment');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `property_no_counter`
+--
+
+CREATE TABLE `property_no_counter` (
+  `seq_year` smallint(5) UNSIGNED NOT NULL,
+  `last_seq` int(10) UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `targets_initiatives`
 --
 
@@ -1388,23 +987,24 @@ CREATE TABLE `targets_initiatives` (
   `approved` varchar(225) NOT NULL,
   `mov` varchar(225) NOT NULL,
   `remarks` varchar(225) NOT NULL,
-  `type` varchar(100) NOT NULL
+  `type` varchar(100) NOT NULL,
+  `mirrored_activity_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `targets_initiatives`
 --
 
-INSERT INTO `targets_initiatives` (`id`, `start`, `end`, `project`, `subproject`, `indicator`, `activity`, `training`, `municipality`, `district`, `barangay`, `agency`, `mode`, `sector`, `person`, `resource`, `participants`, `completers`, `male`, `female`, `approved`, `mov`, `remarks`, `type`) VALUES
-(8028, '2025-01-01', '2025-06-30', 'eLGU BPLS', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', 'Accomplished', 'Target'),
-(8029, '2025-01-01', '2025-06-30', 'FWFA', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target'),
-(8030, '2025-01-01', '2025-06-30', 'GECS', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target'),
-(8031, '2025-01-01', '2025-06-30', 'IIDB', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target'),
-(8033, '2025-01-01', '2025-06-30', 'ILCDB', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target'),
-(8034, '2025-01-01', '2025-01-23', 'Cyberseurity', '', '', 'User\'s Training', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', ''),
-(8043, '2025-02-04', '2025-02-24', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training at Mines and Geosciences Bureau', 'Mines and Geosciences Bureau Regional Ofice', 'Sirgiao City', 'District 2 (Mainland)', '', 'Mines and Geosciences Bureau', 'Face-to-Face', 'Employees', 'Jaykee', 'Reymar Estafia and Jaykee Aba-a', 24, 24, '9', '15', '', '', 'Accomplished', 'Target'),
-(8049, '2025-02-26', '2025-02-26', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training for Surigao del Norte State University Employees', 'Surigao del Norte State University - Main Campus', 'Surigao City', 'District 2', '', 'Surigao del Norte State University', 'Face-to-Face', 'Employees', '', '', 0, 0, '', '', '', '', '', 'Target'),
-(8050, '0000-00-00', '0000-00-00', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training to DTI Surigao City', '', 'Surigao City', 'District 2 (Mainland)', '', 'DTI', 'Face-to-Face', 'Employees', '', '', 0, 0, '', '', '', '', '', 'Target');
+INSERT INTO `targets_initiatives` (`id`, `start`, `end`, `project`, `subproject`, `indicator`, `activity`, `training`, `municipality`, `district`, `barangay`, `agency`, `mode`, `sector`, `person`, `resource`, `participants`, `completers`, `male`, `female`, `approved`, `mov`, `remarks`, `type`, `mirrored_activity_id`) VALUES
+(8028, '2025-01-01', '2025-06-30', 'eLGU BPLS', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', 'Accomplished', 'Target', NULL),
+(8029, '2025-01-01', '2025-06-30', 'FWFA', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target', NULL),
+(8030, '2025-01-01', '2025-06-30', 'GECS', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target', NULL),
+(8031, '2025-01-01', '2025-06-30', 'IIDB', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target', NULL),
+(8033, '2025-01-01', '2025-06-30', 'ILCDB', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', 'Target', NULL),
+(8034, '2025-01-01', '2025-01-23', 'Cyberseurity', '', '', 'User\'s Training', '', '', '', '', '', '', '', '', '', 0, 0, '', '', '', '', '', '', NULL),
+(8043, '2025-02-04', '2025-02-24', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training at Mines and Geosciences Bureau', 'Mines and Geosciences Bureau Regional Ofice', 'Sirgiao City', 'District 2 (Mainland)', '', 'Mines and Geosciences Bureau', 'Face-to-Face', 'Employees', 'Jaykee', 'Reymar Estafia and Jaykee Aba-a', 24, 24, '9', '15', '', '', 'Accomplished', 'Target', NULL),
+(8049, '2025-02-26', '2025-02-26', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training for Surigao del Norte State University Employees', 'Surigao del Norte State University - Main Campus', 'Surigao City', 'District 2', '', 'Surigao del Norte State University', 'Face-to-Face', 'Employees', '', '', 0, 0, '', '', '', '', '', 'Target', NULL),
+(8050, '0000-00-00', '0000-00-00', 'Cybersecurity', '', 'PKI Training', 'PNPKI User\'s Training to DTI Surigao City', '', 'Surigao City', 'District 2 (Mainland)', '', 'DTI', 'Face-to-Face', 'Employees', '', '', 0, 0, '', '', '', '', '', 'Target', NULL);
 
 -- --------------------------------------------------------
 
@@ -2796,7 +2396,7 @@ INSERT INTO `tblfwfa` (`id`, `item_no`, `locality`, `barangay`, `district`, `tra
 (9990, 40, 'General Luna', 'Magsaysay', '1st', 'Dao Primary School', 'Starlink', 'Dao Primary School - AP3', NULL, 'PES', '2026-03-20', NULL, 9.8364435, 126.0121900, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1982', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9991, 41, 'General Luna', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP1', NULL, 'PES', '2026-03-20', NULL, 9.8253266, 126.0449860, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1983', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9992, 42, 'General Luna', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP2', NULL, 'PES', '2026-03-20', NULL, 9.8253266, 126.0449860, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1983', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(9993, 43, 'General Luna', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP3', NULL, 'PES', '2026-03-20', NULL, 9.8253266, 126.0449860, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1983', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(9993, 43, 'General Luna', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP3', NULL, 'PES', '2026-03-20', NULL, 10.0328145, 126.0449860, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1983', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9994, 44, 'General Luna', 'Malinao', '1st', 'Malinao Elementary School', 'Starlink', 'Malinao Elementary School - AP1', NULL, 'PES', '2026-03-20', NULL, 9.8258915, 126.0451440, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1984', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9995, 45, 'General Luna', 'Malinao', '1st', 'Malinao Elementary School', 'Starlink', 'Malinao Elementary School - AP2', NULL, 'PES', '2026-03-20', NULL, 9.8258915, 126.0451440, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1984', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9996, 46, 'General Luna', 'Malinao', '1st', 'Malinao Elementary School', 'Starlink', 'Malinao Elementary School - AP3', NULL, 'PES', '2026-03-20', NULL, 9.8258915, 126.0451440, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-1984', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -2959,10 +2559,15 @@ INSERT INTO `tblfwfa` (`id`, `item_no`, `locality`, `barangay`, `district`, `tra
 (10152, 11, 'Sta. Monica', 'T. Arlan', '1st', 'Sta. Monica Rural Health Unit', 'Starlink', 'Sta. Monica Municipal GYM', NULL, 'LGU-GYM', '2024-10-04', NULL, 10.0203570, 126.0364680, 'Regional Procured', 'Region Initiated', 0, 0, 'PCSPP2-R13-0072', NULL, 'PICS-PP', 'Active', 'UTP', NULL, 'Conforme', 'UAT', NULL, 'Gilbert Samontina\nFb Name: Gsu Gilbert Samonitan Ursua', '9176344427', NULL),
 (10153, 12, 'Sta. Monica', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP1', NULL, 'PES', '2026-03-20', NULL, 9.8963397, 125.8948200, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-2016', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10154, 13, 'Sta. Monica', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP2', NULL, 'PES', '2026-03-20', NULL, 9.8963397, 125.8948200, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-2016', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10155, 14, 'Sta. Monica', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP3', NULL, 'PES', '2026-03-20', NULL, 9.8963397, 125.8948200, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-2016', NULL, 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(10155, 14, 'Sta. Monica', 'Magsaysay', '1st', 'Magsaysay Elementary School', 'Starlink', 'Magsaysay Elementary School - AP3', '', 'PES', '2026-03-20', NULL, 10.0328145, 126.0439262, 'Centrally Procured', 'Manage Service', 0, 0, 'PRPS-L3-2016', '', 'PIALEOS - Remote Public Schools', 'Active', 'UTP', NULL, NULL, NULL, NULL, '', '', ''),
 (10156, 15, 'Sta. Monica', 'Mabuhay', '1st', 'Sta. Monica District Hospital', 'Starlink', 'Sta. Monica District Hospital', NULL, 'HSP', '2026-04-15', NULL, 10.0192100, 126.0398900, 'Regional Procured', 'Manage Service', 0, 0, 'PCSPPP2-PHF-R13-0030', NULL, 'PICS-PP Public Health Facilities', 'Active', 'UTP', NULL, NULL, NULL, NULL, 'Dr, Mario Vertudazo', '9958133875', NULL),
 (10157, 16, 'Sta. Monica', 'Mabuhay', '1st', 'Sta. Monica District Hospital', 'Starlink', 'Sta. Monica District Hospital', NULL, 'HSP', '2026-04-15', NULL, 10.0192100, 126.0398900, 'Regional Procured', 'Manage Service', 0, 0, 'PCSPPP2-PHF-R13-0030', NULL, 'PICS-PP Public Health Facilities', 'Active', 'UTP', NULL, NULL, NULL, NULL, 'Dr, Mario Vertudazo', '9958133875', NULL),
-(10158, 17, 'Sta. Monica', 'Mabuhay', '1st', 'Sta. Monica District Hospital', 'Starlink', 'Sta. Monica District Hospital', NULL, 'HSP', '2026-04-15', NULL, 10.0192100, 126.0398900, 'Regional Procured', 'Manage Service', 0, 0, 'PCSPPP2-PHF-R13-0030', NULL, 'PICS-PP Public Health Facilities', 'Active', 'UTP', NULL, NULL, NULL, NULL, 'Dr, Mario Vertudazo', '9958133875', NULL);
+(10158, 17, 'Sta. Monica', 'Mabuhay', '1st', 'Sta. Monica District Hospital', 'Starlink', 'Sta. Monica District Hospital', NULL, 'HSP', '2026-04-15', NULL, 10.0192100, 126.0398900, 'Regional Procured', 'Manage Service', 0, 0, 'PCSPPP2-PHF-R13-0030', NULL, 'PICS-PP Public Health Facilities', 'Active', 'UTP', NULL, NULL, NULL, NULL, 'Dr, Mario Vertudazo', '9958133875', NULL),
+(10163, 1, 'PH8TESTSDATA', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, 'Centrally Procured', 'Region Initiated', 0, 0, 'ph8sc_p8512109', 'ph8nid_p8512109', '', 'Active', '', NULL, NULL, NULL, NULL, '', '', ''),
+(10164, 1, 'PH8TESTSDATA', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, 'Centrally Procured', 'Region Initiated', 0, 0, 'ph8sc_p8125306', 'ph8nid_p8125306', '', 'Active', '', NULL, NULL, NULL, NULL, '', '', ''),
+(10165, 2, 'PH8TESTSDATA', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, 'Centrally Procured', 'Region Initiated', 0, 0, 'ph8sc2_p8125306', 'ph8nid2_p8125306', '', 'Active', '', NULL, NULL, NULL, NULL, '', '', ''),
+(10166, 5, 'PH8TESTSDATA', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, 'Centrally Procured', 'Region Initiated', 0, 0, 'ph8fresh_p8125306', 'ph8freshn_p8125306', '', 'Active', '', NULL, NULL, NULL, NULL, '', '', ''),
+(10167, NULL, 'PH8TESTSDATA', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, 'Centrally Procured', 'Region Initiated', 0, 0, 'ph8fwf_p8125306', 'ph8fn_p8125306', '', 'Active', '', NULL, NULL, NULL, NULL, '', '', '');
 
 -- --------------------------------------------------------
 
@@ -16411,7 +16016,613 @@ INSERT INTO `tbllogs` (`id`, `user`, `logdate`, `action`) VALUES
 (13784, 'Admin', '2026-09-10 12:29:24', 'Added Item CRUDTESTLOC'),
 (13785, 'Admin', '2026-09-10 12:30:06', 'Added Item CRUDTESTLOC'),
 (13786, 'Admin', '2026-09-10 12:30:06', 'Updated Item CRUDTESTLOC_EDITED'),
-(13787, 'Admin', '2026-09-10 12:30:06', 'Batch deleted 1 item(s) (IDs: 10162)');
+(13787, 'Admin', '2026-09-10 12:30:06', 'Batch deleted 1 item(s) (IDs: 10162)'),
+(13790, 'Administrator', '2026-09-14 22:53:13', 'Created Inventory Custodian Slip: 13202609-001-1 - Total: 7680.00'),
+(13791, 'admin', '2026-09-14 22:56:15', 'Created Inventory Custodian Slip: 13202609-002-1 - Total: 1600.00'),
+(13792, 'Administrator', '2026-09-15 01:41:10', 'Created Inventory Custodian Slip: 13202609-002-1 - Total: 1234.00'),
+(13793, 'Administrator', '2026-09-15 04:29:57', 'Deleted ICS records: 13202609-002-1'),
+(13794, 'Administrator', '2026-09-16 11:44:55', 'Restored the database from a backup file'),
+(13795, 'Administrator', '2026-09-16 13:17:03', 'Downloaded a database backup'),
+(13796, 'Administrator', '2026-09-16 17:00:26', 'Updated Item Sta. Monica'),
+(13797, 'Administrator', '2026-09-21 11:10:02', 'Marked bill (ID 248) as Paid'),
+(13798, 'Administrator', '2026-09-21 11:10:21', 'Updated Bill Water Bill'),
+(13799, 'Administrator', '2026-09-21 11:20:09', 'Marked bill (ID 248) as Paid'),
+(13800, 'Administrator', '2026-09-21 11:20:26', 'Updated Bill Water Bill'),
+(13801, 'Administrator', '2026-09-21 11:25:01', 'Marked letter (ID 1052) as Responded'),
+(13802, 'Administrator', '2026-09-21 11:26:33', 'Marked letter (ID 1051) as Responded'),
+(13803, 'Administrator', '2026-09-21 11:27:15', 'Updated Letter Letter of Request for Interner Connectivity in Memorial Surfing Cup - Municipality of GL'),
+(13804, 'Administrator', '2026-09-21 12:10:02', 'Marked bill (ID 223) as Paid'),
+(13805, 'Administrator', '2026-09-21 12:37:13', 'Updated Bill Internet Bill'),
+(13806, 'Administrator', '2026-09-23 08:07:39', 'Deleted Item: Communication Box'),
+(13807, 'Administrator', '2026-09-23 08:07:39', 'Deleted Item: Communication Box'),
+(13808, 'Administrator', '2026-09-23 08:07:39', 'Deleted Item: Communication Box'),
+(13809, 'Administrator', '2026-09-23 08:07:39', 'Deleted Item: Communication Box'),
+(13810, 'Administrator', '2026-09-23 08:07:39', 'Deleted Item: Communication Box'),
+(13811, 'Administrator', '2026-09-23 08:07:50', 'Deleted Item: Communication Box'),
+(13812, 'Administrator', '2026-09-23 08:07:50', 'Deleted Item: Communication Box'),
+(13813, 'Administrator', '2026-09-23 08:07:50', 'Deleted Item: Communication Box'),
+(13814, 'Administrator', '2026-09-23 08:07:50', 'Deleted Item: Communication Box'),
+(13815, 'Administrator', '2026-09-23 08:07:50', 'Deleted Item: Communication Box'),
+(13816, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13817, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13818, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13819, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13820, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13821, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13822, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13823, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13824, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13825, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13826, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13827, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13828, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13829, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13830, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13831, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13832, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13833, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13834, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13835, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13836, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13837, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13838, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13839, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13840, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Low Earth Orbit Satellite Internet Equipment Kit and Accessories'),
+(13841, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13842, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13843, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13844, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13845, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13846, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13847, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13848, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13849, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13850, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13851, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13852, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13853, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13854, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13855, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13856, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13857, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13858, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13859, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13860, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13861, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13862, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13863, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13864, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13865, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13866, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13867, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13868, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13869, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13870, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13871, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13872, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13873, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13874, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13875, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13876, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13877, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13878, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13879, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13880, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13881, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13882, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13883, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13884, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13885, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13886, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13887, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13888, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13889, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13890, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruijie/Reyee Model: RG-RAP2260(G)'),
+(13891, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13892, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13893, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13894, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13895, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13896, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13897, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13898, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13899, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13900, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13901, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13902, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13903, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13904, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13905, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13906, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13907, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13908, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13909, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13910, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13911, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13912, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13913, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13914, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13915, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Ruije/Reyee Model: RG-EG310GH-P-E'),
+(13916, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13917, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13918, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13919, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13920, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13921, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13922, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13923, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13924, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13925, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13926, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13927, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13928, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13929, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13930, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13931, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13932, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13933, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13934, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13935, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13936, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13937, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13938, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13939, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13940, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13941, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13942, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13943, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13944, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13945, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13946, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13947, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13948, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13949, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13950, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13951, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13952, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13953, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13954, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13955, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13956, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13957, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13958, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13959, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13960, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13961, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13962, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13963, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13964, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13965, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13966, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13967, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13968, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13969, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13970, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13971, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13972, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13973, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13974, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13975, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13976, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13977, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13978, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13979, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13980, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13981, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13982, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13983, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13984, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13985, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13986, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13987, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13988, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13989, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13990, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13991, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13992, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13993, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13994, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13995, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13996, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13997, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13998, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(13999, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14000, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14001, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14002, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14003, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14004, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14005, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14006, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14007, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14008, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14009, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14010, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14011, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14012, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14013, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14014, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14015, 'Administrator', '2026-09-23 08:09:01', 'Deleted Item: Unknown'),
+(14016, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14017, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14018, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14019, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14020, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14021, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14022, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14023, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14024, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14025, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14026, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14027, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14028, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14029, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14030, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14031, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14032, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14033, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14034, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14035, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14036, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14037, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14038, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14039, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14040, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Charge UPS Model: Light 1200'),
+(14041, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14042, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14043, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14044, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14045, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14046, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14047, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14048, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14049, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14050, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14051, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14052, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14053, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14054, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14055, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14056, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14057, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14058, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14059, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14060, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14061, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14062, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14063, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14064, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14065, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14066, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14067, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14068, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14069, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14070, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14071, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14072, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14073, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14074, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14075, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14076, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14077, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14078, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14079, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14080, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14081, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14082, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14083, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14084, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14085, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14086, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14087, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14088, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14089, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14090, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14091, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14092, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14093, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14094, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14095, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14096, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14097, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14098, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14099, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14100, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14101, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14102, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14103, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14104, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14105, 'Administrator', '2026-09-23 08:09:18', 'Deleted Item: Communication Box'),
+(14106, 'Administrator', '2026-09-23 08:50:22', 'Added Classification: Test Classification X'),
+(14107, 'Administrator', '2026-09-23 08:50:27', 'Edited Classification: Test Classification Y'),
+(14108, 'Administrator', '2026-09-23 08:50:40', 'Edited Classification: Test Classification Z'),
+(14109, 'Administrator', '2026-09-23 08:50:45', 'Deleted Classification: Test Classification Z'),
+(14110, 'Administrator', '2026-09-23 08:50:59', 'Added Item:New Record'),
+(14111, 'Administrator', '2026-09-23 08:51:04', 'Edited Item: New Record'),
+(14112, 'Administrator', '2026-09-23 09:17:51', 'Deleted Item: Lenovo ThinkCentre Desktop Computer'),
+(14113, 'Administrator', '2026-09-23 09:17:51', 'Deleted Item: Epson Laser Printer'),
+(14114, 'Administrator', '2026-09-23 09:17:51', 'Deleted Item: Cisco Network Router'),
+(14115, 'Administrator', '2026-09-23 10:03:16', 'Added Item:Verify Item A'),
+(14116, 'Administrator', '2026-09-23 10:03:44', 'Added Item:Verify_Item_B'),
+(14117, 'Administrator', '2026-09-23 10:03:55', 'Added Item:Verify_Item_C_no_serial'),
+(14118, 'Administrator', '2026-09-23 10:04:02', 'Edited Item: Verify_Item_C_no_serial'),
+(14119, 'Administrator', '2026-09-23 10:04:14', 'Deleted Item: Verify Item A'),
+(14120, 'Administrator', '2026-09-23 10:05:02', 'Deleted Item: Verify_Item_C_no_serial'),
+(14121, 'Administrator', '2026-09-23 10:05:02', 'Deleted Item: Verify_Item_B'),
+(14122, 'Administrator', '2026-09-23 10:07:36', 'Created Pass Slip: PS-TEST-0001 - Laptop Computer (1 unit)'),
+(14123, 'Administrator', '2026-09-23 10:07:51', 'Deleted Pass Slip: PS-TEST-0001'),
+(14124, 'Administrator', '2026-09-23 10:10:23', 'Deleted Item: Dell Latitude 3420 Laptop'),
+(14125, 'Administrator', '2026-09-23 10:10:23', 'Deleted Item: Logitech M185 Wireless Mouse'),
+(14126, 'Administrator', '2026-09-23 10:10:23', 'Deleted Item: TP-Link 8-Port Gigabit Switch'),
+(14127, 'Administrator', '2026-09-23 10:17:44', 'Added Item:\"LAPTOP Acer – 2BP17BED Model: Swift SF314-43-R06N Processor: IAMD Ryzen 5 5500U RAM: 8GB Storage: 512GB Display: 14” OS: Win 11 Home Single Bundled Accessories:  Laptop Bag, Power Cord, Mouse and Mouse Pad\"'),
+(14128, 'Administrator', '2026-09-23 10:18:30', 'Edited Item: \"LAPTOP Acer – 2BP17BED Model: Swift SF314-43-R06N Processor: IAMD Ryzen 5 5500U RAM: 8GB Storage: 512GB Display: 14” OS: Win 11 Home Single Bundled Accessories:  Laptop Bag, Power Cord, Mouse and Mouse Pad\"'),
+(14129, 'Administrator', '2026-09-23 11:15:56', 'Created UAT for: Consuelo Brgy. Hall (Municipality: General Luna)'),
+(14130, 'Administrator', '2026-09-23 11:16:33', 'Edited UAT for: Consuelo Brgy. Hall (Revised) (ID: 1)'),
+(14131, 'Administrator', '2026-09-23 11:16:49', 'Created UAT for: Quezon Brgy. Hall (Municipality: Del Carmen)'),
+(14132, 'Administrator', '2026-09-23 11:16:49', 'Deleted UAT record(s): Quezon Brgy. Hall'),
+(14133, 'Administrator', '2026-09-23 11:39:10', 'Deleted Item: \"LAPTOP Acer – 2BP17BED Model: Swift SF314-43-R06N Processor: IAMD Ryzen 5 5500U RAM: 8GB Storage: 512GB Display: 14” OS: Win 11 Home Single Bundled Accessories:  Laptop Bag, Power Cord, Mouse and Mouse Pad\"'),
+(14134, 'Administrator', '2026-09-23 11:51:28', 'Edited UAT for: Consuelo Brgy. Hall (ID: 1)'),
+(14135, 'Administrator', '2026-09-23 11:56:05', 'Edited UAT for: Consuelo Brgy. Hall (ID: 1)'),
+(14136, 'Administrator', '2026-09-23 12:02:25', 'Added Item:\"LAPTOP Acer – 2BP17BED Model: Swift SF314-43-R06N Processor: IAMD Ryzen 5 5500U RAM: 8GB Storage: 512GB Display: 14” OS: Win 11 Home Single Bundled Accessories:  Laptop Bag, Power Cord, Mouse and Mouse Pad\"'),
+(14137, 'Administrator', '2026-09-23 12:03:10', 'Created Pass Slip: PS-2026-0001 -  (1 unit)'),
+(14138, 'Administrator', '2026-09-23 13:35:37', 'Created Pass Slip: PS-2026-TESTRMK - Test Laptop (1 unit), Test Access Point (1 unit), Test Unknown (1 unit)'),
+(14139, 'Administrator', '2026-09-23 13:36:04', 'Edited Pass Slip: PS-2026-TESTRMK (purpose/remarks)'),
+(14140, 'Administrator', '2026-09-23 13:40:31', 'Created Pass Slip: PS-2026-0002 - Ruijie/Reyee:EG310GH-P-E (1 1)'),
+(14141, 'Administrator', '2026-09-23 14:01:21', 'Created Pass Slip: PS-2026-TESTRMK2 - Inv Laptop (1 unit), UAT AP (1 unit), Unknown (1 unit)'),
+(14142, 'Administrator', '2026-09-23 14:10:11', 'Created Pass Slip: PS-2026-TSTLONG - Long Serial Item (1 unit), UAT Item (1 unit)'),
+(14143, 'Administrator', '2026-09-23 14:17:16', 'Created Pass Slip: PS-2026-TSTREAD - High-end fiber optic cable modem router with long model name here (1 unit), Second item long description (1 unit)'),
+(14144, 'Administrator', '2026-09-23 14:21:16', 'Created Pass Slip: PS-2026-TSTWRAP - High-end fiber optic cable modem router long model name (1 unit), Second long description item (1 unit)'),
+(14145, 'Administrator', '2026-09-23 14:22:49', 'Created Pass Slip: PS-2026-TSTBADGE - UAT Matched Item (1 unit), No UAT Match (1 unit)'),
+(14146, 'Administrator', '2026-09-23 14:27:35', 'Deleted Pass Slip: PS-2026-0001'),
+(14147, 'Administrator', '2026-09-23 14:34:08', 'Deleted Pass Slip: PS-2026-TSTLOAN'),
+(14148, 'Administrator', '2026-09-23 14:34:20', 'Created Pass Slip: PS-2026-TSTLINK - LAPTOP Acer auto-filled (1 unit), Manual free-typed row (1 pc)'),
+(14149, 'Administrator', '2026-09-23 14:41:56', 'Deleted Pass Slip: PS-2026-TSTLOAN'),
+(14150, 'Administrator', '2026-09-23 14:56:55', 'Created Pass Slip: PS-2026-0003 - Ruijie RG-RAP72 AP Indoor (1 pcs), Ruijie RG-RAP72Pro-OD AP Outdoor (1 pcs)'),
+(14151, 'Administrator', '2026-09-23 14:57:24', 'Deleted Pass Slip: PS-2026-0002'),
+(14152, 'Administrator', '2026-09-23 15:09:32', 'Created Pass Slip: PS-2026-0004 - Ruijie Indoor Access Point (1 pcs), Ruijie Indoor Access Point (1 pcs), Ruijie Indoor Access Point (1 pcs), Ruijie Indoor Access Point (1 pcs), Ruijie Indoor Access Point (1 pcs), Ruijie Indoor Access Point (1 pcs), Ruijie Router Switch (1 pcs), Ruijie Router Switch (1 pcs), Ruijie Router Switch (1 pcs), Communication box (1 pcs), Communication box (1 pcs), Starlink Kit (1 pcs), Starlink Kit (1 pcs), Indoor UTP Cable (1 box)'),
+(14153, 'Administrator', '2026-09-23 15:38:54', 'Created Pass Slip: PS-2026-0005 - Ruijie RG-EG406XS-P Router (1 pc), Ruijie RG-EG406XS-P Router (1 pc), Ruijie RG-EG406XS-P Router (1 pc), INPLAY LD-UPS-1000VA (1 pc), INPLAY LD-UPS-1000VA (1 pc), INPLAY LD-UPS-1000VA (1 pc), INPLAY LD-UPS-1000VA (1 pc), AP Radio LiteBeam LBE-5AC-Gen2 (1 pc), AP Radio LiteBeam LBE-5AC-Gen2 (1 pc), AP Radio LiteBeam LBE-5AC-Gen2 (1 pc), AP Radio LiteBeam LBE-5AC-Gen2 (1 pc)'),
+(14154, 'Administrator', '2026-09-23 15:47:27', 'Created Pass Slip: PS-2026-TSTEDIT - LAPTOP Acer original (1 unit), Typewriter Underwood (2 pc)'),
+(14155, 'Administrator', '2026-09-23 15:52:44', 'Edited Pass Slip: PS-2026-TSTEDIT (full)'),
+(14156, 'Administrator', '2026-09-23 15:57:28', 'Created Pass Slip: PS-2026-TSTEDIT - LAPTOP Acer original (1 unit), Typewriter Underwood (2 pc)'),
+(14157, 'Administrator', '2026-09-23 16:04:15', 'Created Pass Slip: PS-2026-0001 - Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Router/Switch Ruijie/Reyee Model: RG-EG406XS-P (1 pc), Ruijie/Reyee Model: RG-RAP6260(G) (1 pc), Ruijie/Reyee Model: RG-RAP6260(G) (1 pc), Ruijie/Reyee Model: RG-RAP2260(G) (1 pc), Ruijie/Reyee Model: RG-RAP2260(G) (1 pc), Prolink Pro UPS PRO2000SFCU (4U) (1 pc), Prolink Pro UPS PRO2000SFCU (4U) (1 pc), UPS Secure UPS-1500VA (1 PC), Communication box (18 pc), Power Distribution Unit (18 pc), Cable Clip (8 pc), Cable Tie (3mm x 150mm) (3 pc), Cable Tie (4.8mm x 150mm) (3 pc)'),
+(14158, 'Administrator', '2026-09-23 16:05:04', 'Edited Pass Slip: PS-2026-TSTEDIT (full)'),
+(14159, 'Administrator', '2026-09-23 16:06:43', 'Created Pass Slip: PS-2026-TSTEDIT - LAPTOP Acer original (1 unit), Typewriter Underwood (2 pc)'),
+(14160, 'Administrator', '2026-09-23 16:09:43', 'Edited Pass Slip: PS-2026-TSTEDIT (full)'),
+(14161, 'Administrator', '2026-09-23 16:13:26', 'Edited Pass Slip: PS-2026-TSTEDIT (full)'),
+(14162, 'Administrator', '2026-09-23 16:18:21', 'Edited Pass Slip: PS-2026-0003 (full)'),
+(14163, 'Administrator', '2026-09-23 17:03:23', 'Created Pass Slip: PS-2026-0002 - UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs), UPS (S/N) (1 pcs)'),
+(14164, 'Administrator', '2026-09-23 17:11:16', 'Edited Pass Slip: PS-2026-0002 (full)'),
+(14165, 'Administrator', '2026-09-23 17:12:18', 'Edited Pass Slip: PS-2026-0002 (full)'),
+(14166, 'Administrator', '2026-09-23 17:26:37', 'Created Pass Slip: PS-2026-0003 - LiteBeam 5AC (1 pair), LiteBeam 5AC (0 pair)'),
+(14167, 'Administrator', '2026-09-23 17:27:17', 'Edited Pass Slip: PS-2026-0003 (full)'),
+(14168, 'Administrator', '2026-09-23 17:27:28', 'Edited Pass Slip: PS-2026-0004 (full)'),
+(14169, 'Administrator', '2026-09-23 17:35:05', 'Edited Pass Slip: PS-2026-0003 (full)'),
+(14170, 'Administrator', '2026-09-23 17:36:38', 'Created Pass Slip: PS-2026-0003 - LiteBeam 5AC (1 pair), LiteBeam 5AC (0 )'),
+(14171, 'Administrator', '2026-09-23 17:37:25', 'Edited Pass Slip: PS-2026-0003 (full)'),
+(14172, 'Administrator', '2026-09-23 17:43:28', 'Edited Pass Slip: PS-2026-0005 (full)'),
+(14173, 'Administrator', '2026-09-23 17:51:56', 'Created Pass Slip: PS-2026-0003 - LiteBeam 5AC (1 pair), LiteBeam 5AC (0 )'),
+(14174, 'Administrator', '2026-09-23 17:52:10', 'Edited Pass Slip: PS-2026-0003 (full)'),
+(14175, 'Administrator', '2026-09-23 18:25:34', 'Created Pass Slip: PS-2026-0006 - Starlink Kit (1 Kit), Ruijie - Indoor Access Point (1 Kit), POE Injector (1 Set), Extension Wire (1 Set), Mobile CPE : Celerway (1 Sets), Mobile CPE : Celerway (1 Sets), Mobile CPE : Celerway (1 Sets)'),
+(14177, 'Administrator', '2026-09-23 18:31:52', 'Edited Pass Slip: PS-2026-0006 (full)'),
+(14178, 'Administrator', '2026-09-23 18:35:45', 'Created Pass Slip: PS-2026-0007 - LiteBeam 5AC (1 pair), LiteBeam 5AC (0 )'),
+(14179, 'admin', '2026-09-24 08:54:04', 'Created UAT for: Test Brgy Hall (Municipality: Test Mun)'),
+(14180, 'admin', '2026-09-24 08:54:39', 'Edited UAT for: Test Brgy Hall (ID: 3)'),
+(14181, 'admin', '2026-09-24 08:56:45', 'Deleted Pass Slip(s): PS-2026-TESTUAT'),
+(14182, 'admin', '2026-09-24 08:56:45', 'Blocked Pass Slip delete (UAT link): PS-2026-TESTUAT2'),
+(14183, 'admin', '2026-09-24 08:57:00', 'Blocked Pass Slip delete (UAT link): PS-2026-TESTUAT2'),
+(14184, 'admin', '2026-09-24 08:59:30', 'Added Item:(No description)'),
+(14185, 'admin', '2026-09-24 09:02:12', 'Added Item:(No description)'),
+(14186, 'admin', '2026-09-24 09:02:12', 'Added Item:(No description)'),
+(14187, 'admin', '2026-09-24 09:02:12', 'Added Item:(No description)'),
+(14188, 'admin', '2026-09-24 09:02:12', 'Added Item:(No description)'),
+(14189, 'admin', '2026-09-24 09:02:12', 'Added Item:Test Access Point'),
+(14190, 'admin', '2026-09-24 09:02:31', 'Edited Item: (No description)'),
+(14191, 'admin', '2026-09-24 09:02:31', 'Edited Item: Edited Desc'),
+(14192, 'Administrator', '2026-09-24 09:06:24', 'Deleted Pass Slip(s): PS-2026-0004, PS-2026-0007, PS-2026-0005, PS-2026-0003, PS-2026-0001, PS-2026-0006, PS-2026-0002'),
+(14193, 'Administrator', '2026-09-24 09:06:31', 'Deleted UAT record(s): Consuelo Brgy. Hall'),
+(14194, 'Administrator', '2026-09-24 09:06:38', 'Deleted Item: \"LAPTOP Acer – 2BP17BED Model: Swift SF314-43-R06N Processor: IAMD Ryzen 5 5500U RAM: 8GB Storage: 512GB Display: 14” OS: Win 11 Home Single Bundled Accessories:  Laptop Bag, Power Cord, Mouse and Mouse Pad\"'),
+(14195, 'Administrator', '2026-09-24 09:14:35', 'Added Employee: ENGR. PEEGEE P. GUMA'),
+(14196, 'Administrator', '2026-09-24 09:14:52', 'Added Employee: ENGR. RICARDO T. BACOLOD JR.'),
+(14197, 'Administrator', '2026-09-24 09:15:03', 'Added Employee: MIKKO LUMPOT'),
+(14198, 'Administrator', '2026-09-24 09:15:45', 'Added Employee: ENGR. ECE VAN BACLAY'),
+(14199, 'Administrator', '2026-09-24 09:16:33', 'Added Employee: JOVIT LEOPOLDO'),
+(14200, 'Administrator', '2026-09-24 09:17:39', 'Added Employee: JAY RICO RECIMO'),
+(14201, 'Administrator', '2026-09-24 09:21:21', 'Added Item:Ruijie/Reyee:EG310GH-P-E'),
+(14202, 'admin', '2026-09-24 09:26:53', 'Added Item:(No description)'),
+(14203, 'admin', '2026-09-24 09:26:53', 'Added Item:(No description)'),
+(14204, 'admin', '2026-09-24 09:28:49', 'Edited Item: (No description)'),
+(14205, 'Administrator', '2026-09-24 09:30:15', 'Added Item:Starlink'),
+(14206, 'Administrator', '2026-09-24 09:32:38', 'Added Item:Starlink'),
+(14207, 'Administrator', '2026-09-24 09:33:43', 'Added Item:Secure'),
+(14208, 'Administrator', '2026-09-24 09:34:53', 'Added Item:Communication Box'),
+(14209, 'Administrator', '2026-09-24 09:35:06', 'Edited Item: Communication Box'),
+(14210, 'Administrator', '2026-09-24 09:36:05', 'Added Item:Ruijie/Reyee:RG-RAP2260(G)'),
+(14211, 'Administrator', '2026-09-24 09:36:18', 'Edited Item: Ruijie/Reyee:RG-RAP2260(G)'),
+(14212, 'Administrator', '2026-09-24 09:37:08', 'Added Item:Ruijie/Reyee:RG-RAP2026(G)'),
+(14213, 'Administrator', '2026-09-24 09:37:44', 'Added Item:Ruijie/Reyee:RG-RAP2260(G)'),
+(14214, 'Administrator', '2026-09-24 09:46:31', 'Added Employee: Test Employee One'),
+(14215, 'Administrator', '2026-09-24 09:46:31', 'Added Employee: Test Employee Two'),
+(14216, 'Administrator', '2026-09-24 09:46:38', 'Edited Employee: Test Employee One Edited'),
+(14219, 'Administrator', '2026-09-24 09:49:29', 'Processed Return: PS-2026-0001 - 1 item(s) returned'),
+(14220, 'Administrator', '2026-09-24 09:49:51', 'Deleted Employee: Test Employee Two'),
+(14221, 'admin', '2026-09-24 10:08:57', 'Created UAT for: Test Transport A (Municipality: Test Mun)'),
+(14222, 'admin', '2026-09-24 10:09:40', 'Edited UAT for: Test Transport A (ID: 4)'),
+(14223, 'admin', '2026-09-24 10:09:40', 'Created UAT for: Test Transport PS (Municipality: Test Mun)'),
+(14224, 'admin', '2026-09-24 10:11:08', 'Deleted UAT record(s): Test Transport PS'),
+(14225, 'admin', '2026-09-24 10:11:08', 'Deleted UAT record(s): Test Transport A'),
+(14231, 'Administrator', '2026-09-24 10:25:29', 'Created UAT for: Day-asan Barangay Hall (Municipality: Surigao City)'),
+(14232, 'Administrator', '2026-09-24 10:41:02', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (0 Pcs), Ruijie/Reyee:RG-RAP2260(G) (0 Pcs), Ruijie/Reyee:RG-RAP2260(G) (0 Pcs), Communication Box (1 Pcs), Starlink (1 Pcs), Secure (1 Pcs)'),
+(14233, 'Administrator', '2026-09-24 10:57:52', 'Added Item:Indoor UTP Cable'),
+(14234, 'Administrator', '2026-09-24 10:58:20', 'Edited Pass Slip: PS-2026-0001 (full)');
+INSERT INTO `tbllogs` (`id`, `user`, `logdate`, `action`) VALUES
+(14241, 'Administrator', '2026-09-24 11:14:56', 'Changed status to deployed for Pass Slip: PS-2026-0001'),
+(14242, 'Administrator', '2026-09-24 11:15:44', 'Edited Item: Communication Box'),
+(14243, 'Administrator', '2026-09-24 11:15:50', 'Edited Item: Communication Box'),
+(14244, 'Administrator', '2026-09-24 11:16:04', 'Edited Item: Indoor UTP Cable'),
+(14245, 'Administrator', '2026-09-24 11:17:49', 'Added Item:Ruijie Indoor Access Point'),
+(14246, 'Administrator', '2026-09-24 11:18:01', 'Edited Item: Ruijie Indoor Access Point'),
+(14247, 'Administrator', '2026-09-24 11:19:11', 'Added Item:Ruijie Indoor Access Point'),
+(14248, 'Administrator', '2026-09-24 11:19:59', 'Added Item:Ruijie Indoor Access Point'),
+(14249, 'Administrator', '2026-09-24 11:21:14', 'Added Item:Ruijie Router Switch'),
+(14250, 'Administrator', '2026-09-24 11:22:07', 'Added Item:Ruijie Router Switch'),
+(14251, 'Administrator', '2026-09-24 11:23:40', 'Added Item:UPS'),
+(14252, 'Administrator', '2026-09-24 11:25:07', 'Added Item:Starlink Kit'),
+(14253, 'Administrator', '2026-09-24 11:33:19', 'Changed status to deployed for Pass Slip: PS-2026-0001'),
+(14254, 'Administrator', '2026-09-24 11:36:14', 'Changed status to borrowed for Pass Slip: PS-2026-0001'),
+(14255, 'admin', '2026-09-24 11:36:41', 'Created Pass Slip: EXPLICIT-DEP - Explicit Deploy (1 Pcs)'),
+(14256, 'admin', '2026-09-24 11:43:01', 'Created Pass Slip: SUCCESS-TEST - Success Dummy (1 Pcs)'),
+(14257, 'admin', '2026-09-24 11:46:41', 'Created Pass Slip: EDITTEST - Starlink (1 Pcs)'),
+(14258, 'Administrator', '2026-09-24 11:47:23', 'Deleted Pass Slip(s): PS-2026-0001'),
+(14259, 'admin', '2026-09-24 12:09:30', 'Created Pass Slip: PS-2026-0001 - Starlink (1 Pcs)'),
+(14260, 'admin', '2026-09-24 12:09:51', 'Created Pass Slip: PS-2026-0002 - Starlink (1 Pcs)'),
+(14261, 'Administrator', '2026-09-24 12:52:41', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14262, 'Administrator', '2026-09-24 12:52:47', 'Created Pass Slip: PS-2026-0002 - Ruijie Indoor Access Point (1 Pcs)'),
+(14263, 'Administrator', '2026-09-24 12:52:59', 'Deleted Pass Slip(s): PS-2026-0002'),
+(14264, 'Administrator', '2026-09-24 12:55:34', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14265, 'Administrator', '2026-09-24 12:55:44', 'Created Pass Slip: PS-2026-0002 - Ruijie/Reyee:RG-RAP2260(G) (1 Pcs)'),
+(14266, 'Administrator', '2026-09-24 12:58:19', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14267, 'Administrator', '2026-09-24 12:58:23', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14268, 'Administrator', '2026-09-24 12:59:28', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14269, 'Administrator', '2026-09-24 13:07:48', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14270, 'Administrator', '2026-09-24 13:09:03', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14271, 'Administrator', '2026-09-24 13:09:46', 'Created Pass Slip: PS-2026-0002 - Ruijie Indoor Access Point (1 Pcs)'),
+(14272, 'Administrator', '2026-09-24 13:10:50', 'Created Pass Slip: PS-2026-0003 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14273, 'Administrator', '2026-09-24 13:11:41', 'Deleted Pass Slip(s): PS-2026-0002'),
+(14274, 'Administrator', '2026-09-24 13:12:25', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14275, 'Administrator', '2026-09-24 13:13:37', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14276, 'Administrator', '2026-09-24 13:13:41', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14277, 'Administrator', '2026-09-24 13:13:49', 'Created Pass Slip: PS-2026-0002 - Ruijie/Reyee:RG-RAP2260(G) (1 Pcs)'),
+(14278, 'Administrator', '2026-09-24 13:15:37', 'Created Pass Slip: PS-2026-0001 - Ruijie/Reyee:RG-RAP2026(G) (1 Pcs)'),
+(14279, 'Administrator', '2026-09-24 13:15:41', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14280, 'Administrator', '2026-09-24 13:15:50', 'Created Pass Slip: PS-2026-0002 - Ruijie/Reyee:RG-RAP2260(G) (1 Pcs)'),
+(14281, 'Administrator', '2026-09-24 13:17:43', 'Added Item:UPS'),
+(14282, 'Administrator', '2026-09-24 13:18:23', 'Added Item:UPS'),
+(14283, 'Administrator', '2026-09-24 13:23:57', 'Added Item:UPS'),
+(14284, 'Administrator', '2026-09-24 13:24:13', 'Added Item:UPS'),
+(14285, 'Administrator', '2026-09-24 13:24:27', 'Added Item:UPS'),
+(14286, 'Administrator', '2026-09-24 13:24:51', 'Added Item:UPS'),
+(14287, 'Administrator', '2026-09-24 13:26:53', 'Added Item:UPS'),
+(14288, 'Administrator', '2026-09-24 13:27:05', 'Added Item:UPS'),
+(14289, 'Administrator', '2026-09-24 13:52:09', 'Added Item:UPS'),
+(14290, 'Administrator', '2026-09-24 13:52:17', 'Added Item:UPS'),
+(14291, 'Administrator', '2026-09-24 13:52:29', 'Added Item:UPS'),
+(14292, 'Administrator', '2026-09-24 13:52:48', 'Added Item:UPS'),
+(14293, 'Administrator', '2026-09-24 13:53:35', 'Added Item:UPS'),
+(14294, 'Administrator', '2026-09-24 13:53:44', 'Added Item:UPS'),
+(14295, 'Administrator', '2026-09-24 13:53:55', 'Added Item:UPS'),
+(14296, 'Administrator', '2026-09-24 13:54:05', 'Added Item:UPS'),
+(14297, 'Administrator', '2026-09-24 13:54:18', 'Added Item:UPS'),
+(14298, 'Administrator', '2026-09-24 13:54:31', 'Added Item:UPS'),
+(14299, 'Administrator', '2026-09-24 13:54:38', 'Added Item:UPS'),
+(14300, 'Administrator', '2026-09-24 13:54:48', 'Added Item:UPS'),
+(14301, 'Administrator', '2026-09-24 13:56:23', 'Added Item:UPS'),
+(14302, 'Administrator', '2026-09-24 13:56:31', 'Added Item:UPS'),
+(14303, 'Administrator', '2026-09-24 13:56:40', 'Added Item:UPS'),
+(14304, 'Administrator', '2026-09-24 13:56:55', 'Added Item:UPS'),
+(14305, 'Administrator', '2026-09-24 13:57:03', 'Added Item:UPS'),
+(14306, 'Administrator', '2026-09-24 13:57:11', 'Added Item:UPS'),
+(14307, 'Administrator', '2026-09-24 13:57:26', 'Edited Item: Communication Box'),
+(14308, 'Administrator', '2026-09-24 13:57:57', 'Added Item:Power Distribution Unit'),
+(14309, 'Administrator', '2026-09-24 14:17:44', 'Created Pass Slip: PS-2026-0001 - Ruijie Indoor Access Point (1 Pcs)'),
+(14310, 'Administrator', '2026-09-24 14:17:46', 'Deleted Pass Slip(s): PS-2026-0001'),
+(14311, 'Administrator', '2026-09-24 14:18:19', 'Edited Item: Indoor UTP Cable'),
+(14312, 'Administrator', '2026-09-24 14:18:56', 'Added Item:Outdoor UTP Cable'),
+(14313, 'Administrator', '2026-09-24 14:19:17', 'Edited Item: Rolls outdoor UTP Cable'),
+(14314, 'Administrator', '2026-09-24 14:19:32', 'Added Item:Rolls Indoor UTP Cable'),
+(14315, 'Administrator', '2026-09-24 14:19:48', 'Edited Item: Rolls Outdoor UTP Cable'),
+(14316, 'Administrator', '2026-09-24 14:20:24', 'Added Item:Ladder'),
+(14317, 'Administrator', '2026-09-24 14:20:50', 'Added Item:DICT Free WI-FI Signage'),
+(14318, 'Administrator', '2026-09-24 14:21:56', 'Edited Item: DICT Free WI-FI Signage'),
+(14319, 'Administrator', '2026-09-24 14:22:14', 'Edited Item: UPS'),
+(14320, 'Administrator', '2026-09-24 14:23:58', 'Added Item:Ruijie Outdoor AP'),
+(14321, 'Administrator', '2026-09-24 14:24:20', 'Added Item:Ruijie Indoor AP'),
+(14322, 'Administrator', '2026-09-24 14:24:36', 'Added Item:Indoor UTP Cable'),
+(14323, 'Administrator', '2026-09-24 14:24:50', 'Added Item:Indoor UTP Cable'),
+(14324, 'Administrator', '2026-09-24 14:28:50', 'Added Item:Indoor UTP Cable'),
+(14325, 'Administrator', '2026-09-24 14:29:06', 'Added Item:Indoor UTP Cable'),
+(14326, 'Administrator', '2026-09-24 14:30:15', 'Added Item:Indoor UTP Cable'),
+(14327, 'Administrator', '2026-09-24 14:30:32', 'Edited Item: Ruijie Indoor AP'),
+(14328, 'Administrator', '2026-09-24 14:30:39', 'Edited Item: Ruijie Indoor AP'),
+(14329, 'Administrator', '2026-09-24 14:30:44', 'Edited Item: Ruijie Indoor AP'),
+(14330, 'Administrator', '2026-09-24 14:30:49', 'Edited Item: Ruijie Indoor AP'),
+(14331, 'Administrator', '2026-09-24 14:30:53', 'Edited Item: Ruijie Indoor AP'),
+(14332, 'Administrator', '2026-09-24 14:32:30', 'Edited Item: Ruijie Indoor Access Point'),
+(14333, 'Administrator', '2026-09-24 14:32:35', 'Edited Item: Ruijie Indoor Access Point'),
+(14334, 'Administrator', '2026-09-24 14:32:44', 'Edited Item: Ruijie Indoor Access Point'),
+(14335, 'Administrator', '2026-09-24 14:32:48', 'Edited Item: Ruijie Indoor Access Point'),
+(14336, 'Administrator', '2026-09-24 14:32:55', 'Edited Item: Ruijie Indoor Access Point'),
+(14337, 'Administrator', '2026-09-24 14:33:01', 'Edited Item: Ruijie Indoor Access Point'),
+(14338, 'Administrator', '2026-09-24 14:33:50', 'Added Item:Ruijie Indoor Access Point'),
+(14339, 'Administrator', '2026-09-24 14:34:05', 'Added Item:Ruijie Indoor Access Point'),
+(14340, 'Administrator', '2026-09-24 14:34:16', 'Added Item:Ruijie Indoor Access Point'),
+(14341, 'Administrator', '2026-09-24 14:34:27', 'Added Item:Ruijie Indoor Access Point'),
+(14342, 'Administrator', '2026-09-24 14:35:13', 'Edited Item: Ruijie Indoor Access Point'),
+(14343, 'Administrator', '2026-09-24 14:35:27', 'Added Item:Ruijie Indoor Access Point'),
+(14344, 'Administrator', '2026-09-24 14:35:33', 'Created Pass Slip: PS-2026-0001 - Communication Box (1 Pcs)'),
+(14345, 'Administrator', '2026-09-24 14:35:37', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14346, 'Administrator', '2026-09-24 14:35:39', 'Added Item:Ruijie Indoor Access Point'),
+(14347, 'Administrator', '2026-09-24 14:35:44', 'Edited Pass Slip: PS-2026-0001 (full)'),
+(14348, 'Administrator', '2026-09-24 14:35:46', 'Deleted Pass Slip(s): PS-2026-0001'),
+(14349, 'Administrator', '2026-09-24 14:35:51', 'Added Item:Ruijie Indoor Access Point'),
+(14350, 'Administrator', '2026-09-24 14:35:59', 'Added Item:Ruijie Indoor Access Point'),
+(14351, 'Administrator', '2026-09-24 14:36:08', 'Added Item:Ruijie Indoor Access Point'),
+(14352, 'Administrator', '2026-09-24 14:36:18', 'Added Item:Ruijie Indoor Access Point'),
+(14353, 'Administrator', '2026-09-24 14:37:08', 'Added Item:Ruijie Indoor Access Point'),
+(14354, 'Administrator', '2026-09-24 14:37:15', 'Added Item:Ruijie Indoor Access Point'),
+(14355, 'Administrator', '2026-09-24 14:37:24', 'Added Item:Ruijie Indoor Access Point'),
+(14356, 'Administrator', '2026-09-24 14:37:33', 'Added Item:Ruijie Indoor Access Point'),
+(14357, 'Administrator', '2026-09-24 14:41:57', 'Created Pass Slip: PS-2026-0001 - Ruijie Indoor Access Point (0 Pcs)'),
+(14358, 'Administrator', '2026-09-24 14:52:58', 'Created Pass Slip: PS-2026-0002 - Ruijie Indoor Access Point (1 Pcs)'),
+(14359, 'Administrator', '2026-09-24 14:52:59', 'Deleted Pass Slip(s): PS-2026-0002'),
+(14360, 'Administrator', '2026-09-24 14:53:21', 'Added Item:UPS'),
+(14361, 'Administrator', '2026-09-24 14:53:31', 'Added Item:UPS'),
+(14362, 'Administrator', '2026-09-24 14:53:41', 'Added Item:UPS'),
+(14363, 'Administrator', '2026-09-24 14:54:07', 'Added Item:UPS'),
+(14364, 'Administrator', '2026-09-24 14:54:26', 'Added Item:(No description)'),
+(14365, 'Administrator', '2026-09-24 14:54:58', 'Added Item:RG-RAP72Pro-OD - 5 -'),
+(14366, 'Administrator', '2026-09-24 14:55:21', 'Added Item:RG-RAP72Pro-OD - 5 -'),
+(14367, 'Administrator', '2026-09-24 14:55:36', 'Added Item:RG-RAP72Pro-OD - 5 -'),
+(14368, 'Administrator', '2026-09-24 14:56:47', 'Added Item:RG-RAP72Pro-OD - 5 -'),
+(14369, 'Administrator', '2026-09-24 14:57:00', 'Added Item:RG-RAP72Pro-OD - 5 -'),
+(14370, 'Administrator', '2026-09-24 14:58:13', 'Deleted Pass Slip(s): PS-2026-0001'),
+(14371, 'Administrator', '2026-09-24 14:58:37', 'Created Pass Slip: PS-2026-0001 - Ruijie Indoor Access Point (0 Pcs)'),
+(14372, 'Administrator', '2026-09-24 16:18:06', 'Edited Item: UPS'),
+(14373, 'Administrator', '2026-09-24 16:57:20', 'Deleted Pass Slip(s): PS-2026-0001'),
+(14379, 'Administrator', '2026-09-24 17:19:17', 'Added Item:UPS'),
+(14380, 'Administrator', '2026-09-24 17:19:42', 'Deleted Item: UPS'),
+(14381, 'Administrator', '2026-09-24 18:19:40', 'Added Item:Ruijie Indoor Access Point'),
+(14382, 'Administrator', '2026-09-24 18:19:49', 'Edited Item: Ruijie Indoor Access Point'),
+(14384, 'Administrator', '2026-09-28 07:51:13', 'Deleted Item: Ruijie Indoor Access Point'),
+(14397, 'Administrator', '2026-09-29 09:33:06', 'Updated group shared fields: RG-RAP72Pro-OD - 5 -'),
+(14398, 'Administrator', '2026-09-29 09:33:39', 'Updated group shared fields: RG-RAP72Pro-OD - 5 -'),
+(14399, 'Administrator', '2026-09-29 10:38:48', 'Edited Item: RG-RAP72Pro-OD - 5 -'),
+(14400, 'Administrator', '2026-09-29 10:41:09', 'Edited Item: RG-RAP72Pro-OD - 5 -'),
+(14401, 'Administrator', '2026-09-29 10:45:10', 'Edited Item: RG-RAP72Pro-OD - 5 -'),
+(14402, 'Administrator', '2026-09-29 10:45:22', 'Edited Item: RG-RAP72Pro-OD - 5 -'),
+(14403, 'Administrator', '2026-09-29 10:45:27', 'Updated group shared fields: RG-RAP72Pro-OD - 5 -'),
+(14404, 'Administrator', '2026-09-29 10:45:33', 'Updated group shared fields: RG-RAP72Pro-OD - 5 -'),
+(14421, 'Administrator', '2026-09-29 21:30:26', 'Added Item PH8TESTSDATA'),
+(14422, 'Administrator', '2026-09-29 21:31:15', 'Added Item PH8TESTSDATA'),
+(14423, 'Administrator', '2026-09-29 21:31:15', 'Added Item PH8TESTSDATA'),
+(14424, 'Administrator', '2026-09-29 21:31:15', 'Added Item PH8TESTSDATA'),
+(14425, 'User', '2026-09-29 21:31:16', 'Added Item PH8TESTSDATA'),
+(14432, 'Administrator', '2026-09-29 20:47:11', 'Added Item:test1'),
+(14433, 'Administrator', '2026-09-29 20:50:54', 'Created Pass Slip: PS-2026-0001 - test1 (1 Pcs)'),
+(14434, 'Administrator', '2026-10-05 10:47:24', 'Added Item:(No description)'),
+(14435, 'Administrator', '2026-10-05 10:47:51', 'Deleted Item: (No description)'),
+(14436, 'Administrator', '2026-10-05 10:48:00', 'Added Item:(No description)'),
+(14437, 'Administrator', '2026-10-05 10:49:52', 'Deleted Item: (No description)'),
+(14438, 'Administrator', '2026-10-05 10:49:59', 'Added Item:(No description)'),
+(14439, 'Administrator', '2026-10-05 10:50:08', 'Deleted Item: (No description)'),
+(14440, 'Administrator', '2026-10-05 11:19:00', 'Added Item:tsett'),
+(14441, 'Administrator', '2026-10-05 11:26:46', 'Added Item:wawwww'),
+(14442, 'Administrator', '2026-10-05 16:48:50', 'Deleted Item: tsett'),
+(14443, 'Administrator', '2026-10-05 16:50:33', 'Added Item:UPS'),
+(14444, 'Administrator', '2026-10-05 16:50:59', 'Edited Item: Test ra'),
+(14445, 'Administrator', '2026-10-05 16:51:42', 'Deleted Item: wawwww'),
+(14446, 'Administrator', '2026-10-05 16:53:31', 'Added Item:teststs'),
+(14447, 'Administrator', '2026-10-05 16:55:40', 'Deleted Item: teststs'),
+(14448, 'Administrator', '2026-10-05 17:06:42', 'Deleted Item: Test ra');
 
 -- --------------------------------------------------------
 
@@ -18029,6 +18240,63 @@ INSERT INTO `tbluser` (`id`, `username`, `password`, `type`) VALUES
 (3, 'dictsdn', 'dictsdn', 'administrator'),
 (5, 'user', 'user', 'user');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `uat`
+--
+
+CREATE TABLE `uat` (
+  `id` int(11) NOT NULL,
+  `municipality` varchar(150) NOT NULL,
+  `strategy` varchar(100) NOT NULL,
+  `transport_location` varchar(255) NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `uat`
+--
+
+INSERT INTO `uat` (`id`, `municipality`, `strategy`, `transport_location`, `latitude`, `longitude`, `created_by`, `created_at`) VALUES
+(10, 'Surigao City', 'PICS-PP P2', 'Day-asan Barangay Hall', 9.7726000, 125.5500800, 'dictsdn', '2026-09-24 02:25:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `uat_items`
+--
+
+CREATE TABLE `uat_items` (
+  `id` int(11) NOT NULL,
+  `uat_id` int(11) NOT NULL,
+  `pass_slip_item_id` int(11) DEFAULT NULL,
+  `inventory_id` int(11) DEFAULT NULL,
+  `qty` int(11) NOT NULL DEFAULT 1,
+  `unit` varchar(50) DEFAULT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `serial_numbers` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `uat_items`
+--
+
+INSERT INTO `uat_items` (`id`, `uat_id`, `pass_slip_item_id`, `inventory_id`, `qty`, `unit`, `item_name`, `description`, `serial_numbers`, `created_at`) VALUES
+(25, 10, NULL, 6695, 1, 'Pcs', 'Router/Switch', 'Ruijie/Reyee:RG-RAP2260(G)', 'ZAT311U03569B', '2026-09-24 02:25:29'),
+(26, 10, NULL, 6689, 1, 'Pcs', 'Dish', 'Starlink', '4PBA02411985', '2026-09-24 02:25:29'),
+(27, 10, NULL, 6690, 1, 'Pcs', 'Wi-Fi Router', 'Starlink', 'W3WV000001085812', '2026-09-24 02:25:29'),
+(28, 10, NULL, 6691, 1, 'Pcs', 'UPS', 'Secure', '310026735EA9440000751', '2026-09-24 02:25:29'),
+(29, 10, NULL, 6692, 1, 'Pcs', 'Com Box', 'Communication Box', '', '2026-09-24 02:25:29'),
+(30, 10, NULL, 6693, 1, 'Pcs', 'Access Point', 'Ruijie/Reyee:RG-RAP2260(G)', 'ZAT309N08236', '2026-09-24 02:25:29'),
+(31, 10, NULL, 6694, 1, 'Pcs', 'Access Point', 'Ruijie/Reyee:RG-RAP2026(G)', 'ZAT311U002162', '2026-09-24 02:25:29'),
+(32, 10, NULL, 6695, 1, 'Pcs', 'Access Point', 'Ruijie/Reyee:RG-RAP2260(G)', 'ZAT311U03569B', '2026-09-24 02:25:29');
+
 --
 -- Indexes for dumped tables
 --
@@ -18056,6 +18324,7 @@ ALTER TABLE `bills_monitoring_backup_005`
 --
 ALTER TABLE `classifications`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_classifications_category` (`category`),
   ADD KEY `idx_classifications_status` (`status`),
   ADD KEY `idx_classifications_category` (`category`),
   ADD KEY `idx_classifications_cat_sub` (`category`,`sub_item`);
@@ -18067,17 +18336,44 @@ ALTER TABLE `cybersecurity_metrics`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `employees`
+--
+ALTER TABLE `employees`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `full_name` (`full_name`);
+
+--
+-- Indexes for table `ics`
+--
+ALTER TABLE `ics`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ics_no` (`ics_no`);
+
+--
+-- Indexes for table `ics_attachments`
+--
+ALTER TABLE `ics_attachments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ics_no` (`ics_no`);
+
+--
+-- Indexes for table `ics_items`
+--
+ALTER TABLE `ics_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ics_id` (`ics_id`);
+
+--
 -- Indexes for table `inventory`
 --
 ALTER TABLE `inventory`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_inventory_serial_unique` (`serial_unique`),
   ADD KEY `idx_inventory_project` (`project`),
-  ADD KEY `idx_inventory_ics` (`ics`),
   ADD KEY `idx_inventory_date` (`date`),
-  ADD KEY `idx_inventory_item_type` (`item_type`),
-  ADD KEY `idx_inventory_classification` (`classification`),
   ADD KEY `idx_inventory_remarks` (`remarks`(100)),
-  ADD KEY `idx_inventory_status` (`status`);
+  ADD KEY `idx_inventory_inventory_item_no` (`inventory_item_no`),
+  ADD KEY `idx_inventory_assigned_to` (`assigned_to`);
 
 --
 -- Indexes for table `letters_monitoring`
@@ -18095,6 +18391,13 @@ ALTER TABLE `locationrequests`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `notification_dismissals`
+--
+ALTER TABLE `notification_dismissals`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_dismissal` (`admin_id`,`source_type`,`source_id`);
+
+--
 -- Indexes for table `pass_slip`
 --
 ALTER TABLE `pass_slip`
@@ -18103,7 +18406,13 @@ ALTER TABLE `pass_slip`
   ADD KEY `pass_slip_no` (`pass_slip_no`),
   ADD KEY `idx_pass_slip_status` (`status`),
   ADD KEY `idx_pass_slip_return_date` (`return_date`),
-  ADD KEY `idx_pass_slip_pullout_date` (`pullout_date`);
+  ADD KEY `idx_pass_slip_pullout_date` (`pullout_date`),
+  ADD KEY `fk_pass_slip_requested_by_out_emp_id` (`requested_by_out_emp_id`),
+  ADD KEY `fk_pass_slip_inspected_by_out_emp_id` (`inspected_by_out_emp_id`),
+  ADD KEY `fk_pass_slip_approved_by_out_emp_id` (`approved_by_out_emp_id`),
+  ADD KEY `fk_pass_slip_requested_by_return_emp_id` (`requested_by_return_emp_id`),
+  ADD KEY `fk_pass_slip_inspected_by_return_emp_id` (`inspected_by_return_emp_id`),
+  ADD KEY `fk_pass_slip_approved_by_return_emp_id` (`approved_by_return_emp_id`);
 
 --
 -- Indexes for table `pass_slip_attachments`
@@ -18117,6 +18426,18 @@ ALTER TABLE `pass_slip_attachments`
 --
 ALTER TABLE `procurement_tracking`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `property_categories`
+--
+ALTER TABLE `property_categories`
+  ADD PRIMARY KEY (`code`);
+
+--
+-- Indexes for table `property_no_counter`
+--
+ALTER TABLE `property_no_counter`
+  ADD PRIMARY KEY (`seq_year`);
 
 --
 -- Indexes for table `targets_initiatives`
@@ -18243,6 +18564,21 @@ ALTER TABLE `tbluser`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `uat`
+--
+ALTER TABLE `uat`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `uat_items`
+--
+ALTER TABLE `uat_items`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_uat_items_pass_slip_item` (`pass_slip_item_id`),
+  ADD KEY `uat_id` (`uat_id`),
+  ADD KEY `idx_uat_items_inventory` (`inventory_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -18262,7 +18598,7 @@ ALTER TABLE `bills_monitoring_backup_005`
 -- AUTO_INCREMENT for table `classifications`
 --
 ALTER TABLE `classifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=425;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=430;
 
 --
 -- AUTO_INCREMENT for table `cybersecurity_metrics`
@@ -18271,16 +18607,40 @@ ALTER TABLE `cybersecurity_metrics`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT for table `employees`
+--
+ALTER TABLE `employees`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `ics`
+--
+ALTER TABLE `ics`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `ics_attachments`
+--
+ALTER TABLE `ics_attachments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `ics_items`
+--
+ALTER TABLE `ics_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
 -- AUTO_INCREMENT for table `inventory`
 --
 ALTER TABLE `inventory`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6653;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6812;
 
 --
 -- AUTO_INCREMENT for table `letters_monitoring`
 --
 ALTER TABLE `letters_monitoring`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1052;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1053;
 
 --
 -- AUTO_INCREMENT for table `locationrequests`
@@ -18289,10 +18649,16 @@ ALTER TABLE `locationrequests`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
 
 --
+-- AUTO_INCREMENT for table `notification_dismissals`
+--
+ALTER TABLE `notification_dismissals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+
+--
 -- AUTO_INCREMENT for table `pass_slip`
 --
 ALTER TABLE `pass_slip`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=217;
 
 --
 -- AUTO_INCREMENT for table `pass_slip_attachments`
@@ -18322,7 +18688,7 @@ ALTER TABLE `tblactivity`
 -- AUTO_INCREMENT for table `tblactivityphoto`
 --
 ALTER TABLE `tblactivityphoto`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=761;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=771;
 
 --
 -- AUTO_INCREMENT for table `tblbpls`
@@ -18340,7 +18706,7 @@ ALTER TABLE `tblbplsmonitoring`
 -- AUTO_INCREMENT for table `tblfwfa`
 --
 ALTER TABLE `tblfwfa`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10163;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10172;
 
 --
 -- AUTO_INCREMENT for table `tbllocality`
@@ -18352,7 +18718,7 @@ ALTER TABLE `tbllocality`
 -- AUTO_INCREMENT for table `tbllogs`
 --
 ALTER TABLE `tbllogs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13788;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14449;
 
 --
 -- AUTO_INCREMENT for table `tblmunicipal`
@@ -18388,7 +18754,7 @@ ALTER TABLE `tblsite`
 -- AUTO_INCREMENT for table `tblstaff`
 --
 ALTER TABLE `tblstaff`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `tbltech4ed`
@@ -18409,14 +18775,46 @@ ALTER TABLE `tbluser`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `uat`
+--
+ALTER TABLE `uat`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `uat_items`
+--
+ALTER TABLE `uat_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+
+--
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `ics_items`
+--
+ALTER TABLE `ics_items`
+  ADD CONSTRAINT `ics_items_ibfk_1` FOREIGN KEY (`ics_id`) REFERENCES `ics` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `pass_slip`
 --
 ALTER TABLE `pass_slip`
+  ADD CONSTRAINT `fk_pass_slip_approved_by_out_emp_id` FOREIGN KEY (`approved_by_out_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pass_slip_approved_by_return_emp_id` FOREIGN KEY (`approved_by_return_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pass_slip_inspected_by_out_emp_id` FOREIGN KEY (`inspected_by_out_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pass_slip_inspected_by_return_emp_id` FOREIGN KEY (`inspected_by_return_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pass_slip_requested_by_out_emp_id` FOREIGN KEY (`requested_by_out_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pass_slip_requested_by_return_emp_id` FOREIGN KEY (`requested_by_return_emp_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `pass_slip_ibfk_1` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `uat_items`
+--
+ALTER TABLE `uat_items`
+  ADD CONSTRAINT `fk_uat_items_inventory` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`),
+  ADD CONSTRAINT `fk_uat_items_pass_slip_item` FOREIGN KEY (`pass_slip_item_id`) REFERENCES `pass_slip` (`id`),
+  ADD CONSTRAINT `fk_uat_items_uat` FOREIGN KEY (`uat_id`) REFERENCES `uat` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
