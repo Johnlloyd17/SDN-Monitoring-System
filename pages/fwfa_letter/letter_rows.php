@@ -330,7 +330,7 @@ if (!function_exists('letter_render_headers')) {
             $out .= '<th>' . letter_escape($label) . '</th>' . "\n";
         }
         if ($canManage) {
-            $out .= '<th style="width: 40px !important;">Option</th>' . "\n";
+            $out .= '<th style="width: 80px !important;">Option</th>' . "\n";
         }
         $out .= '</tr>' . "\n";
         return $out;
@@ -361,8 +361,8 @@ if (!function_exists('letter_render_rows')) {
             }
             if ($canManage) {
                 $out .= '<td>'
-                      . '<button class="btn btn-primary btn-sm btn-edit-item" data-id="' . $id . '" data-name="' . $name . '"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button> '
-                      . '<button class="btn btn-primary btn-sm btn-view-item" data-id="' . $id . '" data-name="' . $name . '"><i class="fa fa-eye" aria-hidden="true"></i> View</button>'
+                      . '<button class="btn btn-primary btn-xs btn-edit-item" data-id="' . $id . '" data-name="' . $name . '" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button> '
+                      . '<button class="btn btn-info btn-xs btn-view-item" data-id="' . $id . '" data-name="' . $name . '" title="View"><i class="fa fa-eye" aria-hidden="true"></i></button>'
                       . '</td>';
             }
             $out .= '</tr>';

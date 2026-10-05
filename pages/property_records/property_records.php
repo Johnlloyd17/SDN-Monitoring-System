@@ -149,6 +149,7 @@ if (!isset($_SESSION['role'])) {
                                             <option value="5" selected>5</option>
                                             <option value="10">10</option>
                                             <option value="20">20</option>
+                                            <option value="30">30</option>
                                             <option value="40">40</option>
                                             <option value="50">50</option>
                                             <option value="100">100</option>
@@ -158,6 +159,7 @@ if (!isset($_SESSION['role'])) {
                                         <label style="margin:0; font-weight:normal;"> records per page</label>
                                           <?php if ($_SESSION['role'] !== 'staff') { ?>
                                             <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus"></i> Add Record</button>
+                                            
                                             <button class="btn btn-danger btn-sm" id="deleteSelectedBtn" disabled><i class="fa fa-trash"></i> Delete Selected</button>
                                         <?php } ?>
                                     </div>
@@ -247,7 +249,22 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Serial Number:</label><input name="txt_serial" class="form-control input-sm" type="text" placeholder="Serial Number" /></div>
                                     <div class="form-group"><label>Unit Cost:</label><input name="txt_cost" id="add_cost" class="form-control input-sm" type="text" placeholder="e.g. 43,904.00" /></div>
                                     <div class="form-group"><label>Total Cost:</label><input name="txt_total_cost" id="addTotalCost" class="form-control input-sm" type="text" readonly placeholder="Auto-computed (Qty x Unit Cost)" /></div>
+
                                     <div class="form-group"><label>Inventory Item no.:</label><input name="txt_inventory_item_no" class="form-control input-sm" type="text" placeholder="Inventory Item no." /></div>
+
+<div class="form-group"><label>Category (for auto Property No.):</label>
+    <select name="txt_category" id="addCategory" class="form-control input-sm">
+        <option value="">-- Select category --</option>
+        <?php
+        $catQ = @mysqli_query($con, "SELECT code, name FROM property_categories ORDER BY code");
+        if ($catQ) { while ($cat = mysqli_fetch_assoc($catQ)) {
+            echo '<option value="' . htmlspecialchars($cat['code']) . '">' . htmlspecialchars($cat['code'] . ' - ' . $cat['name']) . '</option>';
+        } }
+        ?>
+    </select></div>
+<div class="form-group"><label>Location Code (for auto Property No.):</label><input name="txt_location_code" id="addLocationCode" class="form-control input-sm" type="text" maxlength="10" style="text-transform:uppercase;" placeholder="e.g. SDN" /><small class="text-muted">Leave "Inventory Item no." empty to auto-generate (e.g. 2026-01-001-SDN).</small></div>
+<div id="addNoPreview" style="font-size:13px; margin:-6px 0 12px;"></div>
+
                                     <div class="form-group"><label>Assigned / Deployed:</label><input name="txt_assigned_to" class="form-control input-sm" type="text" placeholder="Who/where the item is currently deployed (blank = unassigned)" /></div>
                                     <div class="form-group"><label>Estimated Useful Life:</label><input name="txt_life" class="form-control input-sm" type="text" placeholder="Estimated Useful Life" /></div>
                                     <div class="form-group"><label>Remarks:</label><textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks"></textarea></div>
@@ -896,6 +913,62 @@ if (!isset($_SESSION['role'])) {
                 calcTotalCost('#edit_quantity', '#edit_cost', '#editTotalCost');
             });
 
+            // Prevent Enter from submitting forms in Add/Edit modals
+            $('#addForm, #editForm').on('keydown', 'input, textarea, select', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+            
+// ========== LIVE PREVIEW OF NEXT PROPERTY NO. ==========
+var previewTimer = null;
+function updateNoPreview() {
+    var box = document.getElementById('addNoPreview');
+    if (!box) return;
+    var typed = String($('#addForm [name="txt_inventory_item_no"]').val() || '').trim();
+    if (typed !== '') {
+        box.className = 'text-muted';
+        box.textContent = 'Using the number you typed. The series counter is not used.';
+        return;
+    }
+    var cat = $('#addCategory').val();
+    var loc = String($('#addLocationCode').val() || '').trim();
+    if (!cat || !loc) {
+        box.className = 'text-muted';
+        box.textContent = 'Choose a Category and type a Location Code to see the next number.';
+        return;
+    }
+    $.ajax({
+        url: basePath + 'inventory_crud.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'preview_property_no',
+            txt_category: cat,
+            txt_location_code: loc,
+            txt_date: $('#addForm [name="txt_date"]').val()
+        }
+    }).done(function(res) {
+        if (res && res.success) {
+            box.className = 'text-success';
+            box.innerHTML = 'Next Property No.: <strong>' + escHtml(res.preview) + '</strong>';
+        } else {
+            box.className = 'text-danger';
+            box.textContent = (res && res.error) || 'Cannot preview the number.';
+        }
+    }).fail(function() {
+        box.className = 'text-danger';
+        box.textContent = 'Cannot preview the number (network error).';
+    });
+}
+function schedulePreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(updateNoPreview, 300);
+}
+$('#addCategory, #addLocationCode, #addForm [name="txt_date"], #addForm [name="txt_inventory_item_no"]').on('input change', schedulePreview);
+$('#addModal').on('shown.bs.modal hidden.bs.modal', function() { setTimeout(updateNoPreview, 50); });
+
             // ========== ADD ITEM ==========
             $('#addForm').on('submit', function(e) {
                 e.preventDefault();
@@ -908,7 +981,11 @@ if (!isset($_SESSION['role'])) {
                     $('#addAlert').html('<div class="alert alert-danger">Please fill in at least one field before saving.</div>').show();
                     return;
                 }
-
+var invNoVal = String($('#addForm [name="txt_inventory_item_no"]').val() || '').trim();
+if (invNoVal === '' && (!$('#addCategory').val() || String($('#addLocationCode').val() || '').trim() === '')) {
+    $('#addAlert').html('<div class="alert alert-danger">Leave Inventory Item no. empty only if you choose a Category and type a Location Code. Otherwise type the Inventory Item no. yourself.</div>').show();
+    return;
+}
                 var btn = document.getElementById('addSubmitBtn');
                 btn.disabled = true;
                 btn.value = 'Adding...';
@@ -926,7 +1003,7 @@ if (!isset($_SESSION['role'])) {
                     success: function(res) {
                         if (res.success) {
                             $('#addModal').modal('hide');
-                            showToast('Item added successfully!', 'success');
+                   showToast(res.inventory_item_no ? 'Item added! Property No.: ' + res.inventory_item_no : 'Item added successfully!', 'success');
                             loadData(currentPage);
                             loadFilters();
                             document.getElementById('addForm').reset();

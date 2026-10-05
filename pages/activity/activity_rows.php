@@ -487,7 +487,7 @@ function activity_render_headers($view, $canManage)
         $html .= '<th>' . $e($label) . '</th>';
     }
     if ($canManage) {
-        $html .= '<th style="width: 40px !important;">Option</th>';
+        $html .= '<th style="width: 80px !important;">Option</th>';
     }
     $html .= '</tr>';
 
@@ -521,8 +521,8 @@ function activity_render_rows($con, $view, $filters, $canManage)
         }
         if ($canManage) {
             $html .= '<td>
-                    <button class="btn btn-primary btn-sm btn-edit-activity" data-id="' . intval($row['id']) . '" data-activity="' . $e($row['activity']) . '"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                    <button class="btn btn-primary btn-sm btn-view-activity" data-id="' . intval($row['id']) . '" data-activity="' . $e($row['activity']) . '"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                    <button class="btn btn-primary btn-xs btn-edit-activity" data-id="' . intval($row['id']) . '" data-activity="' . $e($row['activity']) . '" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                    <button class="btn btn-info btn-xs btn-view-activity" data-id="' . intval($row['id']) . '" data-activity="' . $e($row['activity']) . '" title="View"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </td>';
         }
         $html .= '</tr>';

@@ -70,8 +70,22 @@ $activityView = 'iidb';
                             DataTables
                         </div>
 
-<div style="padding:10px; display: flex; justify-content: space-between;">
-                                            <div>
+<!-- Toolbar: Show N records per page + Add + Delete (left) | Search + Import + Export (right) -->
+<div style="padding:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                                <label style="margin:0; font-weight:normal;">Show </label>
+                                                <select id="perPageSelect" class="form-control input-sm" style="display:inline-block; width:auto;">
+                                                    <option value="5" selected>5</option>
+                                                    <option value="10">10</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="40">40</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                    <option value="150">150</option>
+                                                    <option value="200">200</option>
+                                                </select>
+                                                <label style="margin:0; font-weight:normal;"> records per page</label>
                                             <?php if ($_SESSION['role'] === 'Administrator') { ?>
                                                         <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal"><i class="fa fa-user-plus" aria-hidden="true"></i> Add Activity</button>
                                                         <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
@@ -82,7 +96,14 @@ $activityView = 'iidb';
                                                         <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                                                     <?php } ?>
                                             </div>
-                                            <div>
+                                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                                <div class="input-group" style="width:300px;">
+                                                    <input type="text" id="searchInput" class="form-control input-sm" placeholder="Search records..." />
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-default btn-sm" id="searchBtn" title="Search"><i class="fa fa-search"></i></button>
+                                                        <button type="button" class="btn btn-default btn-sm" id="clearSearchBtn" title="Clear search"><i class="fa fa-times"></i></button>
+                                                    </span>
+                                                </div>
                                             <?php if ($_SESSION['role'] === 'Administrator') { ?>
                                                 <!-- Import Button -->
                                                 <button id="importBtn" class="btn btn-success btn-sm"><i class="fa fa-download" aria-hidden="true"></i> Import</button>
@@ -140,9 +161,16 @@ $activityView = 'iidb';
 
     $(function() {
         $("#table").dataTable({
-           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
+           "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": [],
+           // "ltip" keeps the length dropdown and the DataTables search box out
+           // of the DOM. ../toolbar_js.php draws "Show N records per page" and
+           // the search box instead, so both features stay enabled and only
+           // their default controls are hidden.
+           "dom": "ltip",
+           "pageLength": 5
         });
     });
+    <?php include dirname(__DIR__) . '/toolbar_js.php'; ?>
 
    // Function to update the date and time
    function updateDateTime() {

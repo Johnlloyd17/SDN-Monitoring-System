@@ -231,7 +231,7 @@ function participant_render_headers($view) {
         $out .= '<th>' . htmlspecialchars($label, ENT_QUOTES) . '</th>' . "\n";
     }
     if ($canManage) {
-        $out .= '<th style="width: 40px !important;">Option</th>' . "\n";
+        $out .= '<th style="width: 80px !important;">Option</th>' . "\n";
     }
 
     return $out;
@@ -264,11 +264,11 @@ function participant_render_rows($con, $view, $filters, $canManage) {
         if ($canManage) {
             $name = htmlspecialchars((string) $row['fullname'], ENT_QUOTES);
             $out .= '<td>'
-                  .   '<button class="btn btn-primary btn-sm btn-edit-item" data-id="' . $id . '" data-name="' . $name . '">'
-                  .     '<i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit'
+                  .   '<button class="btn btn-primary btn-xs btn-edit-item" data-id="' . $id . '" data-name="' . $name . '" title="Edit">'
+                  .     '<i class="fa fa-pencil-square-o" aria-hidden="true"></i>'
                   .   '</button> '
-                  .   '<button class="btn btn-primary btn-sm btn-view-item" data-id="' . $id . '" data-name="' . $name . '">'
-                  .     '<i class="fa fa-eye" aria-hidden="true"></i> View'
+                  .   '<button class="btn btn-info btn-xs btn-view-item" data-id="' . $id . '" data-name="' . $name . '" title="View">'
+                  .     '<i class="fa fa-eye" aria-hidden="true"></i>'
                   .   '</button>'
                   . '</td>';
         }

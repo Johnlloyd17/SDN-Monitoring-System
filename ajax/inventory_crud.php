@@ -51,6 +51,64 @@ function fieldsFilled(array $values) {
     return false;
 }
 
+// ---------------------------------------------------------------
+// Property No. generator: YYYY-CC-NNN-LOCATION (e.g. 2026-01-001-SDN)
+//  - CC comes from the editable `property_categories` table
+//  - NNN is ONE shared counter per year (all categories), kept in
+//    `property_no_counter`; it restarts at 001 every new year
+//  - Only used when the user leaves "Inventory Item no." empty
+// ---------------------------------------------------------------
+function propertyNoFail($msg) {
+    return array('ok' => false, 'error' => $msg);
+}
+
+function generatePropertyNo($con, $year, $categoryCode, $locationCode) {
+    $categoryCode = trim((string)$categoryCode);
+    $locationCode = strtoupper(preg_replace('/\s+/', '', (string)$locationCode));
+    $year = (int)$year;
+
+    if ($categoryCode === '') {
+        return propertyNoFail('Please choose a Category, or type the Inventory Item no. manually.');
+    }
+    if ($locationCode === '') {
+        return propertyNoFail('Please type a Location Code, or type the Inventory Item no. manually.');
+    }
+    if (!preg_match('/^[A-Z0-9]+$/', $locationCode)) {
+        return propertyNoFail('Location Code can only use letters and numbers.');
+    }
+    if ($year < 2000 || $year > 2100) {
+        return propertyNoFail('The Date Acquired year looks invalid. Please check the date.');
+    }
+
+    $stmt = @mysqli_prepare($con, "SELECT code FROM property_categories WHERE code = ? LIMIT 1");
+    if (!$stmt) {
+        return propertyNoFail('Property category table not found. Please run property_no_migration.sql first.');
+    }
+    mysqli_stmt_bind_param($stmt, 's', $categoryCode);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $catRow = $res ? mysqli_fetch_assoc($res) : null;
+    mysqli_stmt_close($stmt);
+    if (!$catRow) {
+        return propertyNoFail('Unknown Category code. Please choose a Category from the list.');
+    }
+    $cc = $catRow['code'];
+
+    // Atomic increment (safe if two people save at the same time).
+    $ok = @mysqli_query($con, "INSERT INTO property_no_counter (seq_year, last_seq) VALUES ($year, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE last_seq = LAST_INSERT_ID(last_seq + 1)");
+    if (!$ok) {
+        return propertyNoFail('Property counter table not found. Please run property_no_migration.sql first.');
+    }
+    $seqRes = mysqli_query($con, "SELECT LAST_INSERT_ID() AS seq");
+    $seqRow = $seqRes ? mysqli_fetch_assoc($seqRes) : null;
+    $seq = $seqRow ? (int)$seqRow['seq'] : 0;
+    if ($seq < 1) {
+        return propertyNoFail('Could not generate the running number. Please try again.');
+    }
+
+    return array('ok' => true, 'no' => $year . '-' . $cc . '-' . str_pad((string)$seq, 3, '0', STR_PAD_LEFT) . '-' . $locationCode);
+}
+
 if ($action === 'add') {
     $filled = fieldsFilled(array(
         $_POST['txt_project'] ?? '',
@@ -96,6 +154,19 @@ if ($action === 'add') {
         }
     }
 
+    // Auto-generate the Property No. only when the box was left empty.
+    $generatedPropertyNo = null;
+    if ($inventoryItemNo === null) {
+        $genYear = $date !== null ? (int)substr($date, 0, 4) : (int)date('Y');
+        $gen = generatePropertyNo($con, $genYear, $_POST['txt_category'] ?? '', $_POST['txt_location_code'] ?? '');
+        if (!$gen['ok']) {
+            echo json_encode(['success' => false, 'error' => $gen['error']]);
+            exit;
+        }
+        $inventoryItemNo = $gen['no'];
+        $generatedPropertyNo = $inventoryItemNo;
+    }
+
     $action_log = 'Added Item:' . $description;
     mysqli_query($con, "INSERT INTO tbllogs (user, logdate, action) VALUES ('" . $_SESSION['role'] . "', NOW(), '$action_log')");
 
@@ -119,7 +190,7 @@ if ($action === 'add') {
             }
         }
 
-        echo json_encode(['success' => true, 'message' => 'Item added successfully']);
+        echo json_encode(['success' => true, 'message' => 'Item added successfully', 'inventory_item_no' => $generatedPropertyNo]);
     } else if (mysqli_errno($con) === 1062) {
         echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to another item.']);
     } else {

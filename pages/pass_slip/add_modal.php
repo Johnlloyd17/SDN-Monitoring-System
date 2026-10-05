@@ -224,6 +224,45 @@ window.initItemEditor = function(cfg) {
 
     updateCount();
 
+    function isRowEmpty(row) {
+        if (!row) return true;
+        var invHidden = row.querySelector('input[name="inventory_id[]"]');
+        var desc = row.querySelector('input[name="description[]"]');
+        var savedId = row.querySelector('input[name="id[]"]');
+        if (savedId && String(savedId.value).trim() !== '') return false;
+        if (invHidden && String(invHidden.value).trim() !== '') return false;
+        if (desc && String(desc.value).trim() !== '') return false;
+        var serial = row.querySelector('input[name="serial_no[]"]');
+        if (serial && String(serial.value).trim() !== '') return false;
+        return true;
+    }
+
+    function findFirstEmptyRow() {
+        var rows = itemsBody.querySelectorAll('.item-row');
+        for (var i = 0; i < rows.length; i++) {
+            if (isRowEmpty(rows[i])) return rows[i];
+        }
+        return null;
+    }
+
+    function addNewRow() {
+        var newRow = document.createElement('tr');
+        newRow.className = 'item-row';
+        newRow.innerHTML = window.itemRowHtml();
+        itemsBody.appendChild(newRow);
+        activeRow = newRow;
+        return newRow;
+    }
+
+    function getOrCreateRowForScan() {
+        var emptyRow = findFirstEmptyRow();
+        if (emptyRow) {
+            activeRow = emptyRow;
+            return emptyRow;
+        }
+        return addNewRow();
+    }
+
     function currentRow() {
         if (activeRow && itemsBody.contains(activeRow)) return activeRow;
         var rows = itemsBody.querySelectorAll('.item-row');
@@ -295,13 +334,51 @@ window.initItemEditor = function(cfg) {
         return empty;
     }
 
-    function runInvSearch(q) {
+    function normalizeSerial(s) {
+        if (s === null || s === undefined) return '';
+        return String(s).trim().toUpperCase();
+    }
+
+    function runInvSearch(q, scanCtx) {
+        var ctx = scanCtx || { isScan: false, scanValue: '' };
         $.getJSON('function.php?action=inventory_search&q=' + encodeURIComponent(q), function(data) {
             invSearchResults.innerHTML = '';
             if (!data || !data.length) {
-                invSearchResults.appendChild(buildNoMatchRow());
+                if (ctx.isScan && ctx.scanValue) {
+                    var emptyScan = document.createElement('div');
+                    emptyScan.className = 'list-group-item disabled-item text-center text-muted';
+                    emptyScan.textContent = 'No match found for scanned code: ' + ctx.scanValue;
+                    invSearchResults.appendChild(emptyScan);
+                } else {
+                    invSearchResults.appendChild(buildNoMatchRow());
+                }
                 invSearchResults.style.display = 'block';
                 return;
+            }
+            var exactMatches = [];
+            var scanValNorm = normalizeSerial(ctx.scanValue || q);
+            if (ctx.isScan || scanValNorm) {
+                data.forEach(function(item) {
+                    if (normalizeSerial(item.serial) === scanValNorm) {
+                        exactMatches.push(item);
+                    }
+                });
+            }
+            if (ctx.isScan && exactMatches.length === 1) {
+                var em = exactMatches[0];
+                var emQty = parseInt(em.quantity, 10);
+                var emNoStock = isNaN(emQty) || emQty <= 0;
+                var emUnavailable = !!(em.on_loan || em.deployed || em.on_deployed_slip || emNoStock);
+        if (!emUnavailable) {
+            fillRow(getOrCreateRowForScan(), em);
+            if (window.createItemEditor && typeof window.createItemEditor.focusSearch === 'function') {
+                window.createItemEditor.focusSearch();
+            }
+            if (window.editItemEditor && typeof window.editItemEditor.focusSearch === 'function') {
+                window.editItemEditor.focusSearch();
+            }
+            return;
+        }
             }
             data.forEach(function(item) {
                 var qty = parseInt(item.quantity, 10);
@@ -310,7 +387,13 @@ window.initItemEditor = function(cfg) {
                 if (!item.on_loan && !item.deployed && !item.on_deployed_slip && !noStock) {
                     d.addEventListener('click', function(e) {
                         e.preventDefault();
-                        fillRow(currentRow(), item);
+                        fillRow(getOrCreateRowForScan(), item);
+                        if (window.createItemEditor && typeof window.createItemEditor.focusSearch === 'function') {
+                            window.createItemEditor.focusSearch();
+                        }
+                        if (window.editItemEditor && typeof window.editItemEditor.focusSearch === 'function') {
+                            window.editItemEditor.focusSearch();
+                        }
                     });
                 } else if (item.on_loan) {
                     d.title = 'This item is currently on loan to another pass slip.';
@@ -323,6 +406,12 @@ window.initItemEditor = function(cfg) {
                 }
                 invSearchResults.appendChild(d);
             });
+            if (ctx.isScan && exactMatches.length === 0 && data.length > 0) {
+                var note = document.createElement('div');
+                note.className = 'list-group-item disabled-item text-center text-muted';
+                note.textContent = 'No match found for scanned code: ' + (ctx.scanValue || q);
+                invSearchResults.insertBefore(note, invSearchResults.firstChild);
+            }
             invSearchResults.style.display = 'block';
         }).fail(function() { hideResults(); });
     }
@@ -331,12 +420,72 @@ window.initItemEditor = function(cfg) {
         var q = invSearchInput.value.trim();
         clearTimeout(searchTimer);
         if (q.length < 2) { hideResults(); return; }
-        searchTimer = setTimeout(function() { runInvSearch(q); }, 250);
+        searchTimer = setTimeout(function() { runInvSearch(q, { isScan: false, scanValue: q }); }, 250);
     });
 
+    var scanKeyTimes = [];
+    var SCAN_THRESHOLD_MS = 40;
+
+    function isScannerLike(times) {
+        if (times.length < 2) return false;
+        var intervals = [];
+        for (var i = 1; i < times.length; i++) {
+            var iv = times[i] - times[i - 1];
+            if (iv >= 0) intervals.push(iv);
+        }
+        if (intervals.length === 0) return false;
+        var fastCount = 0;
+        for (var j = 0; j < intervals.length; j++) {
+            if (intervals[j] <= SCAN_THRESHOLD_MS) fastCount++;
+        }
+        var ratio = fastCount / intervals.length;
+        return ratio >= 0.8;
+    }
+
     invSearchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') e.preventDefault();
-        if (e.key === 'Escape') hideResults();
+        if (e.key === 'Escape') {
+            hideResults();
+            scanKeyTimes = [];
+            return;
+        }
+        if (e.key === 'Enter') {
+            var qEnter = invSearchInput.value.trim();
+            var nowEnter = Date.now();
+            var isScanEnter = false;
+            if (qEnter.length >= 1 && scanKeyTimes.length >= 1) {
+                var lastTime = scanKeyTimes[scanKeyTimes.length - 1];
+                if (nowEnter - lastTime < 150 && isScannerLike(scanKeyTimes)) {
+                    isScanEnter = true;
+                }
+            }
+            e.preventDefault();
+            clearTimeout(searchTimer);
+            if (qEnter.length < 2) {
+                hideResults();
+                scanKeyTimes = [];
+                return;
+            }
+            if (isScanEnter) {
+                runInvSearch(qEnter, { isScan: true, scanValue: qEnter });
+            } else {
+                runInvSearch(qEnter, { isScan: false, scanValue: qEnter });
+            }
+            scanKeyTimes = [];
+            return;
+        }
+        if (e.ctrlKey || e.metaKey || e.altKey) {
+            return;
+        }
+        if (e.key.length === 1 && !e.repeat) {
+            scanKeyTimes.push(Date.now());
+            if (scanKeyTimes.length > 50) {
+                scanKeyTimes.shift();
+            }
+        } else if (e.key === 'Backspace' || e.key === 'Delete') {
+            if (scanKeyTimes.length > 0) {
+                scanKeyTimes.shift();
+            }
+        }
     });
 
     document.addEventListener('keydown', function(e) {
@@ -349,11 +498,7 @@ window.initItemEditor = function(cfg) {
     });
 
     addRowBtn.addEventListener('click', function() {
-        var newRow = document.createElement('tr');
-        newRow.className = 'item-row';
-        newRow.innerHTML = window.itemRowHtml();
-        itemsBody.appendChild(newRow);
-        activeRow = newRow;
+        addNewRow();
     });
 
     itemsBody.addEventListener('click', function(e) {
@@ -369,6 +514,14 @@ window.initItemEditor = function(cfg) {
 
     new MutationObserver(updateCount).observe(itemsBody, { childList: true });
 
+    function focusSearch() {
+        if (invSearchInput && typeof invSearchInput.focus === 'function') {
+            setTimeout(function() {
+                try { invSearchInput.focus(); } catch (e) {}
+            }, 0);
+        }
+    }
+
     return {
         setActiveRow: function(row) {
             if (row && itemsBody.contains(row)) activeRow = row;
@@ -377,7 +530,9 @@ window.initItemEditor = function(cfg) {
             itemsBody.innerHTML = '<tr class="item-row">' + window.itemRowHtml() + '</tr>';
             activeRow = itemsBody.querySelector('.item-row');
             updateCount();
-        }
+            focusSearch();
+        },
+        focusSearch: focusSearch
     };
 };
 
@@ -504,6 +659,18 @@ document.addEventListener('DOMContentLoaded', function() {
         addBtnId: 'editAddRowBtn',
         wrapId: 'editInvSearchWrap',
         countLabelId: 'editItemCount'
+    });
+
+    $('#addPassSlipModal').on('shown.bs.modal', function() {
+        if (window.createItemEditor && typeof window.createItemEditor.focusSearch === 'function') {
+            window.createItemEditor.focusSearch();
+        }
+    });
+
+    $('#editPassSlipModal').on('shown.bs.modal', function() {
+        if (window.editItemEditor && typeof window.editItemEditor.focusSearch === 'function') {
+            window.editItemEditor.focusSearch();
+        }
     });
 
     initEmployeeNameAutocomplete('createRequestedBy', 'createRequestedByEmpId');

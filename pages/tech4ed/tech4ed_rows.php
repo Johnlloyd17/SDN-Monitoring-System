@@ -154,8 +154,8 @@ function tech4ed_render_rows($con, $filters, $canManage, $view = 'all')
 
         if ($canManage) {
             echo '<td>
-                    <button class="btn btn-primary btn-sm btn-edit-item" data-id="' . intval($row['id']) . '"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</button>
-                    <button class="btn btn-primary btn-sm btn-view-item" data-id="' . intval($row['id']) . '" data-name="' . $e($row['barangay']) . '"><i class="fa fa-eye" aria-hidden="true"></i> View</button>
+                    <button class="btn btn-primary btn-xs btn-edit-item" data-id="' . intval($row['id']) . '" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                    <button class="btn btn-info btn-xs btn-view-item" data-id="' . intval($row['id']) . '" data-name="' . $e($row['barangay']) . '" title="View"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </td>';
         }
         echo '</tr>';

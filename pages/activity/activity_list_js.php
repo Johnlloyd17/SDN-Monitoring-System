@@ -88,6 +88,17 @@ $activityFilterAjax = isset($activityFilterAjax) && $activityFilterAjax;
     }
 
     /**
+     * The search box filters the rows that are already in the table, so it stays
+     * put while a dropdown refresh brings in new rows. The DataTable keeps the
+     * search applied across a refresh, which is what we want: narrow the list
+     * with a dropdown, then search inside what is left.
+     *
+     * The box itself and its wiring live in ../toolbar_js.php, shared with every
+     * other list page, and the pages init the DataTable with dom "ltip" so the
+     * DataTables length dropdown and default search box are not drawn.
+     */
+
+    /**
      * On the pages that opted in, drop the inline onchange="this.form.submit()"
      * from each filter dropdown and refresh the rows in place instead. The
      * dropdowns and the rows are both filtered by the same values, so what you
