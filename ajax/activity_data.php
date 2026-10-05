@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../pages/auth_check.php';
 require_auth_api();
-?>
-
-<?php
 
 header('Content-Type: application/json');
 
@@ -19,4 +16,7 @@ echo json_encode(array(
     'success' => true,
     'rows'    => activity_render_rows($con, $view, $filters, activity_can_manage($view)),
     'cards'   => activity_render_cards($con, $view, $filters),
+    // The filter dropdowns narrow each other, so they have to be rebuilt too
+    // when a dropdown changes the filter.
+    'filters' => activity_render_filter_cells($con, $view, $filters),
 ));

@@ -136,7 +136,10 @@ $activityView = 'cyber';
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
-<?php include __DIR__ . '/activity_list_js.php'; ?>
+<?php
+// Filter dropdowns refresh the rows in place instead of reloading the page.
+$activityFilterAjax = true;
+include __DIR__ . '/activity_list_js.php'; ?>
 <script type="text/javascript">
 
     $(function() {

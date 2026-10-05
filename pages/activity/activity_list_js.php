@@ -9,9 +9,15 @@
 if (!isset($activityView)) {
     $activityView = 'cyber';
 }
+
+// A page opts into filtering in place by setting $activityFilterAjax = true
+// before this include. The other activity pages are left as they are, with
+// onchange="this.form.submit()".
+$activityFilterAjax = isset($activityFilterAjax) && $activityFilterAjax;
 ?>
 <script type="text/javascript">
     var activitySectorView = <?php echo json_encode($activityView); ?>;
+    var activityFilterAjax = <?php echo $activityFilterAjax ? 'true' : 'false'; ?>;
 
     /**
      * Re-read the active filter dropdowns so an in-place refresh shows the
@@ -63,12 +69,41 @@ if (!isset($activityView)) {
             var cards = document.getElementById('activityCards');
             if (cards && resp.cards) cards.innerHTML = resp.cards;
 
+            // Rebuild the dropdowns so they keep narrowing each other the way a
+            // full page reload does, then wire the new selects up again.
+            var cells = document.querySelectorAll('.activity-filter-cell');
+            if (cells.length > 0 && resp.filters) {
+                for (var i = 0; i < cells.length && i < resp.filters.length; i++) {
+                    cells[i].innerHTML = resp.filters[i];
+                }
+                bindActivityFilterForm();
+            }
+
             rebindActivityCheckboxes();
         }).fail(function () {
             if (typeof showToast === 'function') {
                 showToast('Could not refresh the list. Please reload the page.', 'error');
             }
         });
+    }
+
+    /**
+     * On the pages that opted in, drop the inline onchange="this.form.submit()"
+     * from each filter dropdown and refresh the rows in place instead. The
+     * dropdowns and the rows are both filtered by the same values, so what you
+     * see is what the reload used to show.
+     */
+    function bindActivityFilterForm() {
+        if (!activityFilterAjax) return;
+        var f = document.getElementById('filterForm');
+        if (!f) return;
+        var selects = f.querySelectorAll('select');
+        for (var j = 0; j < selects.length; j++) {
+            selects[j].removeAttribute('onchange');
+            selects[j].addEventListener('change', function () {
+                refreshActivityData();
+            });
+        }
     }
 
     function bindPhotoCheckboxes() {
@@ -84,6 +119,7 @@ if (!isset($activityView)) {
 
     $(function () {
         rebindActivityCheckboxes();
+        bindActivityFilterForm();
 
         // ---- Delete ----------------------------------------------------
         var delBtn = document.getElementById('btn_delete');

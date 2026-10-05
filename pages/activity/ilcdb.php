@@ -136,6 +136,10 @@ $activityView = 'ilcdb';
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
+<?php
+// Filter dropdowns refresh the rows in place instead of reloading the page.
+$activityFilterAjax = true;
+include __DIR__ . '/activity_list_js.php'; ?>
 <script type="text/javascript">
 
     $(function() {
@@ -143,8 +147,6 @@ $activityView = 'ilcdb';
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
         });
     });
-
-<?php include __DIR__ . '/activity_list_js.php'; ?>
 
    // Function to update the date and time
    function updateDateTime() {

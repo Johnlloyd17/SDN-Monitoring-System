@@ -398,7 +398,7 @@ function activity_render_select($con, $view, $filters, $key, $postName, $column,
         }
     }
 
-    return '<div class="col-md-3 col-sm-6 col-xs-12">
+    return '<div class="col-md-3 col-sm-6 col-xs-12 activity-filter-cell">
     <div class="form-group">
         <label for="' . $e($selectId) . '">' . $e($label) . '</label>
         <select id="' . $e($selectId) . '" name="' . $e($postName) . '" class="form-control" onchange="this.form.submit()">
@@ -409,7 +409,12 @@ function activity_render_select($con, $view, $filters, $key, $postName, $column,
 </div>';
 }
 
-function activity_render_filters($con, $view, $filters)
+/**
+ * The four dropdowns as separate cells. The AJAX filter on the opt-in pages
+ * swaps the cells one by one so the dropdowns keep narrowing each other the
+ * way a full page reload does.
+ */
+function activity_render_filter_cells($con, $view, $filters)
 {
     $cfg = activity_view_config($view);
 
@@ -417,11 +422,17 @@ function activity_render_filters($con, $view, $filters)
     // inline export handler in each page reads the filter by id.
     $secondId = lcfirst($cfg['secondColumn']) . 'Select';
 
-    $html = activity_render_select($con, $view, $filters, 'project', 'project', $cfg['firstColumn'], $cfg['firstLabel'], $cfg['firstAll'], 'projectSelect');
-    $html .= activity_render_select($con, $view, $filters, 'second', $cfg['secondColumn'], $cfg['secondColumn'], $cfg['secondLabel'], $cfg['secondAll'], $secondId);
-    $html .= activity_render_select($con, $view, $filters, 'municipality', 'municipality', 'municipality', 'Select Municipality', 'All Municipalities', 'municipalitySelect');
-    $html .= activity_render_select($con, $view, $filters, 'barangay', 'barangay', 'barangay', 'Select Barangay', 'All Barangays', 'barangaySelect');
-    return $html;
+    return array(
+        activity_render_select($con, $view, $filters, 'project', 'project', $cfg['firstColumn'], $cfg['firstLabel'], $cfg['firstAll'], 'projectSelect'),
+        activity_render_select($con, $view, $filters, 'second', $cfg['secondColumn'], $cfg['secondColumn'], $cfg['secondLabel'], $cfg['secondAll'], $secondId),
+        activity_render_select($con, $view, $filters, 'municipality', 'municipality', 'municipality', 'Select Municipality', 'All Municipalities', 'municipalitySelect'),
+        activity_render_select($con, $view, $filters, 'barangay', 'barangay', 'barangay', 'Select Barangay', 'All Barangays', 'barangaySelect'),
+    );
+}
+
+function activity_render_filters($con, $view, $filters)
+{
+    return implode('', activity_render_filter_cells($con, $view, $filters));
 }
 
 /**

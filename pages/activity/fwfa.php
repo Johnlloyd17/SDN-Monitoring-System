@@ -135,6 +135,7 @@ $activityView = 'fwfa';
         <!-- jQuery 2.0.2 -->
         <?php }
         include "../footer.php"; ?>
+<?php include __DIR__ . '/activity_list_js.php'; ?>
 <script type="text/javascript">
 
     $(function() {
@@ -142,8 +143,6 @@ $activityView = 'fwfa';
            "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 0,3 ] } ],"aaSorting": []
         });
     });
-
-<?php include __DIR__ . '/activity_list_js.php'; ?>
 
    // Function to update the date and time
    function updateDateTime() {
