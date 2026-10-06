@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+bower_components/
+
+# Environment / secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
+
+# Editors / IDE
+.vscode/
+.idea/
+.obsidian/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# PHP / Composer
+vendor/
+composer.phar
+php_errors.log
+
+# Runtime / user-generated content
+uploads/*
+!uploads/fw4a/FW4A.xlsx
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.tar.gz
