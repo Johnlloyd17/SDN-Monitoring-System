@@ -62,22 +62,17 @@ function propertyNoFail($msg) {
     return array('ok' => false, 'error' => $msg);
 }
 
-function generatePropertyNo($con, $year, $categoryCode, $locationCode) {
+// Validates Category + Location against the lookup tables.
+// Returns array('ok' => true, 'cc' => ..., 'loc' => ...) or propertyNoFail(...).
+function propertyNoResolve($con, $categoryCode, $locationCode) {
     $categoryCode = trim((string)$categoryCode);
     $locationCode = strtoupper(preg_replace('/\s+/', '', (string)$locationCode));
-    $year = (int)$year;
 
     if ($categoryCode === '') {
         return propertyNoFail('Please choose a Category, or type the Inventory Item no. manually.');
     }
     if ($locationCode === '') {
-        return propertyNoFail('Please type a Location Code, or type the Inventory Item no. manually.');
-    }
-    if (!preg_match('/^[A-Z0-9]+$/', $locationCode)) {
-        return propertyNoFail('Location Code can only use letters and numbers.');
-    }
-    if ($year < 2000 || $year > 2100) {
-        return propertyNoFail('The Date Acquired year looks invalid. Please check the date.');
+        return propertyNoFail('Please choose a Location, or type the Inventory Item no. manually.');
     }
 
     $stmt = @mysqli_prepare($con, "SELECT code FROM property_categories WHERE code = ? LIMIT 1");
@@ -92,7 +87,59 @@ function generatePropertyNo($con, $year, $categoryCode, $locationCode) {
     if (!$catRow) {
         return propertyNoFail('Unknown Category code. Please choose a Category from the list.');
     }
-    $cc = $catRow['code'];
+
+    $stmt = @mysqli_prepare($con, "SELECT code FROM property_locations WHERE code = ? LIMIT 1");
+    if (!$stmt) {
+        return propertyNoFail('Property location table not found. Please run property_locations_migration.sql first.');
+    }
+    mysqli_stmt_bind_param($stmt, 's', $locationCode);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $locRow = $res ? mysqli_fetch_assoc($res) : null;
+    mysqli_stmt_close($stmt);
+    if (!$locRow) {
+        return propertyNoFail('Unknown Location code. Please choose a Location from the list.');
+    }
+
+    return array('ok' => true, 'cc' => $catRow['code'], 'loc' => $locRow['code']);
+}
+
+// True when the number is already used by an inventory record (typed manually).
+function propertyNoTaken($con, $no) {
+    $stmt = @mysqli_prepare($con, "SELECT 1 FROM inventory WHERE inventory_item_no = ? LIMIT 1");
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, 's', $no);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $taken = $res && mysqli_fetch_row($res);
+    mysqli_stmt_close($stmt);
+    return (bool)$taken;
+}
+
+// Skips running numbers a manual entry already occupies, so a generated
+// number can never repeat an existing one (manual numbers win; typed values
+// are stored exactly as typed). Returns array('seq'=>..., 'no'=>...) or null.
+function propertyNoFreeSeq($con, $year, $cc, $loc, $seq) {
+    for ($guard = 0; $guard < 1000; $guard++) {
+        $no = $year . '-' . $cc . '-' . str_pad((string)$seq, 3, '0', STR_PAD_LEFT) . '-' . $loc;
+        if (!propertyNoTaken($con, $no)) {
+            return array('seq' => $seq, 'no' => $no);
+        }
+        $seq++;
+    }
+    return null;
+}
+
+function generatePropertyNo($con, $year, $categoryCode, $locationCode) {
+    $year = (int)$year;
+    if ($year < 2000 || $year > 2100) {
+        return propertyNoFail('The Date Acquired year looks invalid. Please check the date.');
+    }
+
+    $parts = propertyNoResolve($con, $categoryCode, $locationCode);
+    if (!$parts['ok']) {
+        return $parts;
+    }
 
     // Atomic increment (safe if two people save at the same time).
     $ok = @mysqli_query($con, "INSERT INTO property_no_counter (seq_year, last_seq) VALUES ($year, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE last_seq = LAST_INSERT_ID(last_seq + 1)");
@@ -106,7 +153,54 @@ function generatePropertyNo($con, $year, $categoryCode, $locationCode) {
         return propertyNoFail('Could not generate the running number. Please try again.');
     }
 
-    return array('ok' => true, 'no' => $year . '-' . $cc . '-' . str_pad((string)$seq, 3, '0', STR_PAD_LEFT) . '-' . $locationCode);
+    $free = propertyNoFreeSeq($con, $year, $parts['cc'], $parts['loc'], $seq);
+    if ($free === null) {
+        return propertyNoFail('Could not generate a free running number. Please try again.');
+    }
+
+    return array('ok' => true, 'no' => $free['no']);
+}
+
+// ---------------------------------------------------------------
+// Read-only preview of the next Property No. Same validations as
+// the generator, but it NEVER writes to `property_no_counter` or
+// any other table -- it only reads last_seq.
+// ---------------------------------------------------------------
+if ($action === 'preview_property_no') {
+    $date = normDateOrNull($_POST['txt_date'] ?? '');
+    $year = $date !== null ? (int)substr($date, 0, 4) : (int)date('Y');
+    if ($year < 2000 || $year > 2100) {
+        echo json_encode(array('success' => false, 'error' => 'The Date Acquired year looks invalid. Please check the date.'));
+        exit;
+    }
+
+    $parts = propertyNoResolve($con, $_POST['txt_category'] ?? '', $_POST['txt_location_code'] ?? '');
+    if (!$parts['ok']) {
+        echo json_encode(array('success' => false, 'error' => $parts['error']));
+        exit;
+    }
+
+    $seq = 1;
+    $stmt = @mysqli_prepare($con, "SELECT last_seq FROM property_no_counter WHERE seq_year = ?");
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, 'i', $year);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+        $row = $res ? mysqli_fetch_assoc($res) : null;
+        mysqli_stmt_close($stmt);
+        if ($row) {
+            $seq = (int)$row['last_seq'] + 1;
+        }
+    }
+
+    $free = propertyNoFreeSeq($con, $year, $parts['cc'], $parts['loc'], $seq);
+    if ($free === null) {
+        echo json_encode(array('success' => false, 'error' => 'Could not preview the running number. Please try again.'));
+        exit;
+    }
+
+    echo json_encode(array('success' => true, 'preview' => $free['no']));
+    exit;
 }
 
 if ($action === 'add') {
@@ -356,7 +450,8 @@ if ($action === 'group_update') {
     $cost = isset($_POST['shared_cost']) ? normText(str_replace(',', '', $_POST['shared_cost'])) : null;
     $life = normIntOrNull($_POST['shared_life'] ?? '');
     $received = normText($_POST['shared_received'] ?? '');
-    $inventoryItemNo = normText($_POST['shared_inv_no'] ?? '');
+    // inventory_item_no is deliberately NOT part of this update: each unit
+    // keeps its own number (shared overwrite removed per approved rule).
 
     $unitMatch = $groupUnit === null
         ? 'unit IS NULL'
@@ -374,8 +469,7 @@ if ($action === 'group_update') {
             item = " . sqlVal($con, $item) . ",
             cost = " . sqlVal($con, $cost) . ",
             life = " . sqlVal($con, $life) . ",
-            received = " . sqlVal($con, $received) . ",
-            inventory_item_no = " . sqlVal($con, $inventoryItemNo) . "
+            received = " . sqlVal($con, $received) . "
             WHERE TRIM(description) = " . sqlVal($con, $groupDescription) . " AND $unitMatch AND (serial IS NOT NULL AND TRIM(serial) <> '')";
 
     if (mysqli_query($con, $sql)) {
@@ -472,7 +566,7 @@ if ($action === 'add_unit') {
     $life = null;
     $archetypeId = intval($_POST['archetype_id'] ?? 0);
     if ($archetypeId > 0) {
-        $archStmt = mysqli_prepare($con, "SELECT project, item, received, cost, inventory_item_no, life, description, unit FROM inventory WHERE id = ?");
+        $archStmt = mysqli_prepare($con, "SELECT project, item, received, cost, life, description, unit FROM inventory WHERE id = ?");
         mysqli_stmt_bind_param($archStmt, 'i', $archetypeId);
         mysqli_stmt_execute($archStmt);
         $archResult = mysqli_stmt_get_result($archStmt);
@@ -483,7 +577,6 @@ if ($action === 'add_unit') {
             $item = $archRow['item'];
             $received = $archRow['received'];
             $cost = $archRow['cost'];
-            $inventoryItemNo = $archRow['inventory_item_no'];
             $life = $archRow['life'];
         }
     }
@@ -496,6 +589,24 @@ if ($action === 'add_unit') {
             echo json_encode(['success' => false, 'error' => 'This serial number is already assigned to ' . $dupDesc]);
             exit;
         }
+    }
+
+    // Each unit gets ITS OWN number:
+    //  - a typed Inventory Item no. is saved exactly as typed (no counter);
+    //  - otherwise one number is reserved atomically from the shared
+    //    per-year counter (category/location come from the approved rule:
+    //    the Add Unit panel, prefilled from the group's first unit).
+    $manualNo = normText($_POST['txt_inventory_item_no'] ?? '');
+    if ($manualNo !== null) {
+        $inventoryItemNo = $manualNo;
+    } else {
+        $genYear = $date !== null ? (int)substr($date, 0, 4) : (int)date('Y');
+        $gen = generatePropertyNo($con, $genYear, $_POST['txt_category'] ?? '', $_POST['txt_location_code'] ?? '');
+        if (!$gen['ok']) {
+            echo json_encode(['success' => false, 'error' => $gen['error']]);
+            exit;
+        }
+        $inventoryItemNo = $gen['no'];
     }
 
     $action_log = 'Added Item:' . $groupDescription;
@@ -518,6 +629,7 @@ if ($action === 'add_unit') {
                 'date' => $date,
                 'assigned_to' => $assignedTo,
                 'remarks' => $remarks,
+                'inventory_item_no' => $inventoryItemNo,
             ),
         ]);
     } else if (mysqli_errno($con) === 1062) {

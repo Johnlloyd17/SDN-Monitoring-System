@@ -34,6 +34,15 @@ php_errors.log
 # Runtime / user-generated content
 uploads/*
 !uploads/fw4a/FW4A.xlsx
+pages/**/photo/
+pages/settings/backups/
+screenshots/
+
+# Local planning / test notes (not for the public repo)
+MANUAL_TEST_PROPERTY_RECORDS.md
+HEATMAP_LOCATORS_PLAN.md
+GITHUB_PUBLISH.md
+LARAVEL_MIGRATION_TRACKER.md
 
 # Archives
 *.zip

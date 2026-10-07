@@ -103,6 +103,7 @@ if ($_SESSION['role'] == "Administrator") {
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
+                <li><a href="../property_records/series_register.php"><i class="fa fa-list-ol"></i> Series Register</a></li>
              
                 <li><a href="../uat/uat.php"><i class="fa fa-file-signature"></i> UAT Management</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
@@ -229,6 +230,7 @@ if ($_SESSION['role'] == "Administrator") {
             </a>
             <ul class="treeview-menu">
                 <li><a href="../property_records/property_records.php"><i class="fa fa-database"></i> Inventory Records</a></li>
+                <li><a href="../property_records/series_register.php"><i class="fa fa-list-ol"></i> Series Register</a></li>
                 <li><a href="../property_records/classifications.php"><i class="fa fa-tags"></i> Classifications</a></li>
                 <li><a href="../uat/uat.php"><i class="fa fa-file-signature"></i> UAT Management</a></li>
                 <li><a href="../pass_slip/pass_slip.php"><i class="fa fa-file-text-o"></i> Office Equipment Pass Slip</a></li>
