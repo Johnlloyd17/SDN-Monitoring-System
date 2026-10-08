@@ -13,6 +13,17 @@ if (!isset($_SESSION['role'])) {
 ?>
 
 <body class="skin-black">
+	<style>
+		tr.series-person-banner td {
+			background-color: #eef4fb !important;
+			font-weight: 700;
+		}
+
+		tr.series-person-banner.series-person-blank td {
+			color: #999;
+			font-weight: 600;
+		}
+	</style>
 	<?php include '../connection.php'; ?>
 	<?php include('../header.php'); ?>
 
@@ -102,54 +113,96 @@ if (!isset($_SESSION['role'])) {
 				var q = String(document.getElementById('srSearch').value || '').trim().toLowerCase();
 				var onlyB = document.getElementById('srFormatBOnly').checked;
 
-				var html = '';
-				var index = 1;
+				function personKey(rv) {
+					return String(rv.received || '').trim().toLowerCase();
+				}
 
-				function rowHtml(r) {
-					var hit = true;
+				function personName(rv) {
+					var t = String(rv.received || '').trim();
+					return t === '' ? '(No Received From)' : t;
+				}
+
+				function hit(r) {
 					if (q) {
 						var hay = [r.inventory_item_no, r.description, r.serial, r.f_loc || '', r.assigned_to].join(' ').toLowerCase();
-						hit = hay.indexOf(q) !== -1;
+						if (hay.indexOf(q) === -1) return false;
 					}
-					if (onlyB && !r.is_format_b) hit = false;
-					if (!hit) return '';
-					var out = '<tr class="sr-row">' +
-						'<td>' + index + '</td>' +
-						'<td>' + escHtml(r.inventory_item_no) + '</td>' +
-						'<td>' + escHtml(r.description) + '</td>' +
-						'<td>' + escHtml(r.serial) + '</td>' +
-						'<td>' + escHtml(r.quantity) + '</td>' +
-						'<td>' + escHtml(r.date) + '</td>' +
-						'<td>' + escHtml(r.received) + '</td>' +
-						'<td>' + escHtml(r.assigned_to) + '</td>' +
-						'<td>' + (r.is_format_b ? '<code>' + escHtml(r.f_loc) + '</code>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
-						'</tr>';
-					index++;
-					return out;
+					if (onlyB && !r.is_format_b) return false;
+					return true;
 				}
 
-				var currentYear = null;
-				registerData.data.forEach(function(r) {
-					if (currentYear !== r.f_year) {
-						currentYear = r.f_year;
-						if (onlyB || q) {
-							// count matching rows under this header for the status message is overkill; always render header if any row matches
-						}
-						html += '<tr class="active"><td colspan="9"><strong>Year ' + escHtml(r.f_year) + '</strong></td></tr>';
-						index = 1;
-					}
-					html += rowHtml(r);
+				var data = (registerData.data || []).filter(hit);
+				var others = (registerData.others || []).filter(hit);
+				if (onlyB) others = [];
+
+				var order = [];
+				var seen = {};
+				data.forEach(function(r) {
+					var k = personKey(r);
+					if (!seen[k]) { seen[k] = true; order.push(k); }
+				});
+				others.forEach(function(r) {
+					var k = personKey(r);
+					if (!seen[k]) { seen[k] = true; order.push(k); }
 				});
 
-				if (registerData.others.length > 0 && !onlyB) {
-					var othersHit = false;
-					var before = html.length;
-					html += '<tr class="active"><td colspan="9"><strong>Other formats</strong></td></tr>';
-					index = 1;
-					registerData.others.forEach(function(r) { html += rowHtml(r); });
-					othersHit = html.length > before;
-					if (!othersHit) html = html.substring(0, before);
-				}
+				var html = '';
+				var otherIndex = 0;
+				order.forEach(function(k) {
+					var sample = null;
+					var i;
+					for (i = 0; i < data.length; i++) { if (personKey(data[i]) === k) { sample = data[i]; break; } }
+					if (!sample) for (i = 0; i < others.length; i++) { if (personKey(others[i]) === k) { sample = others[i]; break; } }
+					if (!sample) return;
+
+					html += '<tr class="series-person-banner' + (k === '' ? ' series-person-blank' : '') + '"><td colspan="9"><strong>' +
+						escHtml(personName(sample)) + '</strong></td></tr>';
+
+					var curYear = null;
+					var index = 1;
+					data.forEach(function(r) {
+						if (personKey(r) !== k) return;
+						if (curYear !== r.f_year) {
+							curYear = r.f_year;
+							html += '<tr class="active"><td colspan="9"><strong>Year ' + escHtml(r.f_year) + '</strong></td></tr>';
+							index = 1;
+						}
+						html += '<tr class="sr-row">' +
+							'<td>' + index + '</td>' +
+							'<td>' + escHtml(r.inventory_item_no) + '</td>' +
+							'<td>' + escHtml(r.description) + '</td>' +
+							'<td>' + escHtml(r.serial) + '</td>' +
+							'<td>' + escHtml(r.quantity) + '</td>' +
+							'<td>' + escHtml(r.date) + '</td>' +
+							'<td>' + escHtml(r.received) + '</td>' +
+							'<td>' + escHtml(r.assigned_to) + '</td>' +
+							'<td>' + (r.is_format_b ? '<code>' + escHtml(r.f_loc) + '</code>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
+							'</tr>';
+						index++;
+					});
+
+					var kOther = false;
+					others.forEach(function(r) { if (personKey(r) === k) kOther = true; });
+					if (kOther) {
+						html += '<tr class="active"><td colspan="9"><strong>Other formats</strong></td></tr>';
+						index = 1;
+						others.forEach(function(r) {
+							if (personKey(r) !== k) return;
+							html += '<tr class="sr-row">' +
+								'<td>' + index + '</td>' +
+								'<td>' + escHtml(r.inventory_item_no) + '</td>' +
+								'<td>' + escHtml(r.description) + '</td>' +
+								'<td>' + escHtml(r.serial) + '</td>' +
+								'<td>' + escHtml(r.quantity) + '</td>' +
+								'<td>' + escHtml(r.date) + '</td>' +
+								'<td>' + escHtml(r.received) + '</td>' +
+								'<td>' + escHtml(r.assigned_to) + '</td>' +
+								'<td>' + (r.is_format_b ? '<code>' + escHtml(r.f_loc) + '</code>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
+								'</tr>';
+							index++;
+						});
+					}
+				});
 
 				if (!html) {
 					html = '<tr><td colspan="9" class="text-center text-muted">' +

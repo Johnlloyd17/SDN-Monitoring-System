@@ -184,6 +184,22 @@ if (!isset($_SESSION['role'])) {
 												<button class="btn btn-danger btn-sm" id="deleteSelectedBtn" disabled><i
 														class="fa fa-trash"></i> Delete Selected</button>
 												<?php } ?>
+												<div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
+													<label style="margin:0; font-weight:normal;">Show</label>
+													<select id="perPageSelect" class="form-control input-sm"
+														style="display:inline-block; width:auto;">
+														<option value="5" selected>5</option>
+														<option value="10">10</option>
+														<option value="20">20</option>
+														<option value="30">30</option>
+														<option value="40">40</option>
+														<option value="50">50</option>
+														<option value="100">100</option>
+														<option value="150">150</option>
+														<option value="200">200</option>
+													</select>
+													<label style="margin:0; font-weight:normal;">records per page</label>
+												</div>
 											</div>
 											<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
 												<button id="importBtn" class="btn btn-success btn-sm"><i
@@ -232,20 +248,6 @@ if (!isset($_SESSION['role'])) {
 										<div
 											style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:10px;">
 											<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-												<label style="margin:0; font-weight:normal;">Show </label>
-												<select id="perPageSelect" class="form-control input-sm"
-													style="display:inline-block; width:auto;">
-													<option value="5" selected>5</option>
-													<option value="10">10</option>
-													<option value="20">20</option>
-													<option value="30">30</option>
-													<option value="40">40</option>
-													<option value="50">50</option>
-													<option value="100">100</option>
-													<option value="150">150</option>
-													<option value="200">200</option>
-												</select>
-												<label style="margin:0; font-weight:normal;"> records per page</label>
 												<span id="paginationInfo" class="text-muted"></span>
 											</div>
 											<ul class="pagination" style="margin:0;" id="pagination"></ul>
@@ -290,7 +292,8 @@ if (!isset($_SESSION['role'])) {
 								<div class="form-group"><label>Date Acquired:</label><input name="txt_date"
 										class="form-control input-sm" type="date" placeholder="Date Acquired" /></div>
 								<div class="form-group"><label>Received From:</label><input name="txt_received"
-										class="form-control input-sm" type="text" placeholder="Received From" /></div>
+										id="addReceivedFrom" class="form-control input-sm" type="text"
+										placeholder="Received From" /></div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-group"><label>Serial Number:</label><input name="txt_serial"
@@ -305,15 +308,18 @@ if (!isset($_SESSION['role'])) {
 										name="txt_inventory_item_no" class="form-control input-sm" type="text"
 										placeholder="Inventory Item no." /></div>
 
-								<div class="form-group"><label>Assigned / Deployed:</label><input name="txt_assigned_to"
-										class="form-control input-sm" type="text"
-										placeholder="Who/where the item is currently deployed (blank = unassigned)" />
-								</div>
 								<div class="form-group"><label>Estimated Useful Life:</label><input name="txt_life"
 										class="form-control input-sm" type="text" placeholder="Estimated Useful Life" />
 								</div>
 								<div class="form-group"><label>Remarks:</label><textarea name="txt_remarks"
 										class="form-control input-sm" placeholder="Remarks"></textarea></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="form-group"><label>Assigned / Deployed:</label><input name="txt_assigned_to"
+										id="addAssignedTo" class="form-control input-sm" type="text"
+										placeholder="Deployment note (school/building/area - blank = unassigned)" /></div>
 							</div>
 						</div>
 						<div class="row">
@@ -378,13 +384,19 @@ if (!isset($_SESSION['role'])) {
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 					<h4 class="modal-title"><i class="fa fa-list-ol"></i> Property No. Series Register <small
 							id="seriesSummary" class="text-muted"></small></h4>
+					<div id="seriesPersonBar" style="display:none; margin-top:6px;">
+						<span class="label label-warning"><i class="fa fa-user"></i> Showing only: <strong
+								id="seriesPersonName"></strong></span>
+						<button type="button" class="btn btn-xs btn-default" id="seriesShowAllBtn"><i
+								class="fa fa-list"></i> Show all</button>
+					</div>
 				</div>
 				<div class="modal-body" style="max-height:70vh; overflow-y:auto;">
 					<div style="display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
 						<div style="min-width:190px;">
 							<label class="control-label">Search</label>
 							<input type="text" id="seriesSearch" class="form-control input-sm"
-								placeholder="Search no., description, serial..." style="width:100%;" />
+								placeholder="Search no., description, serial, received from..." style="width:100%;" />
 						</div>
 						<div style="min-width:110px;">
 							<label class="control-label">Year</label>
@@ -412,20 +424,23 @@ if (!isset($_SESSION['role'])) {
 								2026-01-001-SDN)</label>
 						</div>
 					</div>
-					<table class="table table-bordered table-striped">
-						<thead>
-							<tr>
-								<th style="width:40px;">No.</th>
-								<th>Inventory Item no.</th>
-								<th>Category</th>
-								<th>Description</th>
-								<th>Serial Number</th>
-								<th style="width:120px;">Date Acquired</th>
-								<th style="width:90px;">Location</th>
-							</tr>
-						</thead>
-						<tbody id="seriesBody"></tbody>
-					</table>
+					<div class="table-responsive">
+						<table class="table table-bordered table-striped">
+							<thead>
+								<tr>
+									<th style="width:40px;">No.</th>
+									<th>Inventory Item no.</th>
+									<th>Category</th>
+									<th>Description</th>
+									<th>Serial Number</th>
+									<th style="width:120px;">Date Acquired</th>
+									<th>Received From</th>
+									<th style="width:90px;">Location</th>
+								</tr>
+							</thead>
+							<tbody id="seriesBody"></tbody>
+						</table>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
@@ -563,6 +578,11 @@ if (!isset($_SESSION['role'])) {
 										class="form-control input-sm" /></div>
 								<div class="form-group"><label>Date Acquired:</label><input type="date"
 										name="txt_edit_date" id="edit_date" class="form-control input-sm" /></div>
+								<div class="form-group"><label>Category (for reference):</label>
+									<select name="txt_edit_category" id="edit_category" class="form-control input-sm">
+										<option value="">-- Select category --</option>
+									</select>
+								</div>
 								<div class="form-group"><label>Received From:</label><input type="text"
 										name="txt_edit_received" id="edit_received" class="form-control input-sm" />
 								</div>
@@ -578,15 +598,26 @@ if (!isset($_SESSION['role'])) {
 										readonly placeholder="Auto-computed (Qty x Unit Cost)" /></div>
 								<div class="form-group"><label>Inventory Item no.:</label><input type="text"
 										name="txt_edit_inventory_item_no" id="edit_inventory_item_no"
-										class="form-control input-sm" /></div>
-								<div class="form-group"><label>Assigned / Deployed:</label><input type="text"
-										name="txt_edit_assigned_to" id="edit_assigned_to" class="form-control input-sm"
-										placeholder="Who/where the item is currently deployed (blank = unassigned)" />
+										class="form-control input-sm" />
+									<small id="editInvNoWarn" class="text-danger" style="display:none;">Inventory Item no. does not match selected Category/Location.</small>
+								</div>
+								<div class="form-group"><label>Location (for reference):</label>
+									<select name="txt_edit_location_code" id="edit_location_code" class="form-control input-sm">
+										<option value="">-- Select location --</option>
+									</select>
 								</div>
 								<div class="form-group"><label>Estimated Useful Life:</label><input type="text"
 										name="txt_edit_life" id="edit_life" class="form-control input-sm" /></div>
 								<div class="form-group"><label>Remarks:</label><input type="text"
 										name="txt_edit_remarks" id="edit_remarks" class="form-control input-sm" /></div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="form-group"><label>Assigned / Deployed:</label><input type="text"
+										name="txt_edit_assigned_to" id="edit_assigned_to" class="form-control input-sm"
+										placeholder="Deployment note (school/building/area - blank = unassigned)" />
+								</div>
 							</div>
 						</div>
 					</div>
@@ -730,15 +761,18 @@ if (!isset($_SESSION['role'])) {
 									<div class="col-md-2 form-group"><label>Quantity:</label><input type="number"
 											name="ga_qty" id="ga_qty" class="form-control input-sm" value="1" min="1" />
 									</div>
-									<div class="col-md-5 form-group"><label>Serial Number:</label><input type="text"
+									<div class="col-md-8 form-group"><label>Serial Number:</label><input type="text"
 											name="ga_serial" id="ga_serial" class="form-control input-sm"
 											placeholder="Serial Number" /></div>
 									<div class="col-md-2 form-group"><label>Date Acquired:</label><input type="date"
 											name="ga_date" id="ga_date" class="form-control input-sm" /></div>
-									<div class="col-md-3 form-group"><label>Assigned / Deployed:</label><input
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group"><label>Assigned / Deployed:</label><input
 											type="text" name="ga_assigned" id="ga_assigned"
 											class="form-control input-sm"
-											placeholder="Who/where it is deployed (blank = unassigned)" /></div>
+											placeholder="Deployment note (school/building/area - blank = unassigned)" />
+									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-4 form-group"><label>Category (for this unit's no.):</label>
@@ -889,10 +923,12 @@ if (!isset($_SESSION['role'])) {
             array('Unit Cost', 'gSharedCost'),
             array('Est. Useful Life', 'gSharedLife'),
             array('Received From', 'gSharedReceived'),
+            array('Category', 'gSharedCategory'),
+            array('Location', 'gSharedLocation'),
         );
         ?>
 	<div id="groupEditModal" class="modal fade" role="dialog">
-		<div class="modal-dialog modal-sdm-md" role="document">
+		<div class="modal-dialog modal-sdm-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -906,9 +942,17 @@ if (!isset($_SESSION['role'])) {
 						<?php foreach ($sharedFieldDefs as $sharedFieldDef) { ?>
 						<div class="col-md-4">
 							<?php if ($_SESSION['role'] !== 'staff') { ?>
+							<?php if ($sharedFieldDef[1] === 'gSharedCategory') { ?>
+							<div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label><select
+									class="form-control input-sm" id="<?php echo $sharedFieldDef[1]; ?>"><option value="">-- Select category --</option></select></div>
+							<?php } elseif ($sharedFieldDef[1] === 'gSharedLocation') { ?>
+							<div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label><select
+									class="form-control input-sm" id="<?php echo $sharedFieldDef[1]; ?>"><option value="">-- Select location --</option></select></div>
+							<?php } else { ?>
 							<div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label><input type="text"
 									class="form-control input-sm" id="<?php echo $sharedFieldDef[1]; ?>"
 									placeholder="<?php echo $sharedFieldDef[0]; ?>" /></div>
+							<?php } ?>
 							<?php } else { ?>
 							<div class="form-group"><label><?php echo $sharedFieldDef[0]; ?>:</label>
 								<div class="form-control-static" id="<?php echo $sharedFieldDef[1]; ?>">&ndash;</div>
@@ -1150,6 +1194,70 @@ if (!isset($_SESSION['role'])) {
 		border-bottom-style: solid;
 	}
 
+	#seriesModal .modal-dialog {
+		width: 95%;
+		max-width: 1260px;
+	}
+
+	tr.series-person-banner td {
+		background-color: #eef4fb !important;
+		font-weight: 700;
+	}
+
+	tr.series-person-banner.series-person-blank td {
+		color: #999;
+		font-weight: 600;
+	}
+
+	tr.series-row-highlight td {
+		background-color: #ffe082 !important;
+	}
+
+	.emp-autocomplete-results {
+		position: absolute;
+		z-index: 1060;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 3px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		display: none;
+		max-height: 220px;
+		overflow-y: auto;
+	}
+
+	.emp-autocomplete-results .list-group-item:first-child {
+		border-top: none;
+	}
+
+	.emp-autocomplete-results .list-group-item:last-child {
+		border-bottom: none;
+	}
+
+	.emp-autocomplete-results .list-group-item:hover:not(.disabled-item) {
+		background: #f5f5f5;
+	}
+
+	.emp-autocomplete-results .disabled-item {
+		cursor: not-allowed;
+		opacity: 0.65;
+		background: #fafafa;
+	}
+
+	.emp-autocomplete-results .emp-name-item {
+		font-weight: 600;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 100%;
+	}
+
+	.emp-autocomplete-results .emp-name-item.active {
+		background: #eef4fb;
+	}
+
 	tr.group-highlight td {
 		background-color: #ffe082 !important;
 	}
@@ -1306,7 +1414,8 @@ if (!isset($_SESSION['role'])) {
 						'<td>' + escHtml(row.received) + '</td>' +
 						'<td>' + (row.inventory_item_no && String(row.inventory_item_no).trim() !== '' ?
 							'<a href="javascript:void(0)" class="seriesLink" data-no="' + escHtml(row.inventory_item_no) +
-							'" title="View series sequence"><i class="fa fa-list-ol"></i> ' + escHtml(row.inventory_item_no) +
+							'" data-received="' + escHtml(row.received) + '" title="View series sequence"><i class="fa fa-list-ol"></i> ' +
+							escHtml(row.inventory_item_no) +
 							'</a>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
 						'<td>&ndash;</td>' +
 						'<td>' + (row.life ? escHtml(row.life) + ' yrs' : '-') + '</td>' +
@@ -1339,7 +1448,8 @@ if (!isset($_SESSION['role'])) {
 						'<td>' + escHtml(row.received) + '</td>' +
 						'<td>' + (row.inventory_item_no && String(row.inventory_item_no).trim() !== '' ?
 							'<a href="javascript:void(0)" class="seriesLink" data-no="' + escHtml(row.inventory_item_no) +
-							'" title="View series sequence"><i class="fa fa-list-ol"></i> ' + escHtml(row.inventory_item_no) +
+							'" data-received="' + escHtml(row.received) + '" title="View series sequence"><i class="fa fa-list-ol"></i> ' +
+							escHtml(row.inventory_item_no) +
 							'</a>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
 						'<td>' + escHtml(row.assigned_to) + '</td>' +
 						'<td>' + (row.life ? escHtml(row.life) + ' yrs' : '-') + '</td>' +
@@ -1665,6 +1775,16 @@ if (!isset($_SESSION['role'])) {
 		// ========== SERIES REGISTER (MODAL) ==========
 var seriesData = null;
 var seriesCategories = {};
+var seriesPerson = null;
+var seriesPersonLabel = '';
+var seriesHighlight = null;
+function seriesPersonKey(r) {
+    return String(r.received || '').trim().toLowerCase();
+}
+function seriesPersonDisplay(r) {
+    var t = String(r.received || '').trim();
+    return t === '' ? '(No Received From)' : t;
+}
 function seriesRowHtml(r, n) {
     var el = function (v) {
         if (v === null || v === undefined || String(v).trim() === '') return '<span class="text-muted">&ndash;</span>';
@@ -1674,13 +1794,15 @@ function seriesRowHtml(r, n) {
     if (r.is_format_b) {
         cat = seriesCategories[r.f_cc] ? r.f_cc + ' - ' + seriesCategories[r.f_cc] : escHtml(r.f_cc);
     }
-    return '<tr>' +
+    var hl = (seriesHighlight && String(r.inventory_item_no) === String(seriesHighlight)) ? ' class="series-row-highlight"' : '';
+    return '<tr' + hl + ' data-no="' + escHtml(r.inventory_item_no) + '">' +
         '<td>' + n + '</td>' +
         '<td>' + escHtml(r.inventory_item_no) + '</td>' +
         '<td>' + (r.is_format_b ? escHtml(cat) : '<span class="text-muted">&ndash;</span>') + '</td>' +
         '<td>' + el(r.description) + '</td>' +
         '<td>' + el(r.serial) + '</td>' +
         '<td>' + el(r.date) + '</td>' +
+        '<td>' + el(r.received) + '</td>' +
         '<td>' + (r.is_format_b ? '<span class="label label-info">' + escHtml(r.f_loc) + '</span>' : '<span class="text-muted">&ndash;</span>') + '</td>' +
         '</tr>';
 }
@@ -1695,7 +1817,7 @@ function seriesMatches(r) {
     if (cat && !(r.is_format_b && String(r.f_cc) === cat)) return false;
     if (loc && !(r.is_format_b && r.f_loc === loc)) return false;
     if (q) {
-        var hay = [r.inventory_item_no, r.description, r.serial, r.f_loc || '', r.f_cc || ''].join(' ').toLowerCase();
+        var hay = [r.inventory_item_no, r.description, r.serial, r.received || '', r.f_loc || '', r.f_cc || ''].join(' ').toLowerCase();
         if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -1703,42 +1825,82 @@ function seriesMatches(r) {
 function renderSeriesModal() {
     if (!seriesData) return;
     var onlyB = document.getElementById('seriesFormatBOnly').checked;
-    var html = '';
-    var currentYear = null;
-    (seriesData.data || []).forEach(function(r) {
-        if (!seriesMatches(r)) return;
-        if (currentYear !== r.f_year) {
-            currentYear = r.f_year;
-            html += '<tr class="active"><td colspan="7"><strong>Year ' + escHtml(r.f_year) + '</strong></td></tr>';
-        }
-        html += seriesRowHtml(r, r.f_seq);
-    });
-    if (!onlyB && (seriesData.others || []).length > 0) {
-        var before = html.length;
-        var n = 1;
-        html += '<tr class="active"><td colspan="7"><strong>Other formats</strong></td></tr>';
-        (seriesData.others || []).forEach(function(r) {
-            if (!seriesMatches(r)) return;
-            html += seriesRowHtml(r, n);
-            n++;
-        });
-        if (html.length === before) html = html.substring(0, before);
+    var personBar = document.getElementById('seriesPersonBar');
+    if (personBar) personBar.style.display = seriesPerson ? '' : 'none';
+    if (seriesPerson) {
+        var pn = document.getElementById('seriesPersonName');
+        if (pn) pn.textContent = seriesPersonLabel;
     }
+    var data = (seriesData.data || []).filter(function(r) {
+        return seriesMatches(r) && (!seriesPerson || seriesPersonKey(r) === seriesPerson);
+    });
+    var others = (seriesData.others || []).filter(function(r) {
+        return seriesMatches(r) && (!seriesPerson || seriesPersonKey(r) === seriesPerson);
+    });
+    if (onlyB) others = [];
+
+    var order = [];
+    var seen = {};
+    data.forEach(function(r) {
+        var k = seriesPersonKey(r);
+        if (!seen[k]) { seen[k] = true; order.push(k); }
+    });
+    others.forEach(function(r) {
+        var k = seriesPersonKey(r);
+        if (!seen[k]) { seen[k] = true; order.push(k); }
+    });
+
+    var html = '';
+    var otherIndex = 0;
+    order.forEach(function(k) {
+        var sample = null;
+        var i;
+        for (i = 0; i < data.length; i++) { if (seriesPersonKey(data[i]) === k) { sample = data[i]; break; } }
+        if (!sample) for (i = 0; i < others.length; i++) { if (seriesPersonKey(others[i]) === k) { sample = others[i]; break; } }
+        if (!sample) return;
+        if (!seriesPerson) {
+            html += '<tr class="series-person-banner' + (k === '' ? ' series-person-blank' : '') +
+                '"><td colspan="8"><strong>' + escHtml(seriesPersonDisplay(sample)) + '</strong></td></tr>';
+        }
+        var curYear = null;
+        data.forEach(function(r) {
+            if (seriesPersonKey(r) !== k) return;
+            if (curYear !== r.f_year) {
+                curYear = r.f_year;
+                html += '<tr class="active"><td colspan="8"><strong>Year ' + escHtml(r.f_year) + '</strong></td></tr>';
+            }
+            html += seriesRowHtml(r, r.f_seq);
+        });
+        var kOther = false;
+        others.forEach(function(r) { if (seriesPersonKey(r) === k) kOther = true; });
+        if (kOther) {
+            html += '<tr class="active"><td colspan="8"><strong>Other formats</strong></td></tr>';
+            others.forEach(function(r) {
+                if (seriesPersonKey(r) !== k) return;
+                otherIndex++;
+                html += seriesRowHtml(r, otherIndex);
+            });
+        }
+    });
     if (!html) {
-        html = '<tr><td colspan="7" class="text-center text-muted">' +
+        html = '<tr><td colspan="8" class="text-center text-muted">' +
             ((seriesData.data || []).length + (seriesData.others || []).length === 0 ? 'No property numbers have been registered yet.' : 'No records match the current filter.') +
             '</td></tr>';
     }
     document.getElementById('seriesBody').innerHTML = html;
+    if (seriesHighlight) {
+        var hl = document.querySelector('#seriesBody tr.series-row-highlight');
+        if (hl) hl.scrollIntoView({ block: 'center' });
+    }
 }
 function seriesPlural(n, word) {
     return n + ' ' + word + (n === 1 ? '' : 's');
 }
 function loadSeriesModal() {
-    document.getElementById('seriesBody').innerHTML = '<tr><td colspan="7" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+    document.getElementById('seriesBody').innerHTML = '<tr><td colspan="8" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
     $.getJSON(basePath + 'series_register_data.php', function(res) {
         if (!res || !res.success) {
-            document.getElementById('seriesBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load the series register.</td></tr>';
+            document.getElementById('seriesBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load the series register.</td></tr>';
             return;
         }
         seriesData = res;
@@ -1768,7 +1930,7 @@ function loadSeriesModal() {
         document.getElementById('seriesFormatBWrapper').style.display = (others > 0) ? '' : 'none';
         renderSeriesModal();
     }).fail(function() {
-        document.getElementById('seriesBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load the series register (network error).</td></tr>';
+        document.getElementById('seriesBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load the series register (network error).</td></tr>';
     });
 }
 function loadSeriesCategories() {
@@ -1785,23 +1947,31 @@ function loadSeriesCategories() {
         renderSeriesModal();
     });
 }
-function seriesShow(no) {
+function seriesShow(no, receivedText) {
     document.getElementById('seriesSearch').value = '';
     document.getElementById('seriesCategory').value = '';
     document.getElementById('seriesLocation').value = '';
-    var yr = '';
-    if (no) {
-        var m = String(no).trim().match(/^(\d{4})-(\d{2})-(\d{3})-([A-Z0-9]{1,16})$/i);
-        if (m) yr = m[1];
-    }
-    document.getElementById('seriesYear').value = yr;
+    document.getElementById('seriesYear').value = '';
+    var fmtB = document.getElementById('seriesFormatBOnly');
+    if (fmtB) fmtB.checked = false;
+    var t = String(receivedText || '').trim();
+    seriesPerson = t === '' ? null : t.toLowerCase();
+    seriesPersonLabel = t === '' ? '' : t;
+    seriesHighlight = no || null;
+    var wrap = document.querySelector('#seriesModal .table-responsive');
+    if (wrap) wrap.scrollLeft = 0;
     $('#seriesModal').modal('show');
     if (seriesData) { renderSeriesModal(); } else { loadSeriesModal(); }
 }
 $(document).on('click', '.seriesLink', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    seriesShow($(this).attr('data-no'));
+    seriesShow($(this).attr('data-no'), $(this).attr('data-received') || '');
+});
+$('#seriesShowAllBtn').on('click', function() {
+    seriesPerson = null;
+    seriesPersonLabel = '';
+    renderSeriesModal();
 });
 $('#seriesSearch').on('input', renderSeriesModal);
 $('#seriesYear, #seriesCategory, #seriesLocation').on('change', renderSeriesModal);
@@ -2803,6 +2973,118 @@ loadSeriesCategories();
 		}
 		setInterval(updateDateTime, 1000);
 		updateDateTime();
+
+		// ========== EMPLOYEE NAME AUTOCOMPLETE ==========
+		// Same pattern/endpoint as Pass Slip's Requested/Inspected/Approved By.
+		// Plain-text only: the field keeps whatever the user picks or types.
+		function initEmployeeNameAutocomplete(inputId) {
+			var input = document.getElementById(inputId);
+			if (!input || input.tagName !== 'INPUT') return null;
+			var parent = input.closest('.form-group') || input.parentNode;
+			if (!parent) return null;
+
+			parent.style.position = 'relative';
+
+			var results = document.createElement('div');
+			results.className = 'list-group inv-search-results emp-autocomplete-results';
+			parent.appendChild(results);
+
+			var timer = null;
+			var items = [];
+			var activeIndex = -1;
+
+			function hide() {
+				results.style.display = 'none';
+				results.innerHTML = '';
+				items = [];
+				activeIndex = -1;
+			}
+
+			function applyHighlight() {
+				var nodes = results.querySelectorAll('.emp-name-item');
+				for (var i = 0; i < nodes.length; i++) {
+					nodes[i].classList.toggle('active', i === activeIndex);
+				}
+				if (activeIndex >= 0 && nodes[activeIndex]) {
+					nodes[activeIndex].scrollIntoView({ block: 'nearest' });
+				}
+			}
+
+			function selectItem(item) {
+				if (!item) return;
+				input.value = item.name;
+				hide();
+				input.focus();
+			}
+
+			input.addEventListener('input', function() {
+				var q = input.value.trim();
+				clearTimeout(timer);
+				if (q.length < 2) { hide(); return; }
+				timer = setTimeout(function() {
+					$.getJSON('../pass_slip/function.php?action=employee_search&q=' + encodeURIComponent(q), function(data) {
+						results.innerHTML = '';
+						items = data || [];
+						activeIndex = -1;
+						if (!items.length) {
+							var e = document.createElement('div');
+							e.className = 'list-group-item disabled-item text-center text-muted';
+							e.textContent = 'No matching employee - you can still type the name manually.';
+							results.appendChild(e);
+							results.style.display = 'block';
+							return;
+						}
+						items.forEach(function(item, i) {
+							var d = document.createElement('div');
+							d.className = 'list-group-item emp-name-item';
+							d.textContent = item.name;
+							d.title = item.name;
+							d.addEventListener('click', function(ev) {
+								ev.preventDefault();
+								selectItem(item);
+							});
+							results.appendChild(d);
+						});
+						results.style.display = 'block';
+					}).fail(function() { hide(); });
+				}, 250);
+			});
+
+			input.addEventListener('keydown', function(e) {
+				var visible = results.style.display !== 'none';
+				if (e.key === 'ArrowDown' && visible && items.length) {
+					e.preventDefault();
+					activeIndex = Math.min(activeIndex + 1, items.length - 1);
+					applyHighlight();
+				} else if (e.key === 'ArrowUp' && visible && items.length) {
+					e.preventDefault();
+					activeIndex = Math.max(activeIndex - 1, 0);
+					applyHighlight();
+				} else if (e.key === 'Enter') {
+					// Never submit while the dropdown is open, whether a
+					// suggestion is highlighted or not (barcode-scanner safe).
+					if (visible) {
+						e.preventDefault();
+						e.stopPropagation();
+						if (activeIndex >= 0 && items[activeIndex]) {
+							selectItem(items[activeIndex]);
+						}
+					}
+				} else if (e.key === 'Escape') {
+					hide();
+				}
+			});
+
+			document.addEventListener('click', function(e) {
+				if (!parent.contains(e.target)) hide();
+			});
+
+			return { hide: hide };
+		}
+
+		initEmployeeNameAutocomplete('addReceivedFrom');
+		initEmployeeNameAutocomplete('edit_received');
+		initEmployeeNameAutocomplete('gSharedReceived');
 
 		// ========== INIT ==========
 		loadFilters();
