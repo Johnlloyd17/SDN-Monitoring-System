@@ -39,6 +39,16 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                 <input name="txt_transport_type" class="form-control input-sm" type="text" placeholder="Transport Type" />
                             </div>
                             <div class="form-group">
+                                <label>Connection Type:</label>
+                                <select name="txt_connection_type" class="form-control input-sm">
+                                    <option value="">-- Select --</option>
+                                    <option value="Satellite">Satellite</option>
+                                    <option value="Fiber">Fiber</option>
+                                    <option value="SIM">SIM</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Site Locations:</label>
                                 <input name="txt_site_locations" id="add_locations" class="form-control input-sm" type="text" placeholder="Site Locations" />
                             </div>
@@ -73,6 +83,38 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                             <div class="form-group">
                                 <label>Longitude:</label>
                                 <input name="txt_longitude" class="form-control input-sm" type="number" step="0.0000001" min="-180" max="180" placeholder="Longitude" />
+                            </div>
+                            <div class="form-group">
+                                <label>Down Time:</label>
+                                <input name="txt_down_time" class="form-control input-sm" type="datetime-local" />
+                            </div>
+                            <div class="form-group">
+                                <label>Connectivity Status:</label>
+                                <input name="txt_connectivity_status" class="form-control input-sm" type="text" placeholder="Connectivity Status" />
+                            </div>
+                            <div class="form-group">
+                                <label>Area Classification:</label>
+                                <select name="txt_area_classification" class="form-control input-sm">
+                                    <option value="">-- Select --</option>
+                                    <option value="GIDA">GIDA</option>
+                                    <option value="NON-GIDA">NON-GIDA</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>With DICT Free WiFi:</label>
+                                <select name="txt_with_dict_free_wifi" class="form-control input-sm">
+                                    <option value="">-- Select --</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Monitored:</label>
+                                <input name="txt_last_monitored_at" class="form-control input-sm" type="datetime-local" />
+                            </div>
+                            <div class="form-group">
+                                <label>Monitoring Notes:</label>
+                                <textarea name="txt_monitoring_notes" class="form-control input-sm" placeholder="Monitoring Notes" rows="2"></textarea>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -121,6 +163,292 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                     <option value="Ongoing Acceptance">Ongoing Acceptance</option>
                                     <option value="For Installation">For Installation</option>
                                     <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <!-- Daily Status columns (7 dates x AM/PM) -->
+                            <div class="form-group">
+                                <label>2026-10-06 AM:</label>
+                                <select name="txt_status_2026_10_06_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-06 PM:</label>
+                                <select name="txt_status_2026_10_06_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-07 AM:</label>
+                                <select name="txt_status_2026_10_07_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-07 PM:</label>
+                                <select name="txt_status_2026_10_07_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-08 AM:</label>
+                                <select name="txt_status_2026_10_08_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-08 PM:</label>
+                                <select name="txt_status_2026_10_08_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-12 AM:</label>
+                                <select name="txt_status_2026_10_12_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-12 PM:</label>
+                                <select name="txt_status_2026_10_12_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-13 AM:</label>
+                                <select name="txt_status_2026_10_13_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-13 PM:</label>
+                                <select name="txt_status_2026_10_13_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-14 AM:</label>
+                                <select name="txt_status_2026_10_14_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-14 PM:</label>
+                                <select name="txt_status_2026_10_14_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-15 AM:</label>
+                                <select name="txt_status_2026_10_15_am" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>2026-10-15 PM:</label>
+                                <select name="txt_status_2026_10_15_pm" class="form-control input-sm">
+                                    <option value="">--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Assist">Assist</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                    <option value="Ongoing Acceptance">Ongoing Acceptance</option>
+                                    <option value="For Installation">For Installation</option>
+                                    <option value="For Transfer">For Transfer</option>
+                                    <option value="Down">Down</option>
+                                    <option value="No Signal">No Signal</option>
+                                    <option value="With SMS Only">With SMS Only</option>
+                                    <option value="With Data">With Data</option>
+                                    <option value="Unknown">Unknown</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -155,6 +483,7 @@ require_once __DIR__ . '/../auth_check.php'; require_auth();
                                 <label>Remarks:</label>
                                 <textarea name="txt_remarks" class="form-control input-sm" placeholder="Remarks" rows="3"></textarea>
                             </div>
+                            <input type="hidden" name="txt_source_sheet" value="Manual Entry" />
                         </div>
                     </div>
                 </div>

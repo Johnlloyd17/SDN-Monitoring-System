@@ -383,7 +383,8 @@ if (!isset($_SESSION['role'])) {
                 <?php if ($isAdmin) { ?>
                     <button id="importBtn" class="btn btn-success btn-sm"><i class="fa fa-download"></i> Import</button>
                     <input type="file" id="importFile" style="display:none;" accept=".csv, .xlsx" />
-                    <button id="exportBtn" class="btn btn-primary btn-sm"><i class="fa fa-upload"></i> Export</button>
+                    <button id="exportBtn" class="btn btn-primary btn-sm"><i class="fa fa-file-text-o"></i> Export CSV</button>
+                    <button id="exportXlsxBtn" class="btn btn-info btn-sm"><i class="fa fa-file-excel-o"></i> Export XLSX</button>
                 <?php } ?>
             </div>
         </div>
@@ -391,38 +392,50 @@ if (!isset($_SESSION['role'])) {
         <div class="box-body table-responsive">
             <table id="table" class="table table-bordered">
                 <thead>
+                    <!-- Row 1: Main headers (rowspan=3 for plain, rowspan=2 for groups, colspan=14 for Status) -->
                     <tr class="grp-row">
                         <?php if ($isAdmin) { ?>
-                            <th rowspan="2" style="width: 20px !important;"><input type="checkbox" id="cbxMain" /></th>
+                            <th rowspan="3" style="width: 20px !important;"><input type="checkbox" id="cbxMain" /></th>
                         <?php } ?>
-                        <th rowspan="2">Item No.</th>
-                        <th rowspan="2">Locality</th>
-                        <th rowspan="2">Barangay</th>
-                        <th rowspan="2">District</th>
-                        <th rowspan="2">Transport Location</th>
-                        <th rowspan="2">Transport Type</th>
-                        <th rowspan="2">Site Locations</th>
-                        <th rowspan="2" class="grp-narrow">Transfer/New Locations</th>
-                        <th rowspan="2" class="grp-narrow">Remarks</th>
-                        <th rowspan="2">Site Code</th>
-                        <th rowspan="2">Nationwide ID</th>
-                        <th rowspan="2">Site Type</th>
+                        <th rowspan="3">Item No.</th>
+                        <th rowspan="3">Locality</th>
+                        <th rowspan="3">Barangay</th>
+                        <th rowspan="3">District</th>
+                        <th rowspan="3">Transport Location</th>
+                        <th rowspan="3">Transport Type</th>
+                        <th rowspan="3">Site Code</th>
+                        <th rowspan="3">New Renamed</th>
+                        <th rowspan="3">Site Locations</th>
+                        <th rowspan="3" class="grp-narrow">Transfer/New Locations</th>
+                        <th rowspan="3" class="grp-narrow">Remarks</th>
+                        <th rowspan="3">Nationwide ID</th>
+                        <th rowspan="3">Site Type</th>
                         <th colspan="2" class="grp">Date of Activation</th>
                         <th colspan="2" class="grp">Coordinates</th>
                         <th colspan="2" class="grp">Procurement Initiative</th>
                         <th colspan="2" class="grp">Documents</th>
-                        <th rowspan="2">Strategy</th>
-                        <th rowspan="2">Status</th>
-                        <th rowspan="2">Link Type</th>
-                        <th rowspan="2">Replacement Form File</th>
-                        <th rowspan="2">Conforme File</th>
-                        <th rowspan="2">UAT File</th>
-                        <th rowspan="2">Additional UAT</th>
+                        <th rowspan="3">Strategy</th>
+                        <th rowspan="3">Link Type</th>
+                        <th colspan="14" class="grp">Status</th>
+                        <th rowspan="3">Contact Details</th>
+                        <!-- Extra columns not in spreadsheet -->
+                        <th rowspan="3">Connection Type</th>
+                        <th rowspan="3">Down Time</th>
+                        <th rowspan="3">Connectivity Status</th>
+                        <th rowspan="3">Area Classification</th>
+                        <th rowspan="3">With DICT Free WiFi</th>
+                        <th rowspan="3">Last Monitored</th>
+                        <th rowspan="3">Monitoring Notes</th>
+                        <th rowspan="3">Replacement Form File</th>
+                        <th rowspan="3">Conforme File</th>
+                        <th rowspan="3">UAT File</th>
+                        <th rowspan="3">Additional UAT</th>
                         <th colspan="2" class="grp">Site Coordinators</th>
                         <?php if ($isAdmin) { ?>
-                            <th rowspan="2" style="width: 80px !important;">Option</th>
+                            <th rowspan="3" style="width: 80px !important;">Option</th>
                         <?php } ?>
                     </tr>
+                    <!-- Row 2: Group sub-headers + 7 dates under Status -->
                     <tr class="grp-sub">
                         <th>Date of Activation</th>
                         <th>Current Date of Acceptance</th>
@@ -432,13 +445,38 @@ if (!isset($_SESSION['role'])) {
                         <th>Installation Type</th>
                         <th>UAT</th>
                         <th>Conforme</th>
+                        <th>2026-10-06</th>
+                        <th>2026-10-07</th>
+                        <th>2026-10-08</th>
+                        <th>2026-10-12</th>
+                        <th>2026-10-13</th>
+                        <th>2026-10-14</th>
+                        <th>2026-10-15</th>
+                    </tr>
+                    <!-- Row 3: Group sub-headers + 14 AM/PM under Status -->
+                    <tr class="grp-sub">
+                        <th>Date of Activation</th>
+                        <th>Current Date of Acceptance</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Procurement Initiative</th>
+                        <th>Installation Type</th>
+                        <th>UAT</th>
+                        <th>Conforme</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
+                        <th>AM</th><th>PM</th>
                         <th>Name (Site Coordinators)</th>
                         <th>Contact Details</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     <tr>
-                        <td colspan="<?php echo $isAdmin ? 31 : 29; ?>" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td>
+                        <td colspan="<?php echo $isAdmin ? 54 : 52; ?>" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -478,6 +516,15 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>District:</label><input type="text" name="txt_edit_district" id="edit_district" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Transport Location:</label><input type="text" name="txt_edit_transport_location" id="edit_transport_location" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Transport Type:</label><input type="text" name="txt_edit_transport_type" id="edit_transport_type" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Connection Type:</label>
+                                        <select name="txt_edit_connection_type" id="edit_connection_type" class="form-control input-sm">
+                                            <option value="">-- Select --</option>
+                                            <option value="Satellite">Satellite</option>
+                                            <option value="Fiber">Fiber</option>
+                                            <option value="SIM">SIM</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
                                     <div class="form-group"><label>Site Locations:</label><input type="text" name="txt_edit_site_locations" id="edit_site_locations" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Transfer/New Locations:</label><input type="text" name="txt_edit_transfer_new_locations" id="edit_transfer_new_locations" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Site Code:</label><input type="text" name="txt_edit_site_code" id="edit_site_code" class="form-control input-sm" /></div>
@@ -487,6 +534,24 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Current Date of Acceptance:</label><input type="date" name="txt_edit_current_date_of_acceptance" id="edit_current_date_of_acceptance" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Latitude:</label><input type="number" step="0.0000001" min="-90" max="90" name="txt_edit_latitude" id="edit_latitude" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Longitude:</label><input type="number" step="0.0000001" min="-180" max="180" name="txt_edit_longitude" id="edit_longitude" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Down Time:</label><input type="datetime-local" name="txt_edit_down_time" id="edit_down_time" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Connectivity Status:</label><input type="text" name="txt_edit_connectivity_status" id="edit_connectivity_status" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Area Classification:</label>
+                                        <select name="txt_edit_area_classification" id="edit_area_classification" class="form-control input-sm">
+                                            <option value="">-- Select --</option>
+                                            <option value="GIDA">GIDA</option>
+                                            <option value="NON-GIDA">NON-GIDA</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>With DICT Free WiFi:</label>
+                                        <select name="txt_edit_with_dict_free_wifi" id="edit_with_dict_free_wifi" class="form-control input-sm">
+                                            <option value="">-- Select --</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>Last Monitored:</label><input type="datetime-local" name="txt_edit_last_monitored_at" id="edit_last_monitored_at" class="form-control input-sm" /></div>
+                                    <div class="form-group"><label>Monitoring Notes:</label><textarea name="txt_edit_monitoring_notes" id="edit_monitoring_notes" class="form-control input-sm" rows="2"></textarea></div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group"><label>Procurement Initiative:</label>
@@ -524,6 +589,11 @@ if (!isset($_SESSION['role'])) {
                                             <option value="Ongoing Acceptance">Ongoing Acceptance</option>
                                             <option value="For Installation">For Installation</option>
                                             <option value="For Transfer">For Transfer</option>
+                                            <option value="Down">Down</option>
+                                            <option value="No Signal">No Signal</option>
+                                            <option value="With SMS Only">With SMS Only</option>
+                                            <option value="With Data">With Data</option>
+                                            <option value="Unknown">Unknown</option>
                                         </select>
                                     </div>
                                     <div class="form-group"><label>Link Type:</label><input type="text" name="txt_edit_link_type" id="edit_link_type" class="form-control input-sm" /></div>
@@ -534,6 +604,7 @@ if (!isset($_SESSION['role'])) {
                                     <div class="form-group"><label>Name (Site Coordinators):</label><input type="text" name="txt_edit_site_coordinator_name" id="edit_site_coordinator_name" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Contact Details:</label><input type="text" name="txt_edit_contact_details" id="edit_contact_details" class="form-control input-sm" /></div>
                                     <div class="form-group"><label>Remarks:</label><textarea name="txt_edit_remarks" id="edit_remarks" class="form-control input-sm"></textarea></div>
+                                    <input type="hidden" name="txt_edit_source_sheet" id="edit_source_sheet" value="" />
                                 </div>
                             </div>
                         </div>
@@ -728,7 +799,7 @@ include "../footer.php"; ?>
             function loadData(page) {
                 currentPage = page || 1;
                 var f = getFilters();
-                var colspan = isAdmin ? 31 : 29;
+                var colspan = isAdmin ? 54 : 52;
                 var params = 'page=' + currentPage +
                     '&per_page=' + perPage +
                     '&search=' + encodeURIComponent(f.search) +
@@ -759,7 +830,7 @@ include "../footer.php"; ?>
 
             function renderTable(rows) {
                 var tbody = document.getElementById('tableBody');
-                var colspan = isAdmin ? 31 : 29;
+                var colspan = isAdmin ? 54 : 52;
                 if (!rows || rows.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="text-center">No records found.</td></tr>';
                     return;
@@ -779,6 +850,8 @@ include "../footer.php"; ?>
                         cell(row.district) +
                         transportCell(row.transport_location, id) +
                         cell(row.transport_type) +
+                        cell(row.site_code) +
+                        cell(row.new_renamed) +
                         cell(row.site_locations) +
                         cell(row.transfer_new_locations) +
                         cell(row.remarks) +
@@ -793,8 +866,28 @@ include "../footer.php"; ?>
                         cell(row.installation_type) +
                         boolCell(row.uat) +
                         boolCell(row.conforme) +
-                        cell(row.strategy) +
-                        cell(row.status) +
+                        cell(row.status_2026_10_06_am) +
+                        cell(row.status_2026_10_06_pm) +
+                        cell(row.status_2026_10_07_am) +
+                        cell(row.status_2026_10_07_pm) +
+                        cell(row.status_2026_10_08_am) +
+                        cell(row.status_2026_10_08_pm) +
+                        cell(row.status_2026_10_12_am) +
+                        cell(row.status_2026_10_12_pm) +
+                        cell(row.status_2026_10_13_am) +
+                        cell(row.status_2026_10_13_pm) +
+                        cell(row.status_2026_10_14_am) +
+                        cell(row.status_2026_10_14_pm) +
+                        cell(row.status_2026_10_15_am) +
+                        cell(row.status_2026_10_15_pm) +
+                        cell(row.contact_details) +
+                        cell(row.connection_type) +
+                        cell(row.down_time) +
+                        cell(row.connectivity_status) +
+                        cell(row.area_classification) +
+                        cell(row.with_dict_free_wifi) +
+                        cell(row.last_monitored_at) +
+                        cell(row.monitoring_notes) +
                         cell(row.link_type) +
                         linkCell(row.replacement_form_file) +
                         linkCell(row.conforme_file) +
@@ -1081,6 +1174,7 @@ include "../footer.php"; ?>
                     $('#edit_district').val(item.district);
                     $('#edit_transport_location').val(item.transport_location);
                     $('#edit_transport_type').val(item.transport_type);
+                    $('#edit_connection_type').val(item.connection_type || '');
                     $('#edit_site_locations').val(item.site_locations);
                     $('#edit_transfer_new_locations').val(item.transfer_new_locations);
                     $('#edit_site_code').val(item.site_code);
@@ -1090,6 +1184,27 @@ include "../footer.php"; ?>
                     $('#edit_current_date_of_acceptance').val(item.current_date_of_acceptance || '');
                     $('#edit_latitude').val(item.latitude);
                     $('#edit_longitude').val(item.longitude);
+                    $('#edit_down_time').val(item.down_time ? item.down_time.replace(' ', 'T') : '');
+                    $('#edit_connectivity_status').val(item.connectivity_status || '');
+                    $('#edit_area_classification').val(item.area_classification || '');
+                    $('#edit_with_dict_free_wifi').val(item.with_dict_free_wifi || '');
+                    $('#edit_last_monitored_at').val(item.last_monitored_at ? item.last_monitored_at.replace(' ', 'T') : '');
+                    $('#edit_monitoring_notes').val(item.monitoring_notes || '');
+                    // Status columns
+                    $('#edit_status_2026_10_06_am').val(item.status_2026_10_06_am || '');
+                    $('#edit_status_2026_10_06_pm').val(item.status_2026_10_06_pm || '');
+                    $('#edit_status_2026_10_07_am').val(item.status_2026_10_07_am || '');
+                    $('#edit_status_2026_10_07_pm').val(item.status_2026_10_07_pm || '');
+                    $('#edit_status_2026_10_08_am').val(item.status_2026_10_08_am || '');
+                    $('#edit_status_2026_10_08_pm').val(item.status_2026_10_08_pm || '');
+                    $('#edit_status_2026_10_12_am').val(item.status_2026_10_12_am || '');
+                    $('#edit_status_2026_10_12_pm').val(item.status_2026_10_12_pm || '');
+                    $('#edit_status_2026_10_13_am').val(item.status_2026_10_13_am || '');
+                    $('#edit_status_2026_10_13_pm').val(item.status_2026_10_13_pm || '');
+                    $('#edit_status_2026_10_14_am').val(item.status_2026_10_14_am || '');
+                    $('#edit_status_2026_10_14_pm').val(item.status_2026_10_14_pm || '');
+                    $('#edit_status_2026_10_15_am').val(item.status_2026_10_15_am || '');
+                    $('#edit_status_2026_10_15_pm').val(item.status_2026_10_15_pm || '');
                     $('#edit_procurement_initiative').val(item.procurement_initiative || '');
                     $('#edit_installation_type').val(item.installation_type || '');
                     $('#edit_uat').prop('checked', String(item.uat) === '1' || item.uat === 1 || item.uat === true);
@@ -1104,6 +1219,7 @@ include "../footer.php"; ?>
                     $('#edit_site_coordinator_name').val(item.site_coordinator_name);
                     $('#edit_contact_details').val(item.contact_details);
                     $('#edit_remarks').val(item.remarks);
+                    $('#edit_source_sheet').val(item.source_sheet || '');
                     $('#editModal').modal('show');
                 }).fail(function() {
                     showToast('Failed to load item data.', 'danger');
@@ -1357,7 +1473,17 @@ include "../footer.php"; ?>
                 var url = 'export.php?locality=' + encodeURIComponent(f.locality) +
                     '&barangay=' + encodeURIComponent(f.barangay) +
                     '&type=' + encodeURIComponent(f.type) +
-                    '&strategy=' + encodeURIComponent(f.strategy);
+                    '&strategy=' + encodeURIComponent(f.strategy) +
+                    '&format=csv';
+                window.location.href = url;
+            });
+            $('#exportXlsxBtn').on('click', function() {
+                var f = getFilters();
+                var url = 'export.php?locality=' + encodeURIComponent(f.locality) +
+                    '&barangay=' + encodeURIComponent(f.barangay) +
+                    '&type=' + encodeURIComponent(f.type) +
+                    '&strategy=' + encodeURIComponent(f.strategy) +
+                    '&format=xlsx';
                 window.location.href = url;
             });
 

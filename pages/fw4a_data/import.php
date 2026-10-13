@@ -12,18 +12,26 @@ $VALID_STATUS = ['Active', 'Inactive', 'Ongoing', 'Assist', 'Terminated', 'Deact
 $VALID_PROCUREMENT_INITIATIVE = ['Centrally Procured', 'Regional Procured'];
 $VALID_INSTALLATION_TYPE = ['Region Initiated', 'Manage Service'];
 
-// A..AC template positions (0-based col index => DB field), used by the CSV
-// full-29 path and as the canonical insert order.
+// A..AL template positions (0-based col index => DB field), matching spreadsheet "FW4A - Updated SDN Monitoring"
 $FIELD_BY_COL = [
     0  => 'item_no', 1 => 'locality', 2 => 'barangay', 3 => 'district',
-    4  => 'transport_location', 5 => 'transport_type', 6 => 'site_locations',
-    7  => 'transfer_new_locations', 8 => 'remarks', 9 => 'site_code',
-    10 => 'nationwide_id', 11 => 'site_type', 12 => 'date_of_activation',
-    13 => 'current_date_of_acceptance', 14 => 'latitude', 15 => 'longitude',
-    16 => 'procurement_initiative', 17 => 'installation_type', 18 => 'uat',
-    19 => 'conforme', 20 => 'strategy', 21 => 'status', 22 => 'link_type',
-    23 => 'replacement_form_file', 24 => 'conforme_file', 25 => 'uat_file',
-    26 => 'additional_uat', 27 => 'site_coordinator_name', 28 => 'contact_details',
+    4  => 'transport_location', 5 => 'transport_type', 6 => 'site_code',
+    7  => 'new_renamed', 8 => 'site_locations', 9 => 'transfer_new_locations',
+    10 => 'remarks', 11 => 'nationwide_id', 12 => 'site_type',
+    13 => 'date_of_activation', 14 => 'current_date_of_acceptance',
+    15 => 'latitude', 16 => 'longitude',
+    17 => 'procurement_initiative', 18 => 'installation_type',
+    19 => 'uat', 20 => 'conforme',
+    21 => 'strategy', 22 => 'link_type',
+    // Status columns (14 columns for 7 dates x AM/PM)
+    23 => 'status_2026_10_06_am', 24 => 'status_2026_10_06_pm',
+    25 => 'status_2026_10_07_am', 26 => 'status_2026_10_07_pm',
+    27 => 'status_2026_10_08_am', 28 => 'status_2026_10_08_pm',
+    29 => 'status_2026_10_12_am', 30 => 'status_2026_10_12_pm',
+    31 => 'status_2026_10_13_am', 32 => 'status_2026_10_13_pm',
+    33 => 'status_2026_10_14_am', 34 => 'status_2026_10_14_pm',
+    35 => 'status_2026_10_15_am', 36 => 'status_2026_10_15_pm',
+    37 => 'contact_details',
 ];
 
 // Header labels (normalized) → DB field
@@ -31,9 +39,10 @@ $LABEL_MAP = [
     'item no' => 'item_no', 'itemno' => 'item_no', 'item no.' => 'item_no',
     'locality' => 'locality', 'barangay' => 'barangay', 'district' => 'district',
     'transport location' => 'transport_location', 'transporttype' => 'transport_type', 'transport type' => 'transport_type',
+    'site code' => 'site_code', 'new renamed' => 'new_renamed',
     'site locations' => 'site_locations', 'sitelocations' => 'site_locations',
     'transfer new locations' => 'transfer_new_locations', 'transfer new location' => 'transfer_new_locations',
-    'site code' => 'site_code', 'nationwide id' => 'nationwide_id',
+    'remarks' => 'remarks', 'nationwide id' => 'nationwide_id',
     'site type' => 'site_type',
     'date of activation' => 'date_of_activation', 'dateactivated' => 'date_of_activation',
     'current date of acceptance' => 'current_date_of_acceptance',
@@ -41,8 +50,9 @@ $LABEL_MAP = [
     'procurement initiative' => 'procurement_initiative',
     'installation type' => 'installation_type',
     'uat' => 'uat', 'conforme' => 'conforme',
-    'strategy' => 'strategy', 'status' => 'status', 'remarks' => 'remarks',
-    'link type' => 'link_type',
+    'strategy' => 'strategy', 'link type' => 'link_type',
+    // Status columns - will match by position in spreadsheet
+    'status' => 'status', // fallback
     'replacement form file' => 'replacement_form_file',
     'conforme file' => 'conforme_file',
     'uat file' => 'uat_file', 'uat f ile' => 'uat_file',
@@ -111,7 +121,7 @@ function normalizeBool($value) {
  *
  * Returns true on success, false on hard DB error (hardError filled).
  */
-function saveRow($con, $rec, $validStatus, $validProc, $validInst, &$warnings, &$hardError) {
+function saveRow($con, $rec, $validStatus, $validProc, $validInst, &$warnings, &$hardError, $sourceSheet = 'Unknown') {
     $g = function ($f) use ($rec) { return trim((string)($rec[$f] ?? '')); };
 
     $item_no    = $g('item_no');
@@ -203,22 +213,65 @@ function saveRow($con, $rec, $validStatus, $validProc, $validInst, &$warnings, &
     $str = function ($s) use ($esc) { return $s !== '' ? "'" . $esc($s) . "'" : 'NULL'; };
     $num = function ($n) { return $n !== null ? (string)$n : 'NULL'; };
 
+    // Status columns
+    $statusCols = [
+        'status_2026_10_06_am', 'status_2026_10_06_pm',
+        'status_2026_10_07_am', 'status_2026_10_07_pm',
+        'status_2026_10_08_am', 'status_2026_10_08_pm',
+        'status_2026_10_12_am', 'status_2026_10_12_pm',
+        'status_2026_10_13_am', 'status_2026_10_13_pm',
+        'status_2026_10_14_am', 'status_2026_10_14_pm',
+        'status_2026_10_15_am', 'status_2026_10_15_pm',
+    ];
+    $statusVals = [];
+    foreach ($statusCols as $col) {
+        $v = $g($col);
+        if ($v !== '' && in_array($v, $validStatus, true)) {
+            $statusVals[] = "'" . $esc($v) . "'";
+        } else {
+            $statusVals[] = 'NULL';
+        }
+    }
+
+    $newRenamed = $g('new_renamed');
+    $connectionType = $g('connection_type');
+    $downTime = $g('down_time');
+    $connectivityStatus = $g('connectivity_status');
+    $areaClassification = $g('area_classification');
+    $withDictFreeWifi = $g('with_dict_free_wifi');
+    $lastMonitoredAt = $g('last_monitored_at');
+    $monitoringNotes = $g('monitoring_notes');
+
     $query = "INSERT INTO tblfwfa (
         item_no, locality, barangay, district, transport_location, transport_type,
-        site_locations, transfer_new_locations, remarks, site_code, nationwide_id, site_type,
+        site_code, new_renamed, site_locations, transfer_new_locations, remarks,
+        nationwide_id, site_type,
         date_of_activation, current_date_of_acceptance, latitude, longitude,
-        procurement_initiative, installation_type, uat, conforme, strategy, status, link_type,
+        procurement_initiative, installation_type, uat, conforme, strategy, link_type,
+        status_2026_10_06_am, status_2026_10_06_pm,
+        status_2026_10_07_am, status_2026_10_07_pm,
+        status_2026_10_08_am, status_2026_10_08_pm,
+        status_2026_10_12_am, status_2026_10_12_pm,
+        status_2026_10_13_am, status_2026_10_13_pm,
+        status_2026_10_14_am, status_2026_10_14_pm,
+        status_2026_10_15_am, status_2026_10_15_pm,
+        contact_details, connection_type, down_time, connectivity_status,
+        area_classification, with_dict_free_wifi, last_monitored_at, monitoring_notes,
         replacement_form_file, conforme_file, uat_file, additional_uat,
-        site_coordinator_name, contact_details
+        site_coordinator_name, contact_details, source_sheet
     ) VALUES (
         " . ($item_no !== '' ? intval($item_no) : 'NULL') . ", " . $str($locality) . ", " . $str($barangay) . ", " . $str($district) . ", "
-        . $str($transportLocation) . ", " . $str($transportType) . ", " . $str($siteLocations) . ", " . $str($transferNew) . ", "
-        . $str($remarks) . ", " . $str($siteCode) . ", " . $str($nationwideId) . ", " . $str($siteType) . ", "
+        . $str($transportLocation) . ", " . $str($transportType) . ", "
+        . $str($siteCode) . ", " . $str($newRenamed) . ", " . $str($siteLocations) . ", " . $str($transferNew) . ", "
+        . $str($remarks) . ", " . $str($nationwideId) . ", " . $str($siteType) . ", "
         . ($actVal !== null ? "'$actVal'" : 'NULL') . ", " . ($accVal !== null ? "'$accVal'" : 'NULL') . ", " . $num($lat) . ", " . $num($lng) . ", "
         . $str($procurement) . ", " . $str($installation) . ", " . ($uat !== null ? (string)$uat : 'NULL') . ", " . ($conforme !== null ? (string)$conforme : 'NULL') . ", "
-        . $str($strategy) . ", " . $str($status) . ", " . $str($linkType) . ", "
+        . $str($strategy) . ", " . $str($linkType) . ", "
+        . implode(', ', $statusVals) . ", "
+        . $str($contact) . ", " . $str($connectionType) . ", " . $str($downTime) . ", " . $str($connectivityStatus) . ", "
+        . $str($areaClassification) . ", " . $str($withDictFreeWifi) . ", " . $str($lastMonitoredAt) . ", " . $str($monitoringNotes) . ", "
         . $str($replFile) . ", " . $str($confFile) . ", " . $str($uatFile) . ", " . $str($addUat) . ", "
-        . $str($coordName) . ", " . $str($contact)
+        . $str($coordName) . ", " . $str($contact) . ", " . $str($sourceSheet)
     . ")";
 
     if (@mysqli_query($con, $query)) {
@@ -383,6 +436,22 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $rows = $chosen['rows'];
         xlsxExpandMerges($rows, $chosen['merges']);
         $colToField = $chosen['colToField'];
+        $sourceSheet = $chosen['sheet']['name'];
+
+        // Hardcode status column mapping for "FW4A - Updated SDN Monitoring" sheet
+        // Status block spans columns X-AK (indices 23-36): 7 dates x AM/PM = 14 columns
+        $statusCols = [
+            23 => 'status_2026_10_06_am', 24 => 'status_2026_10_06_pm',
+            25 => 'status_2026_10_07_am', 26 => 'status_2026_10_07_pm',
+            27 => 'status_2026_10_08_am', 28 => 'status_2026_10_08_pm',
+            29 => 'status_2026_10_12_am', 30 => 'status_2026_10_12_pm',
+            31 => 'status_2026_10_13_am', 32 => 'status_2026_10_13_pm',
+            33 => 'status_2026_10_14_am', 34 => 'status_2026_10_14_pm',
+            35 => 'status_2026_10_15_am', 36 => 'status_2026_10_15_pm',
+        ];
+        foreach ($statusCols as $c => $f) {
+            $colToField[$c] = $f;
+        }
 
         foreach ($rows as $idx => $cells) {
             if ($idx < 2) continue;
@@ -394,7 +463,7 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             }
             if (!$hasData) continue;
             $err = '';
-            if (saveRow($con, $rec, $VALID_STATUS, $VALID_PROCUREMENT_INITIATIVE, $VALID_INSTALLATION_TYPE, $warnings, $err)) {
+            if (saveRow($con, $rec, $VALID_STATUS, $VALID_PROCUREMENT_INITIATIVE, $VALID_INSTALLATION_TYPE, $warnings, $err, $sourceSheet)) {
                 $inserted++;
             } else {
                 $hardError = $err;
@@ -405,6 +474,7 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $handle = fopen($fileTmpName, "r");
         if ($handle === false) { echo json_encode(['success' => false, 'error' => 'Error opening the CSV file.']); exit; }
         $rowNo = 1; // header line consumed below
+        $sourceSheet = 'CSV Import';
         while (($data = fgetcsv($handle)) !== false) {
             $rowNo++;
             $rec = [];
@@ -436,7 +506,7 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             foreach ($rec as $v) if ($v !== '') { $hasData = true; break; }
             if (!$hasData) continue;
             $err = '';
-            if (saveRow($con, $rec, $VALID_STATUS, $VALID_PROCUREMENT_INITIATIVE, $VALID_INSTALLATION_TYPE, $warnings, $err)) {
+            if (saveRow($con, $rec, $VALID_STATUS, $VALID_PROCUREMENT_INITIATIVE, $VALID_INSTALLATION_TYPE, $warnings, $err, $sourceSheet)) {
                 $inserted++;
             } else {
                 $hardError = $err;

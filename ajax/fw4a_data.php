@@ -30,10 +30,10 @@ $params = [];
 $types = '';
 
 if ($search !== '') {
-    $where[] = "(item_no LIKE ? OR locality LIKE ? OR barangay LIKE ? OR district LIKE ? OR transport_location LIKE ? OR transport_type LIKE ? OR site_locations LIKE ? OR transfer_new_locations LIKE ? OR site_code LIKE ? OR nationwide_id LIKE ? OR site_type LIKE ? OR procurement_initiative LIKE ? OR installation_type LIKE ? OR strategy LIKE ? OR status LIKE ? OR link_type LIKE ? OR site_coordinator_name LIKE ? OR contact_details LIKE ? OR remarks LIKE ?)";
+    $where[] = "(item_no LIKE ? OR locality LIKE ? OR barangay LIKE ? OR district LIKE ? OR transport_location LIKE ? OR transport_type LIKE ? OR site_locations LIKE ? OR transfer_new_locations LIKE ? OR site_code LIKE ? OR nationwide_id LIKE ? OR site_type LIKE ? OR date_of_activation LIKE ? OR current_date_of_acceptance LIKE ? OR latitude LIKE ? OR longitude LIKE ? OR procurement_initiative LIKE ? OR installation_type LIKE ? OR uat LIKE ? OR conforme LIKE ? OR strategy LIKE ? OR status LIKE ? OR link_type LIKE ? OR replacement_form_file LIKE ? OR conforme_file LIKE ? OR uat_file LIKE ? OR additional_uat LIKE ? OR site_coordinator_name LIKE ? OR contact_details LIKE ? OR remarks LIKE ?)";
     $s = "%$search%";
-    $params = array_merge($params, [$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s]);
-    $types .= str_repeat('s', 19);
+    $params = array_merge($params, [$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s,$s]);
+    $types .= str_repeat('s', 29);
 }
 if ($strategy !== '') {
     $where[] = "strategy = ?";

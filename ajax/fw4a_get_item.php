@@ -19,6 +19,10 @@ if ($action === 'item' && isset($_GET['id'])) {
     mysqli_stmt_close($stmt);
 
     if ($row) {
+        // Ensure source_sheet is present for legacy rows
+        if (!isset($row['source_sheet']) || $row['source_sheet'] === '') {
+            $row['source_sheet'] = 'Legacy Import';
+        }
         echo json_encode($row);
     } else {
         http_response_code(404);

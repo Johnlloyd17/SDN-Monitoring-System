@@ -174,7 +174,6 @@ $("#table").dataTable({
            "pageLength": 5
         });
     });
-    <?php include dirname(__DIR__) . '/toolbar_js.php'; ?>
 
    // Function to update the date and time
    function updateDateTime() {
@@ -247,6 +246,7 @@ var exportBtn = document.getElementById('exportBtn');
         }
 
 </script>
+<?php include dirname(__DIR__) . '/toolbar_js.php'; ?>
 
 <style>
     .info-box-icon {

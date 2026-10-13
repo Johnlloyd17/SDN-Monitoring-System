@@ -10,11 +10,36 @@ header('Expires: 0');
 
 include '../pages/connection.php';
 
+// Values to exclude from filter dropdowns (header rows, garbage data)
+$FILTER_EXCLUDE = [
+    'strategy' => ['Strategy'],
+    'site_type' => ['Site Type'],
+    'locality' => ['Locality'],
+    'barangay' => ['Barangay'],
+    'transport_type' => ['Transport Type'],
+    'transport_location' => ['Transport Location'],
+    'site_locations' => ['Site Locations', 'Locations'],
+    'site_code' => ['Site Code'],
+    'nationwide_id' => ['Nationwide ID'],
+    'status' => ['Status'],
+    'district' => ['District'],
+];
+
 function getSimpleValues($con, $column, $filters = []) {
+    global $FILTER_EXCLUDE;
+    
     $where = ["locality != ''", "$column IS NOT NULL", "$column != ''"];
     $params = [];
     $types = '';
-
+    
+    // Add exclusions for this column
+    $exclusions = $FILTER_EXCLUDE[$column] ?? [];
+    foreach ($exclusions as $excl) {
+        $where[] = "$column != ?";
+        $params[] = $excl;
+        $types .= 's';
+    }
+    
     foreach ($filters as $col => $val) {
         if ($val !== '' && $col !== $column) {
             $where[] = "$col = ?";
@@ -22,10 +47,10 @@ function getSimpleValues($con, $column, $filters = []) {
             $types .= 's';
         }
     }
-
+    
     $whereClause = implode(' AND ', $where);
     $query = "SELECT DISTINCT $column FROM tblfwfa WHERE $whereClause ORDER BY $column ASC";
-
+    
     if (!empty($params)) {
         $stmt = mysqli_prepare($con, $query);
         mysqli_stmt_bind_param($stmt, $types, ...$params);
@@ -35,7 +60,7 @@ function getSimpleValues($con, $column, $filters = []) {
     } else {
         $result = mysqli_query($con, $query);
     }
-
+    
     $values = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $val = reset($row);

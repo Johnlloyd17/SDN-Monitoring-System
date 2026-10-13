@@ -69,17 +69,31 @@ function fw4a_csrf_ok()
         && hash_equals($_SESSION['fw4a_csrf'], $sent);
 }
 
-/** Whether another row already holds the given value in a natural-key column. */
-function fw4a_dup_value($con, $field, $value, $excludeId = 0)
+/** Whether another row already holds the given value in a natural-key column.
+ * For site_code, checks composite (site_code, source_sheet).
+ * For nationwide_id, checks globally (as before). */
+function fw4a_dup_value($con, $field, $value, $excludeId = 0, $sourceSheet = '')
 {
     if ($value === '') {
         return false;
     }
-    $stmt = mysqli_prepare($con, "SELECT id FROM tblfwfa WHERE $field = ? AND id <> ? LIMIT 1");
+    $sql = "SELECT id FROM tblfwfa WHERE $field = ? AND id <> ?";
+    $params = [$value, $excludeId];
+    $types = 'si';
+    
+    // For site_code, also check source_sheet to allow same code in different sheets
+    if ($field === 'site_code' && $sourceSheet !== '') {
+        $sql .= " AND source_sheet = ?";
+        $params[] = $sourceSheet;
+        $types .= 's';
+    }
+    $sql .= " LIMIT 1";
+    
+    $stmt = mysqli_prepare($con, $sql);
     if (!$stmt) {
         return false;
     }
-    mysqli_stmt_bind_param($stmt, 'si', $value, $excludeId);
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
     $row = $res ? mysqli_fetch_assoc($res) : null;
@@ -131,6 +145,8 @@ if ($action === 'add') {
     $name = escf($con, 'txt_site_coordinator_name');
     $contact_details = escf($con, 'txt_contact_details');
     $remarks = escf($con, 'txt_remarks');
+    $source_sheet = escf($con, 'txt_source_sheet');
+    if ($source_sheet === '') $source_sheet = 'Manual Entry';
 
     $enumError = validateEnumField($status, $VALID_STATUS, 'Status')
         ?? validateEnumField($procurement_initiative, $VALID_PROCUREMENT_INITIATIVE, 'Procurement Initiative')
@@ -143,9 +159,9 @@ if ($action === 'add') {
         exit;
     }
 
-    if (fw4a_dup_value($con, 'site_code', $site_code)) {
+    if (fw4a_dup_value($con, 'site_code', $site_code, 0, $source_sheet)) {
         if (ob_get_level()) { ob_clean(); }
-        echo json_encode(['success' => false, 'error' => 'Site code already exists.']);
+        echo json_encode(['success' => false, 'error' => 'Site code already exists for this source.']);
         exit;
     }
     if (fw4a_dup_value($con, 'nationwide_id', $nationwide_id)) {
@@ -154,20 +170,65 @@ if ($action === 'add') {
         exit;
     }
 
+    // Status columns
+    $status_2026_10_06_am = escf($con, 'txt_status_2026_10_06_am');
+    $status_2026_10_06_pm = escf($con, 'txt_status_2026_10_06_pm');
+    $status_2026_10_07_am = escf($con, 'txt_status_2026_10_07_am');
+    $status_2026_10_07_pm = escf($con, 'txt_status_2026_10_07_pm');
+    $status_2026_10_08_am = escf($con, 'txt_status_2026_10_08_am');
+    $status_2026_10_08_pm = escf($con, 'txt_status_2026_10_08_pm');
+    $status_2026_10_12_am = escf($con, 'txt_status_2026_10_12_am');
+    $status_2026_10_12_pm = escf($con, 'txt_status_2026_10_12_pm');
+    $status_2026_10_13_am = escf($con, 'txt_status_2026_10_13_am');
+    $status_2026_10_13_pm = escf($con, 'txt_status_2026_10_13_pm');
+    $status_2026_10_14_am = escf($con, 'txt_status_2026_10_14_am');
+    $status_2026_10_14_pm = escf($con, 'txt_status_2026_10_14_pm');
+    $status_2026_10_15_am = escf($con, 'txt_status_2026_10_15_am');
+    $status_2026_10_15_pm = escf($con, 'txt_status_2026_10_15_pm');
+
+    $new_renamed = escf($con, 'txt_new_renamed');
+    $connection_type = escf($con, 'txt_connection_type');
+    $down_time = escf($con, 'txt_down_time');
+    $connectivity_status = escf($con, 'txt_connectivity_status');
+    $area_classification = escf($con, 'txt_area_classification');
+    $with_dict_free_wifi = escf($con, 'txt_with_dict_free_wifi');
+    $last_monitored_at = escf($con, 'txt_last_monitored_at');
+    $monitoring_notes = escf($con, 'txt_monitoring_notes');
+
     $query = "INSERT INTO tblfwfa (
         item_no, locality, barangay, district, transport_location, transport_type,
-        site_locations, transfer_new_locations, site_code, nationwide_id, site_type,
+        site_code, new_renamed, site_locations, transfer_new_locations, remarks,
+        nationwide_id, site_type,
         date_of_activation, current_date_of_acceptance, latitude, longitude,
-        procurement_initiative, installation_type, uat, conforme, strategy, status,
-        link_type, replacement_form_file, conforme_file, uat_file, additional_uat,
-        site_coordinator_name, contact_details, remarks
+        procurement_initiative, installation_type, uat, conforme, strategy, link_type,
+        status_2026_10_06_am, status_2026_10_06_pm,
+        status_2026_10_07_am, status_2026_10_07_pm,
+        status_2026_10_08_am, status_2026_10_08_pm,
+        status_2026_10_12_am, status_2026_10_12_pm,
+        status_2026_10_13_am, status_2026_10_13_pm,
+        status_2026_10_14_am, status_2026_10_14_pm,
+        status_2026_10_15_am, status_2026_10_15_pm,
+        contact_details, connection_type, down_time, connectivity_status,
+        area_classification, with_dict_free_wifi, last_monitored_at, monitoring_notes,
+        replacement_form_file, conforme_file, uat_file, additional_uat,
+        site_coordinator_name, contact_details, remarks, source_sheet
     ) VALUES (
         " . ($item_no !== '' ? intval($item_no) : 'NULL') . ", '$locality', '$barangay', '$district', '$transport_location', '$transport_type',
-        '$site_locations', '$transfer_new_locations', '$site_code', '$nationwide_id', '$site_type',
+        '$site_code', '$new_renamed', '$site_locations', '$transfer_new_locations', '$remarks',
+        '$nationwide_id', '$site_type',
         $date_of_activation, $current_date_of_acceptance, " . ($latitude !== '' ? floatval($latitude) : 'NULL') . ", " . ($longitude !== '' ? floatval($longitude) : 'NULL') . ",
-        " . ($procurement_initiative !== '' ? "'$procurement_initiative'" : 'NULL') . ", " . ($installation_type !== '' ? "'$installation_type'" : 'NULL') . ", $uat, $conforme, '$strategy', " . ($status !== '' ? "'$status'" : 'NULL') . ",
-        '$link_type', " . ($replacement_form_file !== '' ? "'$replacement_form_file'" : 'NULL') . ", " . ($conforme_file !== '' ? "'$conforme_file'" : 'NULL') . ", " . ($uat_file !== '' ? "'$uat_file'" : 'NULL') . ", " . ($additional_uat !== '' ? "'$additional_uat'" : 'NULL') . ",
-        '$name', '$contact_details', '$remarks'
+        " . ($procurement_initiative !== '' ? "'$procurement_initiative'" : 'NULL') . ", " . ($installation_type !== '' ? "'$installation_type'" : 'NULL') . ", $uat, $conforme, '$strategy', '$link_type',
+        " . ($status_2026_10_06_am !== '' ? "'$status_2026_10_06_am'" : 'NULL') . ", " . ($status_2026_10_06_pm !== '' ? "'$status_2026_10_06_pm'" : 'NULL') . ",
+        " . ($status_2026_10_07_am !== '' ? "'$status_2026_10_07_am'" : 'NULL') . ", " . ($status_2026_10_07_pm !== '' ? "'$status_2026_10_07_pm'" : 'NULL') . ",
+        " . ($status_2026_10_08_am !== '' ? "'$status_2026_10_08_am'" : 'NULL') . ", " . ($status_2026_10_08_pm !== '' ? "'$status_2026_10_08_pm'" : 'NULL') . ",
+        " . ($status_2026_10_12_am !== '' ? "'$status_2026_10_12_am'" : 'NULL') . ", " . ($status_2026_10_12_pm !== '' ? "'$status_2026_10_12_pm'" : 'NULL') . ",
+        " . ($status_2026_10_13_am !== '' ? "'$status_2026_10_13_am'" : 'NULL') . ", " . ($status_2026_10_13_pm !== '' ? "'$status_2026_10_13_pm'" : 'NULL') . ",
+        " . ($status_2026_10_14_am !== '' ? "'$status_2026_10_14_am'" : 'NULL') . ", " . ($status_2026_10_14_pm !== '' ? "'$status_2026_10_14_pm'" : 'NULL') . ",
+        " . ($status_2026_10_15_am !== '' ? "'$status_2026_10_15_am'" : 'NULL') . ", " . ($status_2026_10_15_pm !== '' ? "'$status_2026_10_15_pm'" : 'NULL') . ",
+        '$contact_details', '$connection_type', " . ($down_time !== '' ? "'$down_time'" : 'NULL') . ", '$connectivity_status',
+        '$area_classification', " . ($with_dict_free_wifi !== '' ? "'$with_dict_free_wifi'" : 'NULL') . ", " . ($last_monitored_at !== '' ? "'$last_monitored_at'" : 'NULL') . ", '$monitoring_notes',
+        " . ($replacement_form_file !== '' ? "'$replacement_form_file'" : 'NULL') . ", " . ($conforme_file !== '' ? "'$conforme_file'" : 'NULL') . ", " . ($uat_file !== '' ? "'$uat_file'" : 'NULL') . ", " . ($additional_uat !== '' ? "'$additional_uat'" : 'NULL') . ",
+        '$name', '$contact_details', '$remarks', '$source_sheet'
     )";
 
     if (mysqli_query($con, $query)) {
@@ -217,6 +278,33 @@ if ($action === 'edit') {
     $name = escf($con, 'txt_edit_site_coordinator_name');
     $contact_details = escf($con, 'txt_edit_contact_details');
     $remarks = escf($con, 'txt_edit_remarks');
+    $source_sheet = escf($con, 'txt_edit_source_sheet');
+    if ($source_sheet === '') $source_sheet = 'Manual Entry';
+
+    // Status columns
+    $status_2026_10_06_am = escf($con, 'txt_edit_status_2026_10_06_am');
+    $status_2026_10_06_pm = escf($con, 'txt_edit_status_2026_10_06_pm');
+    $status_2026_10_07_am = escf($con, 'txt_edit_status_2026_10_07_am');
+    $status_2026_10_07_pm = escf($con, 'txt_edit_status_2026_10_07_pm');
+    $status_2026_10_08_am = escf($con, 'txt_edit_status_2026_10_08_am');
+    $status_2026_10_08_pm = escf($con, 'txt_edit_status_2026_10_08_pm');
+    $status_2026_10_12_am = escf($con, 'txt_edit_status_2026_10_12_am');
+    $status_2026_10_12_pm = escf($con, 'txt_edit_status_2026_10_12_pm');
+    $status_2026_10_13_am = escf($con, 'txt_edit_status_2026_10_13_am');
+    $status_2026_10_13_pm = escf($con, 'txt_edit_status_2026_10_13_pm');
+    $status_2026_10_14_am = escf($con, 'txt_edit_status_2026_10_14_am');
+    $status_2026_10_14_pm = escf($con, 'txt_edit_status_2026_10_14_pm');
+    $status_2026_10_15_am = escf($con, 'txt_edit_status_2026_10_15_am');
+    $status_2026_10_15_pm = escf($con, 'txt_edit_status_2026_10_15_pm');
+
+    $new_renamed = escf($con, 'txt_edit_new_renamed');
+    $connection_type = escf($con, 'txt_edit_connection_type');
+    $down_time = escf($con, 'txt_edit_down_time');
+    $connectivity_status = escf($con, 'txt_edit_connectivity_status');
+    $area_classification = escf($con, 'txt_edit_area_classification');
+    $with_dict_free_wifi = escf($con, 'txt_edit_with_dict_free_wifi');
+    $last_monitored_at = escf($con, 'txt_edit_last_monitored_at');
+    $monitoring_notes = escf($con, 'txt_edit_monitoring_notes');
 
     $enumError = validateEnumField($status, $VALID_STATUS, 'Status')
         ?? validateEnumField($procurement_initiative, $VALID_PROCUREMENT_INITIATIVE, 'Procurement Initiative')
@@ -232,7 +320,7 @@ if ($action === 'edit') {
     // Only block an edit when the submitted value is a NEW one that another
     // row already holds. Keeping a stored value must keep working even when a
     // legacy duplicate exists, otherwise editing such a row would break.
-    $stmt = mysqli_prepare($con, "SELECT site_code, nationwide_id FROM tblfwfa WHERE id = ?");
+    $stmt = mysqli_prepare($con, "SELECT site_code, nationwide_id, source_sheet FROM tblfwfa WHERE id = ?");
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
@@ -240,10 +328,16 @@ if ($action === 'edit') {
     mysqli_stmt_close($stmt);
     $curCode = $cur ? (string) $cur['site_code'] : '';
     $curNid  = $cur ? (string) $cur['nationwide_id'] : '';
+    $curSheet = $cur ? (string) $cur['source_sheet'] : '';
 
-    if ($site_code !== '' && $site_code !== $curCode && fw4a_dup_value($con, 'site_code', $site_code, $id)) {
+    // Use current source_sheet if not provided
+    if ($source_sheet === 'Manual Entry' && $curSheet !== '') {
+        $source_sheet = $curSheet;
+    }
+
+    if ($site_code !== '' && $site_code !== $curCode && fw4a_dup_value($con, 'site_code', $site_code, $id, $source_sheet)) {
         if (ob_get_level()) { ob_clean(); }
-        echo json_encode(['success' => false, 'error' => 'Site code already exists.']);
+        echo json_encode(['success' => false, 'error' => 'Site code already exists for this source.']);
         exit;
     }
     if ($nationwide_id !== '' && $nationwide_id !== $curNid && fw4a_dup_value($con, 'nationwide_id', $nationwide_id, $id)) {
@@ -259,9 +353,11 @@ if ($action === 'edit') {
         district = '$district',
         transport_location = '$transport_location',
         transport_type = '$transport_type',
+        site_code = '$site_code',
+        new_renamed = '$new_renamed',
         site_locations = '$site_locations',
         transfer_new_locations = '$transfer_new_locations',
-        site_code = '$site_code',
+        remarks = '$remarks',
         nationwide_id = '$nationwide_id',
         site_type = '$site_type',
         date_of_activation = $date_of_activation,
@@ -273,15 +369,37 @@ if ($action === 'edit') {
         uat = $uat,
         conforme = $conforme,
         strategy = '$strategy',
-        status = " . ($status !== '' ? "'$status'" : 'NULL') . ",
         link_type = '$link_type',
+        status_2026_10_06_am = " . ($status_2026_10_06_am !== '' ? "'$status_2026_10_06_am'" : 'NULL') . ",
+        status_2026_10_06_pm = " . ($status_2026_10_06_pm !== '' ? "'$status_2026_10_06_pm'" : 'NULL') . ",
+        status_2026_10_07_am = " . ($status_2026_10_07_am !== '' ? "'$status_2026_10_07_am'" : 'NULL') . ",
+        status_2026_10_07_pm = " . ($status_2026_10_07_pm !== '' ? "'$status_2026_10_07_pm'" : 'NULL') . ",
+        status_2026_10_08_am = " . ($status_2026_10_08_am !== '' ? "'$status_2026_10_08_am'" : 'NULL') . ",
+        status_2026_10_08_pm = " . ($status_2026_10_08_pm !== '' ? "'$status_2026_10_08_pm'" : 'NULL') . ",
+        status_2026_10_12_am = " . ($status_2026_10_12_am !== '' ? "'$status_2026_10_12_am'" : 'NULL') . ",
+        status_2026_10_12_pm = " . ($status_2026_10_12_pm !== '' ? "'$status_2026_10_12_pm'" : 'NULL') . ",
+        status_2026_10_13_am = " . ($status_2026_10_13_am !== '' ? "'$status_2026_10_13_am'" : 'NULL') . ",
+        status_2026_10_13_pm = " . ($status_2026_10_13_pm !== '' ? "'$status_2026_10_13_pm'" : 'NULL') . ",
+        status_2026_10_14_am = " . ($status_2026_10_14_am !== '' ? "'$status_2026_10_14_am'" : 'NULL') . ",
+        status_2026_10_14_pm = " . ($status_2026_10_14_pm !== '' ? "'$status_2026_10_14_pm'" : 'NULL') . ",
+        status_2026_10_15_am = " . ($status_2026_10_15_am !== '' ? "'$status_2026_10_15_am'" : 'NULL') . ",
+        status_2026_10_15_pm = " . ($status_2026_10_15_pm !== '' ? "'$status_2026_10_15_pm'" : 'NULL') . ",
+        contact_details = '$contact_details',
+        connection_type = '$connection_type',
+        down_time = " . ($down_time !== '' ? "'$down_time'" : 'NULL') . ",
+        connectivity_status = '$connectivity_status',
+        area_classification = '$area_classification',
+        with_dict_free_wifi = " . ($with_dict_free_wifi !== '' ? "'$with_dict_free_wifi'" : 'NULL') . ",
+        last_monitored_at = " . ($last_monitored_at !== '' ? "'$last_monitored_at'" : 'NULL') . ",
+        monitoring_notes = '$monitoring_notes',
         replacement_form_file = " . ($replacement_form_file !== '' ? "'$replacement_form_file'" : 'NULL') . ",
         conforme_file = " . ($conforme_file !== '' ? "'$conforme_file'" : 'NULL') . ",
         uat_file = " . ($uat_file !== '' ? "'$uat_file'" : 'NULL') . ",
         additional_uat = " . ($additional_uat !== '' ? "'$additional_uat'" : 'NULL') . ",
         site_coordinator_name = '$name',
         contact_details = '$contact_details',
-        remarks = '$remarks'
+        remarks = '$remarks',
+        source_sheet = '$source_sheet'
         WHERE id = $id";
 
     if (mysqli_query($con, $query)) {
