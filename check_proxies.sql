@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM mysql.proxies_priv;
